@@ -12,8 +12,11 @@ import '../../widgets/budgets/budget_rule_card.dart';
 import '../../widgets/budgets/budget_list_item.dart';
 import '../../widgets/budgets/add_budget_dialog.dart';
 import '../../widgets/budgets/category_spending_item.dart';
-import '../../widgets/common/skeleton_loader.dart';
 import '../../widgets/common/confirm_dialog.dart';
+import '../../widgets/common/shimmer_loader.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
 
 class BudgetsScreen extends StatefulWidget {
   const BudgetsScreen({super.key});
@@ -216,7 +219,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('budget_apply_success'.tr(), style: const TextStyle()),
-          backgroundColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: AppColors.primary,
         ),
       );
     }
@@ -227,7 +230,9 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? AppColors.surfaceDark
+          : AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -358,11 +363,11 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
   Color _insightColor(String type) {
     switch (type) {
       case 'danger':
-        return AppColors.error;
+        return AppColors.expense;
       case 'warning':
         return AppColors.warning;
       case 'success':
-        return AppColors.success;
+        return AppColors.income;
       default:
         return AppColors.primary;
     }
@@ -370,8 +375,7 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final available = _income - _totalDebtPayments;
     final totalBudgeted = _budgets.fold(
       0.0,
@@ -384,32 +388,37 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
     final insights = _getAdvisorInsights();
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor:
+          isDark ? AppColors.backgroundDark : AppColors.background,
       appBar: AppBar(
+        backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surface,
+        elevation: 0,
         title: Text(
           'nav_budgets'.tr(),
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            color: colorScheme.onSurface,
+          style: AppTypography.headingMd.copyWith(
+            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
           ),
         ),
-        iconTheme: IconThemeData(color: colorScheme.onSurface),
+        iconTheme: const IconThemeData(color: AppColors.textSecondary),
         actions: [
           IconButton(
-            icon: Icon(Icons.add, color: colorScheme.primary),
+            icon: const Icon(Icons.add, color: AppColors.primary),
             tooltip: 'budget_add'.tr(),
             onPressed: () => _showAddDialog(),
           ),
         ],
       ),
       body: _loading
-          ? const PageSkeleton()
+          ? Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: const DashboardShimmer(),
+            )
           : RefreshIndicator(
               onRefresh: _load,
-              color: colorScheme.primary,
+              color: AppColors.primary,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(AppSpacing.md),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -423,9 +432,8 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                         });
                         _load();
                       },
-                      colorScheme: colorScheme,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
 
                     if (_income > 0) ...[
                       BudgetSummaryCard(
@@ -435,72 +443,38 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                         totalBudgeted: totalBudgeted,
                         totalSpent: totalSpent,
                         currency: _currency,
-                        colorScheme: colorScheme,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppSpacing.sm),
                     ],
 
                     FinancialAdvisorCard(
                       insights: insights,
-                      colorScheme: colorScheme,
                       getInsightColor: _insightColor,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.sm),
 
                     if (_income > 0) ...[
                       BudgetRuleCard(
                         available: available,
                         currency: _currency,
-                        colorScheme: colorScheme,
-                        onApply: () async {
-                          final confirm = await showDialog<bool>(
-                            context: context,
-                            builder: (_) => AlertDialog(
-                              backgroundColor: colorScheme.surface,
-                              title: Text(
-                                'dash_rule_confirm_title'.tr(),
-                                style: TextStyle(color: colorScheme.onSurface),
-                              ),
-                              content: Text(
-                                'dash_rule_confirm_body'.tr(),
-                                style: TextStyle(
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(context, false),
-                                  child: Text(
-                                    'cancel'.tr(),
-                                    style: const TextStyle(),
-                                  ),
-                                ),
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context, true),
-                                  child: Text(
-                                    'تطبيق',
-                                    style: TextStyle(
-                                      color: colorScheme.primary,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                          if (confirm == true) await _apply502030();
-                        },
+                        onApply: () => ConfirmDialog.show(
+                          context: context,
+                          title: 'dash_rule_confirm_title'.tr(),
+                          message: 'dash_rule_confirm_body'.tr(),
+                          danger: false,
+                          onConfirm: _apply502030,
+                        ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.md),
                     ],
 
                     if (_budgets.isNotEmpty) ...[
                       Text(
                         'dash_my_budgets'.tr(),
-                        style: TextStyle(
-                          color: colorScheme.onSurface,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 15,
+                        style: AppTypography.headingSm.copyWith(
+                          color: isDark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -511,21 +485,20 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                           spent: _spending[b['category']] ?? 0,
                           currency: _currency,
                           localizedCategories: _localizedCategories,
-                          colorScheme: colorScheme,
                           onEdit: (budget) => _showAddDialog(existing: budget),
                           onDelete: _deleteBudget,
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.md),
                     ],
 
                     if (_spending.isNotEmpty) ...[
                       Text(
                         'dash_spending_by_category'.tr(),
-                        style: TextStyle(
-                          color: colorScheme.onSurface,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 15,
+                        style: AppTypography.headingSm.copyWith(
+                          color: isDark
+                              ? AppColors.textPrimaryDark
+                              : AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -543,7 +516,6 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                           amount: e.value,
                           percentage: pct,
                           currency: _currency,
-                          colorScheme: colorScheme,
                         );
                       }),
                     ],
