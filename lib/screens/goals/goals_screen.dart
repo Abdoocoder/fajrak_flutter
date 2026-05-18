@@ -88,12 +88,13 @@ class _GoalsScreenState extends State<GoalsScreen> {
         });
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ErrorHandler.handle(
           e,
           context: context,
           developerMessage: 'Goals Load',
         );
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }

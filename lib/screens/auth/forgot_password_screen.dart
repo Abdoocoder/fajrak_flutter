@@ -56,12 +56,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       });
     } catch (e) {
       _startCooldown(60);
-      if (mounted)
+      if (mounted) {
         ErrorHandler.handle(
           e,
           context: context,
           developerMessage: 'ForgotPassword Action',
         );
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }

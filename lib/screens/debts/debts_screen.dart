@@ -106,12 +106,13 @@ class _DebtsScreenState extends State<DebtsScreen> {
         });
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ErrorHandler.handle(
           e,
           context: context,
           developerMessage: 'Debts Load',
         );
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -136,8 +137,9 @@ class _DebtsScreenState extends State<DebtsScreen> {
         }
       } else {
         final idx = _debts.indexWhere((d) => d['id'] == debtId);
-        if (idx != -1)
+        if (idx != -1) {
           _debts[idx] = {..._debts[idx], 'remaining_amount': newRemaining};
+        }
       }
     });
     // refresh خفيف في الخلفية لمزامنة البيانات
@@ -153,8 +155,9 @@ class _DebtsScreenState extends State<DebtsScreen> {
           .from('alerts')
           .update({'is_read': true})
           .eq('id', id);
-      if (mounted)
+      if (mounted) {
         setState(() => _debtAlerts.removeWhere((a) => a['id'] == id));
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }

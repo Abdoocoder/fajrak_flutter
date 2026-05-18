@@ -246,8 +246,9 @@ class _RecurringScreenState extends State<RecurringScreen> {
                             onSelected: (action) {
                               if (action == 'toggle') _toggleActive(rec);
                               if (action == 'edit') _showForm(existing: rec);
-                              if (action == 'delete')
+                              if (action == 'delete') {
                                 _delete(rec['id'] as String);
+                              }
                             },
                             itemBuilder: (_) => [
                               PopupMenuItem(

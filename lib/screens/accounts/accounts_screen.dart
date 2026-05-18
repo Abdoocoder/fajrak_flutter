@@ -66,11 +66,12 @@ class _AccountsScreenState extends State<AccountsScreen> {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
     final data = await AccountsService.fetchAccounts();
-    if (mounted)
+    if (mounted) {
       setState(() {
         _accounts = data;
         _loading = false;
       });
+    }
   }
 
   double get _totalBalance =>
@@ -799,10 +800,11 @@ class _TransferSheetState extends State<_TransferSheet> {
                 .toList(),
             onChanged: (v) => setState(() {
               _fromId = v!;
-              if (_toId == _fromId)
+              if (_toId == _fromId) {
                 _toId =
                     widget.accounts.firstWhere((a) => a['id'] != _fromId)['id']
                         as String;
+              }
             }),
           ),
           const SizedBox(height: 10),

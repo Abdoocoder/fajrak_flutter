@@ -85,8 +85,9 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
   }
 
   Future<void> _deleteAccount() async {
-    if (_deleteInputCtrl.text.trim() != 'settings_delete_confirm_text'.tr())
+    if (_deleteInputCtrl.text.trim() != 'settings_delete_confirm_text'.tr()) {
       return;
+    }
     setState(() => _deleting = true);
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) {

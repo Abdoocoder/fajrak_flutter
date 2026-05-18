@@ -107,12 +107,13 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
         });
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ErrorHandler.handle(
           e,
           context: context,
           developerMessage: 'Achievements Load',
         );
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }

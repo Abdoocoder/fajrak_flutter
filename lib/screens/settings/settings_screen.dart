@@ -101,12 +101,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         (a, d) => a + (d['remaining_amount'] as num).toDouble(),
       );
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ErrorHandler.handle(
           e,
           context: context,
           developerMessage: 'Settings Load',
         );
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }

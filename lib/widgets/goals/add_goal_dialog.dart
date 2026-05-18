@@ -118,12 +118,13 @@ class _AddGoalDialogState extends State<AddGoalDialog> {
       widget.onSaved();
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ErrorHandler.handle(
           e,
           context: context,
           developerMessage: 'Goals Save',
         );
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }

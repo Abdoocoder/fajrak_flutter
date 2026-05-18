@@ -54,8 +54,9 @@ class _MonthSummaryCardState extends State<MonthSummaryCard> {
   Widget build(BuildContext context) {
     final now = DateTime.now();
     if (_dismissed || now.day > 7) return const SizedBox.shrink();
-    if (widget.prevIncome == 0 && widget.prevExpenses == 0)
+    if (widget.prevIncome == 0 && widget.prevExpenses == 0) {
       return const SizedBox.shrink();
+    }
 
     final cs = Theme.of(context).colorScheme;
     final prevSaved = widget.prevIncome - widget.prevExpenses;

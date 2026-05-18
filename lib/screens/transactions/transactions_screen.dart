@@ -202,12 +202,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       }
     } catch (e) {
       if (mounted) setState(() => _hasError = true);
-      if (mounted)
+      if (mounted) {
         ErrorHandler.handle(
           e,
           context: context,
           developerMessage: 'Transactions Load',
         );
+      }
     } finally {
       if (mounted) {
         setState(() {

@@ -93,10 +93,6 @@ void main() async {
   // The DB is re-opened with the correct key after the user signs in
   // (handled in AuthService / SplashScreen).
   if (!kIsWeb) {
-    final initialKey =
-        Supabase.instance.client.auth.currentSession?.accessToken ??
-        dotenv.env['SUPABASE_ANON_KEY'] ??
-        'fajrak_default_key';
     final initialKey = await _getLocalDbKey();
     await AppDatabase.initialize(encryptionKey: initialKey);
   }

@@ -48,12 +48,13 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       await Future.delayed(const Duration(seconds: 2));
       if (mounted) Navigator.pushReplacementNamed(context, '/main');
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ErrorHandler.handle(
           e,
           context: context,
           developerMessage: 'ResetPassword Action',
         );
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }

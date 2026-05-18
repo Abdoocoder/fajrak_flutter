@@ -334,12 +334,13 @@ class _LearnScreenState extends State<LearnScreen> {
         );
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ErrorHandler.handle(
           e,
           context: context,
           developerMessage: 'Learn MarkComplete',
         );
+      }
     }
   }
 

@@ -107,18 +107,21 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen>
             .catchError((_) => http.Response('', 404));
         if (fbRes.statusCode == 200 && fbRes.body.isNotEmpty) {
           final fb = json.decode(fbRes.body);
-          if (goldP == null && fb['gold'] != null)
+          if (goldP == null && fb['gold'] != null) {
             goldP = (fb['gold'] as num).toDouble() * usdRate;
-          if (silverP == null && fb['silver'] != null)
+          }
+          if (silverP == null && fb['silver'] != null) {
             silverP = (fb['silver'] as num).toDouble() * usdRate;
+          }
         }
       }
 
       if (mounted) {
         setState(() {
           if (goldP != null) _goldPriceCtrl.text = goldP.toStringAsFixed(2);
-          if (silverP != null)
+          if (silverP != null) {
             _silverPriceCtrl.text = silverP.toStringAsFixed(2);
+          }
         });
       }
     } catch (e, s) {
@@ -263,11 +266,12 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen>
       'is_paid': false,
     }, onConflict: 'user_id,year');
     await _load();
-    if (mounted)
+    if (mounted) {
       setState(() {
         _saving = false;
         _saved = true;
       });
+    }
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) setState(() => _saved = false);
     });

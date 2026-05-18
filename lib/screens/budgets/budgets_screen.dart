@@ -149,12 +149,13 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
         });
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ErrorHandler.handle(
           e,
           context: context,
           developerMessage: 'Budgets Load',
         );
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }

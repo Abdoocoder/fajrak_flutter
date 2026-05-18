@@ -36,8 +36,9 @@ class _MoreScreenState extends State<MoreScreen> {
     try {
       // No explicit Supabase calls in this screen's initial load
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ErrorHandler.handle(e, context: context, developerMessage: 'More Load');
+      }
     }
   }
 

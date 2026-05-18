@@ -50,13 +50,14 @@ class _AlertsScreenState extends State<AlertsScreen> {
         });
       }
     } catch (e, st) {
-      if (mounted)
+      if (mounted) {
         ErrorHandler.handle(
           e,
           st: st,
           context: context,
           developerMessage: 'Load Alerts',
         );
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -80,13 +81,14 @@ class _AlertsScreenState extends State<AlertsScreen> {
         context.read<AppState>().loadUnreadAlerts();
       }
     } catch (e, st) {
-      if (mounted)
+      if (mounted) {
         ErrorHandler.handle(
           e,
           st: st,
           context: context,
           developerMessage: 'Mark All Read',
         );
+      }
     }
   }
 
@@ -104,13 +106,14 @@ class _AlertsScreenState extends State<AlertsScreen> {
         context.read<AppState>().decrementUnreadAlerts();
       }
     } catch (e, st) {
-      if (mounted)
+      if (mounted) {
         ErrorHandler.handle(
           e,
           st: st,
           context: context,
           developerMessage: 'Mark Read',
         );
+      }
     }
   }
 
@@ -127,13 +130,14 @@ class _AlertsScreenState extends State<AlertsScreen> {
         context.read<AppState>().clearUnreadAlerts();
       }
     } catch (e, st) {
-      if (mounted)
+      if (mounted) {
         ErrorHandler.handle(
           e,
           st: st,
           context: context,
           developerMessage: 'Delete All Alerts',
         );
+      }
     }
   }
 
@@ -145,13 +149,14 @@ class _AlertsScreenState extends State<AlertsScreen> {
         context.read<AppState>().loadUnreadAlerts();
       }
     } catch (e, st) {
-      if (mounted)
+      if (mounted) {
         ErrorHandler.handle(
           e,
           st: st,
           context: context,
           developerMessage: 'Delete Alert',
         );
+      }
     }
   }
 
@@ -186,13 +191,14 @@ class _AlertsScreenState extends State<AlertsScreen> {
         }
       }
     } catch (e, st) {
-      if (mounted)
+      if (mounted) {
         ErrorHandler.handle(
           e,
           st: st,
           context: context,
           developerMessage: 'Generate Alerts Error',
         );
+      }
     } finally {
       if (mounted) setState(() => _generating = false);
     }

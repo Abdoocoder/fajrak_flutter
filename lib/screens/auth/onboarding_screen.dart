@@ -73,12 +73,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
       if (mounted) Navigator.pushReplacementNamed(context, '/main');
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ErrorHandler.handle(
           e,
           context: context,
           developerMessage: 'Onboarding Save',
         );
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
