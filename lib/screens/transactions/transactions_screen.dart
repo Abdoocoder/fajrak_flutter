@@ -54,6 +54,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   int? _filterYear = DateTime.now().year;
 
   final ScrollController _scrollController = ScrollController();
+  int _lastTransactionVersion = -1;
 
   @override
   void initState() {
@@ -62,6 +63,18 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     AnalyticsService.logScreenView('Transactions');
     _load();
     _watchSyncQueue();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final version = context.watch<AppState>().transactionVersion;
+    if (_lastTransactionVersion == -1) {
+      _lastTransactionVersion = version;
+    } else if (version != _lastTransactionVersion) {
+      _lastTransactionVersion = version;
+      _load(reset: true);
+    }
   }
 
   void _watchSyncQueue() {
@@ -660,7 +673,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                           key: ValueKey(tx['id']),
                           transaction: tx,
                           currency: _currency,
-                          colorScheme: colorScheme,
                           onDelete: _delete,
                           onTap: (t) => _showAddDialog(existing: t),
                           syncStatus: _syncStatuses[tx['id']],
@@ -670,11 +682,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddDialog,
-        backgroundColor: colorScheme.primary,
-        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

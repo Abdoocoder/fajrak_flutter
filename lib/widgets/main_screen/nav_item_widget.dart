@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_typography.dart';
 
 class NavItemWidget extends StatefulWidget {
   final int index;
@@ -28,14 +30,12 @@ class _NavItemWidgetState extends State<NavItemWidget> {
   @override
   Widget build(BuildContext context) {
     final isSelected = widget.currentIndex == widget.index;
-    final colorScheme = Theme.of(context).colorScheme;
     final reduceMotion = MediaQuery.of(context).disableAnimations;
-    final animDuration = reduceMotion
-        ? Duration.zero
-        : const Duration(milliseconds: 180);
-    final pressDuration = reduceMotion
-        ? Duration.zero
-        : const Duration(milliseconds: 120);
+    final pressDuration =
+        reduceMotion ? Duration.zero : const Duration(milliseconds: 100);
+
+    final iconColor = isSelected ? AppColors.primary : AppColors.textTertiary;
+    final labelColor = isSelected ? AppColors.primary : AppColors.textTertiary;
 
     return Semantics(
       label: widget.label,
@@ -51,54 +51,46 @@ class _NavItemWidgetState extends State<NavItemWidget> {
           scale: _pressed && !reduceMotion ? 0.92 : 1.0,
           duration: pressDuration,
           curve: Curves.easeOut,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedContainer(
-                duration: animDuration,
-                curve: Curves.easeOut,
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? colorScheme.primary.withValues(alpha: 0.14)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
+          child: SizedBox(
+            width: 64,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
                   isSelected ? widget.selectedIcon : widget.icon,
-                  color: isSelected
-                      ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant,
+                  color: iconColor,
                   size: 24,
+                  semanticLabel: widget.label,
                 ),
-              ),
-              const SizedBox(height: 2),
-              AnimatedDefaultTextStyle(
-                duration: animDuration,
-                curve: Curves.easeOut,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                  color: isSelected
-                      ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant,
+                const SizedBox(height: 2),
+                AnimatedDefaultTextStyle(
+                  duration: reduceMotion
+                      ? Duration.zero
+                      : const Duration(milliseconds: 150),
+                  style: AppTypography.labelSm.copyWith(color: labelColor),
+                  child: Text(
+                    widget.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                child: Text(widget.label),
-              ),
-              AnimatedContainer(
-                duration: reduceMotion
-                    ? Duration.zero
-                    : const Duration(milliseconds: 200),
-                curve: Curves.easeOut,
-                margin: const EdgeInsets.only(top: 3),
-                width: isSelected ? 16 : 0,
-                height: 3,
-                decoration: BoxDecoration(
-                  color: colorScheme.primary,
-                  borderRadius: BorderRadius.circular(2),
+                // 4px dot indicator
+                AnimatedContainer(
+                  duration: reduceMotion
+                      ? Duration.zero
+                      : const Duration(milliseconds: 200),
+                  curve: Curves.easeOut,
+                  margin: const EdgeInsets.only(top: 3),
+                  width: isSelected ? 4 : 0,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -25,6 +25,16 @@ abstract final class AppTheme {
       useMaterial3: true,
       brightness: brightness,
       scaffoldBackgroundColor: scaffoldBg,
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: _FajrakPageTransitionsBuilder(),
+          TargetPlatform.iOS: _FajrakPageTransitionsBuilder(),
+          TargetPlatform.fuchsia: _FajrakPageTransitionsBuilder(),
+          TargetPlatform.linux: _FajrakPageTransitionsBuilder(),
+          TargetPlatform.macOS: _FajrakPageTransitionsBuilder(),
+          TargetPlatform.windows: _FajrakPageTransitionsBuilder(),
+        },
+      ),
       fontFamily: 'IBMPlexSansArabic',
       fontFamilyFallback: const [
         'Cairo',
@@ -93,14 +103,17 @@ abstract final class AppTheme {
         surfaceTintColor: Colors.transparent,
       ),
 
-      // ── Card — 0 elevation, 1 px border (Stripe style) ────
+      // ── Card — 0 elevation, 1px border, Stripe rule ─────────
       cardTheme: CardThemeData(
         color: surface,
         elevation: 0,
+        shadowColor: Colors.transparent,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: AppRadius.borderLg,
-          side: BorderSide(color: outlineVariant),
+          side: BorderSide(
+            color: isDark ? AppColors.borderDark : AppColors.borderLight,
+          ),
         ),
       ),
 
@@ -174,14 +187,20 @@ abstract final class AppTheme {
         ),
       ),
 
-      // ── FloatingActionButton ───────────────────────────────
+      // ── FloatingActionButton — gold, only shadow in the app ──
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: primary,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.accent,
+        foregroundColor: const Color(0xFF7A5800),
         elevation: 0,
         focusElevation: 0,
         hoverElevation: 0,
-        shape: const RoundedRectangleBorder(borderRadius: AppRadius.borderLg),
+        highlightElevation: 0,
+        shape: const StadiumBorder(),
+        extendedPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+        extendedTextStyle: AppTypography.labelLg.copyWith(
+          fontWeight: FontWeight.w600,
+          color: const Color(0xFF7A5800),
+        ),
       ),
 
       // ── BottomNavigationBar (M2, for existing screens) ────
@@ -197,10 +216,11 @@ abstract final class AppTheme {
         unselectedLabelStyle: AppTypography.caption1,
       ),
 
-      // ── NavigationBar (M3) ─────────────────────────────────
+      // ── NavigationBar (M3) — surface bg, 1px top border ────
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: surface,
-        indicatorColor: primary.withValues(alpha: 0.15),
+        indicatorColor: Colors.transparent,
+        indicatorShape: const RoundedRectangleBorder(),
         elevation: 0,
         height: AppSpacing.navBarHeight,
         surfaceTintColor: Colors.transparent,
@@ -209,18 +229,15 @@ abstract final class AppTheme {
           (states) => IconThemeData(
             color: states.contains(WidgetState.selected)
                 ? primary
-                : onSurfaceVariant,
+                : AppColors.textTertiary,
             size: 24,
           ),
         ),
         labelTextStyle: WidgetStateProperty.resolveWith(
-          (states) => AppTypography.caption1.copyWith(
-            fontWeight: states.contains(WidgetState.selected)
-                ? FontWeight.w600
-                : FontWeight.w400,
+          (states) => AppTypography.labelSm.copyWith(
             color: states.contains(WidgetState.selected)
                 ? primary
-                : onSurfaceVariant,
+                : AppColors.textTertiary,
           ),
         ),
       ),
@@ -328,6 +345,39 @@ abstract final class AppTheme {
         linearTrackColor: outlineVariant,
         circularTrackColor: outlineVariant,
       ),
+    );
+  }
+}
+
+/// 250ms fade + translateY(8px→0), easeOut — applied to all routes globally.
+class _FajrakPageTransitionsBuilder extends PageTransitionsBuilder {
+  const _FajrakPageTransitionsBuilder();
+
+  static const _easeOut = Cubic(0.23, 1, 0.32, 1);
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final disableAnimations = MediaQuery.of(context).disableAnimations;
+
+    if (disableAnimations) {
+      return FadeTransition(opacity: animation, child: child);
+    }
+
+    final fade = CurvedAnimation(parent: animation, curve: _easeOut);
+    final slide = Tween<Offset>(
+      begin: const Offset(0, 0.04),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: animation, curve: _easeOut));
+
+    return FadeTransition(
+      opacity: fade,
+      child: SlideTransition(position: slide, child: child),
     );
   }
 }
