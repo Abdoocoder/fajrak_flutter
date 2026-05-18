@@ -68,7 +68,7 @@
   "dash_overview_6m": "Overview (6 Months)",
   "dash_debts_payment": "Debt Payments",
   "dash_no_transactions": "No transactions yet",
-  "dash_balance_label": "Your balance this month",
+  "dash_balance_label": "Total Balance",
   "dash_monthly_budget": "Monthly Budget",
   "retry": "Retry",
   "dash_points_per_100": "/100 Points",

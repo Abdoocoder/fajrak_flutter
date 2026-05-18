@@ -8,13 +8,13 @@ import '../common/app_card.dart';
 class BalanceCard extends StatefulWidget {
   const BalanceCard({
     super.key,
-    required this.net,
+    required this.totalBalance,
     required this.income,
     required this.expenses,
     required this.currency,
   });
 
-  final double net;
+  final double totalBalance;
   final double income;
   final double expenses;
   final String currency;
@@ -37,7 +37,7 @@ class _BalanceCardState extends State<BalanceCard>
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    _animation = Tween<double>(begin: 0, end: widget.net).animate(
+    _animation = Tween<double>(begin: 0, end: widget.totalBalance).animate(
       CurvedAnimation(parent: _controller, curve: _curve),
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -53,8 +53,8 @@ class _BalanceCardState extends State<BalanceCard>
   @override
   void didUpdateWidget(BalanceCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.net != widget.net) {
-      _animation = Tween<double>(begin: 0, end: widget.net).animate(
+    if (oldWidget.totalBalance != widget.totalBalance) {
+      _animation = Tween<double>(begin: 0, end: widget.totalBalance).animate(
         CurvedAnimation(parent: _controller, curve: _curve),
       );
       if (MediaQuery.of(context).disableAnimations) {
@@ -79,7 +79,7 @@ class _BalanceCardState extends State<BalanceCard>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isNegative = widget.net < 0;
+    final isNegative = widget.totalBalance < 0;
     final amountColor = isNegative ? AppColors.expense : AppColors.primary;
     final dividerColor = isDark ? AppColors.borderDark : AppColors.borderLight;
     final labelColor =
@@ -130,9 +130,9 @@ class _BalanceCardState extends State<BalanceCard>
               );
             },
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.lg),
           Divider(height: 1, thickness: 1, color: dividerColor),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.lg),
           // Income / expense row
           Row(
             children: [
@@ -190,22 +190,32 @@ class _StatColumn extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(
-              isIncome ? Icons.arrow_upward : Icons.arrow_downward,
-              size: 14,
-              color: color,
+            Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Icon(
+                isIncome ? Icons.arrow_upward : Icons.arrow_downward,
+                size: 11,
+                color: color,
+              ),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: AppSpacing.xs),
             Text(
               label,
               style: AppTypography.labelSm.copyWith(color: labelColor),
             ),
           ],
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: AppSpacing.xs),
         Text(
           '$formatted $currency',
-          style: AppTypography.currency.copyWith(color: color),
+          style: AppTypography.headingMd.copyWith(
+            color: color,
+            letterSpacing: -0.5,
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),

@@ -1,159 +1,126 @@
 import 'package:flutter/material.dart';
-import '../../utils/app_colors.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
 
 class TransactionSummary extends StatelessWidget {
-  final double income;
-  final double expenses;
-  final double debtPayments;
-  final String currency;
-  final ColorScheme colorScheme;
-
   const TransactionSummary({
     super.key,
     required this.income,
     required this.expenses,
     required this.currency,
-    required this.colorScheme,
     this.debtPayments = 0,
+    // kept for backward-compat call sites, unused
+    this.colorScheme,
   });
+
+  final double income;
+  final double expenses;
+  final double debtPayments;
+  final String currency;
+  final ColorScheme? colorScheme;
+
+  String _fmt(double v) {
+    final n = v.abs();
+    return n % 1 == 0 ? n.toStringAsFixed(0) : n.toStringAsFixed(2);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final realExpenses = expenses - debtPayments;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final net = income - expenses;
+    final dividerColor = isDark ? AppColors.borderDark : AppColors.borderLight;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.screenPaddingHorizontal,
+        vertical: AppSpacing.md,
+      ),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-        border: Border(bottom: BorderSide(color: colorScheme.outlineVariant)),
+        color: isDark ? AppColors.surfaceDark : AppColors.surface,
+        border: Border(bottom: BorderSide(color: dividerColor, width: 1)),
       ),
       child: Row(
         children: [
           Expanded(
-            child: _statCard(
-              'trans_total_net'.tr(),
-              net,
-              net >= 0 ? AppColors.success : AppColors.error,
-              isNet: true,
+            child: _Stat(
+              label: 'trans_total_income'.tr(),
+              value: _fmt(income),
+              currency: currency,
+              color: AppColors.income,
+              isDark: isDark,
             ),
           ),
-          const SizedBox(width: 8),
-          Expanded(child: _expensesCard(realExpenses, debtPayments)),
-          const SizedBox(width: 8),
+          Container(width: 1, height: 36, color: dividerColor),
           Expanded(
-            child: _statCard(
-              'trans_total_income'.tr(),
-              income,
-              AppColors.success,
+            child: _Stat(
+              label: 'trans_total_expenses'.tr(),
+              value: _fmt(expenses),
+              currency: currency,
+              color: AppColors.expense,
+              isDark: isDark,
+            ),
+          ),
+          Container(width: 1, height: 36, color: dividerColor),
+          Expanded(
+            child: _Stat(
+              label: 'trans_total_net'.tr(),
+              value: _fmt(net),
+              currency: currency,
+              color: net >= 0 ? AppColors.income : AppColors.expense,
+              prefix: net > 0 ? '+' : (net < 0 ? '−' : ''),
+              isDark: isDark,
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _expensesCard(double realExpenses, double debtPayments) {
-    const color = AppColors.error;
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
-      ),
-      child: Column(
-        children: [
-          FittedBox(
-            child: Text(
-              '-${realExpenses.abs().toStringAsFixed(0)}',
-              style: const TextStyle(
-                color: color,
-                fontWeight: FontWeight.w900,
-                fontSize: 15,
-              ),
-            ),
-          ),
-          Text(
-            'trans_total_expenses'.tr(),
-            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 10),
-          ),
-          if (debtPayments > 0) ...[
-            const SizedBox(height: 4),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    '💳 ${'dash_debt_payments'.tr()}',
-                    style: const TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  FittedBox(
-                    child: Text(
-                      debtPayments.toStringAsFixed(0),
-                      style: const TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
+class _Stat extends StatelessWidget {
+  const _Stat({
+    required this.label,
+    required this.value,
+    required this.currency,
+    required this.color,
+    required this.isDark,
+    this.prefix = '',
+  });
 
-  Widget _statCard(
-    String label,
-    double value,
-    Color color, {
-    bool isNet = false,
-  }) {
-    String sign = "";
-    if (isNet) {
-      sign = value > 0 ? "+" : (value < 0 ? "-" : "");
-    } else {
-      sign = label == 'trans_total_income'.tr() ? "+" : "-";
-    }
+  final String label;
+  final String value;
+  final String currency;
+  final Color color;
+  final bool isDark;
+  final String prefix;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
-      ),
-      child: Column(
-        children: [
-          FittedBox(
-            child: Text(
-              '$sign${value.abs().toStringAsFixed(0)}',
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.w900,
-                fontSize: 15,
-              ),
-            ),
+  @override
+  Widget build(BuildContext context) {
+    final labelColor =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          label,
+          style: AppTypography.labelSm.copyWith(color: labelColor),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 3),
+        Text(
+          '$prefix$value',
+          style: AppTypography.headingSm.copyWith(
+            color: color,
+            letterSpacing: -0.3,
           ),
-          Text(
-            label,
-            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 10),
-          ),
-        ],
-      ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     );
   }
 }

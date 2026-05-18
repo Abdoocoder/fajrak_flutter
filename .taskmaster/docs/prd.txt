@@ -1,0 +1,79 @@
+# Fajrak Flutter — UI Redesign PRD
+
+## Project Overview
+Complete UI redesign of the Fajrak personal finance app to match the fajrak-design system (Stripe visual language + Apple HIG + Material 3). The app is a bilingual (AR/EN) RTL-first Flutter app for tracking income, expenses, budgets, debts, goals, and investments.
+
+## Design System
+- Colors: primary #1A5F8A, accent #D4A843, income #2A7D4F, expense #B83232
+- Font: IBM Plex Sans Arabic (GoogleFonts)
+- Elevation: 0 always — cards use 1px border, no shadows
+- FAB: gold (#D4A843) — only shadow in the app
+- All padding: EdgeInsetsDirectional (start/end), never left/right
+- Loading: shimmer always, never CircularProgressIndicator for data
+- Animations: Emil Kowalski curves — Cubic(0.23,1,0.32,1) easeOut
+
+## Phase 1 — Foundation (Tokens + Shared Components)
+Token alignment and 8 shared components. Everything downstream inherits these.
+
+### Tasks:
+1. Align `lib/core/theme/app_colors.dart` to DESIGN.md tokens (income/expense/warning/surfaces/text/dark mode)
+2. Align `lib/core/theme/app_typography.dart` — display/heading/body/label/currency scales with IBM Plex Sans Arabic
+3. Create `lib/core/theme/app_spacing.dart` — xs/sm/md/lg/xl/xxl + screenPaddingHorizontal/listItemHeight
+4. Create `lib/core/theme/app_radius.dart` — xs/sm/md/lg/xl/full tokens
+5. Update `lib/core/theme/app_theme.dart` — CardTheme (elevation 0, 1px border), FAB theme, NavigationBar, BottomSheet
+6. Build `lib/widgets/common/app_card.dart` — animated scale 0.98 on press, 1px border, no shadow
+7. Build `lib/widgets/common/app_button.dart` — PRIMARY/SECONDARY/GHOST/ACCENT/DANGER/SMALL variants with loading state
+8. Update `lib/widgets/transactions/transaction_list_item.dart` — 68px fixed height, category tint circles, Emil stagger on first load
+9. Build `lib/widgets/common/app_text_field.dart` — 48px height, blur-only validation, all states
+10. Build `lib/widgets/common/shimmer_loader.dart` — TransactionShimmer (6 tiles × 68px) + DashboardShimmer
+11. Build `lib/widgets/common/empty_state.dart` — bilingual icon+title+subtitle+CTA, vertically centered
+12. Build `lib/widgets/common/filter_chips.dart` — 34px height, full radius, horizontal scroll
+13. Build `lib/widgets/common/section_header.dart` — Row spaceBetween, bilingual title + "الكل ← / See all"
+14. Build `lib/widgets/common/progress_bar.dart` — 6px track, gradient fill, label row above, info row below
+
+## Phase 2 — Navigation Shell
+Fix the app's navigation structure to match the 4-tab spec.
+
+### Tasks:
+1. Update `lib/screens/main_screen.dart` — 4 tabs only (Home, Transactions, Reports, More)
+2. Update `lib/widgets/main_screen/main_bottom_nav_bar.dart` — surface bg, 1px top border, 4px dot indicator, elevation 0
+3. Replace FAB with `FloatingActionButton.extended` — accent gold (#D4A843), text #7A5800, label "سجّل معاملة / Add Transaction"
+4. FAB visibility logic — show on Home/Transactions/Reports, hide on More and all secondary screens
+5. Page transitions — 250ms fade + slide up 8px, Cubic(0.23,1,0.32,1)
+6. Bottom sheet open/close animation — 300ms Cubic(0.32,0.72,0,1) open, 220ms Cubic(0.23,1,0.32,1) close
+
+## Phase 3 — Dashboard Screen
+Redesign the dashboard using the Header Overlap pattern and remove all gamification widgets.
+
+### Tasks:
+1. Implement Header Overlap pattern — Stack + Positioned, BalanceCard overlaps AppBar by -18px
+2. Build BalanceCard — displayLarge amount (40px/700/letterSpacing -2.0), count-up animation (600ms easeOutQuart), income/expense split row
+3. Build BudgetProgressCard — 2 categories max, ProgressRing hero (120px, 10px stroke), "الكل ← / See all" link
+4. Recent transactions section — last 3 TransactionTiles in AppCard, SectionHeader above
+5. REMOVE banned widgets: badges_grid, challenges_card, gamification_card, dashboard_health_score, wealth_simulator_card, dashboard_stage_card
+6. Dashboard AppBar — primary blue bg (#1A5F8A), greeting + date in white/70% white (textInverse)
+
+## Phase 4 — List Screens
+Redesign the Transactions and Reports screens.
+
+### Tasks:
+1. Transactions screen — full-width search bar, horizontal FilterChips scroll, month section headers
+2. Transactions list — ListView.builder with itemExtent: 68, pull-to-refresh (RefreshIndicator), pagination 20 items/page
+3. Transactions empty state — designed state with bilingual text and "سجّل أول معاملة" CTA
+4. Reports screen (new combined layout) — month selector chips (horizontal scroll)
+5. Reports — 3-column stat row: income | vertical divider | expense | vertical divider | net
+6. Reports — 6-month expense trend bar chart + "أعلى الفئات / Top Categories" section (5 CategoryPills with amounts)
+
+## Phase 5 — Secondary Screens
+Redesign all remaining screens.
+
+### Tasks:
+1. Budgets screen — ProgressRing cards, add budget bottom sheet, edit/delete swipe actions
+2. Goals screen — goal cards with progress bars, milestone markers
+3. Debts screen — debt cards with payoff timeline, Dismissible delete
+4. Investments screen — portfolio summary card, asset list
+5. More screen — progressive disclosure grid, tool name only visible, tap opens full screen
+6. FIRE calculator — reactive (no submit button), form inputs in collapsible AppCard sections, result card always visible
+7. Zakat calculator — reactive, nisab comparison, result in accent gold
+8. Settings screen — grouped list sections, toggle rows, language switcher
+9. Auth screens — Login, Register, Forgot Password, Onboarding screens aligned to design system

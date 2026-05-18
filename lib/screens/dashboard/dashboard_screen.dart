@@ -29,7 +29,7 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   bool _loading = true;
   bool _hasError = false;
-  double _income = 0, _expenses = 0, _net = 0;
+  double _income = 0, _expenses = 0, _totalBalance = 0;
   String _currency = 'JOD';
   String _name = '';
   List<Map<String, dynamic>> _recentTx = [];
@@ -73,18 +73,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
           year: now.year,
           month: now.month,
         ).catchError((_) => <String, dynamic>{}),
+        Supabase.instance.client.rpc(
+          'get_account_balances',
+          params: {'p_user_id': user.id},
+        ).catchError((_) => <dynamic>[]),
       ]);
 
       final profile = results[0] as Map<String, dynamic>;
       final recent = results[1] as List;
       final monthly = results[2] as Map<String, dynamic>;
+      final balancesData = results[3] as List;
 
       final currency =
           (profile['currency'] as String? ?? 'JOD').toUpperCase();
       final income = (monthly['income'] as num?)?.toDouble() ?? 0.0;
       final expenses = (monthly['expenses'] as num?)?.toDouble() ?? 0.0;
-      final net =
-          (monthly['net'] as num?)?.toDouble() ?? (income - expenses);
+      final totalBalance = balancesData.fold<double>(
+        0.0,
+        (sum, b) => sum + (b['current_balance'] as num).toDouble(),
+      );
 
       if (mounted) {
         setState(() {
@@ -93,7 +100,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _currency = currency;
           _income = income;
           _expenses = expenses;
-          _net = net;
+          _totalBalance = totalBalance;
           _recentTx = recent.cast<Map<String, dynamic>>();
           _loading = false;
         });
@@ -149,7 +156,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         )
                       : _DashboardContent(
                           headerHeight: headerHeight,
-                          net: _net,
+                          totalBalance: _totalBalance,
                           income: _income,
                           expenses: _expenses,
                           currency: _currency,
@@ -196,16 +203,17 @@ class _DashboardAppBar extends StatelessWidget {
               children: [
                 Text(
                   'dash_welcome'.tr(args: [name]),
-                  style: AppTypography.headingMd.copyWith(
+                  style: AppTypography.headingLg.copyWith(
                     color: AppColors.textInverse,
+                    letterSpacing: -0.3,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 3),
                 Text(
                   DateFormat('EEEE، d MMMM yyyy', 'ar')
                       .format(DateTime.now()),
                   style: AppTypography.bodySm.copyWith(
-                    color: const Color(0xB3FFFFFF), // 70% white
+                    color: const Color(0x99FFFFFF), // 60% white — clearly secondary
                   ),
                 ),
               ],
@@ -230,7 +238,7 @@ class _DashboardAppBar extends StatelessWidget {
 class _DashboardContent extends StatelessWidget {
   const _DashboardContent({
     required this.headerHeight,
-    required this.net,
+    required this.totalBalance,
     required this.income,
     required this.expenses,
     required this.currency,
@@ -239,7 +247,7 @@ class _DashboardContent extends StatelessWidget {
   });
 
   final double headerHeight;
-  final double net;
+  final double totalBalance;
   final double income;
   final double expenses;
   final String currency;
@@ -267,7 +275,7 @@ class _DashboardContent extends StatelessWidget {
             AppSpacing.md,
           ),
           child: BalanceCard(
-            net: net,
+            totalBalance: totalBalance,
             income: income,
             expenses: expenses,
             currency: currency,

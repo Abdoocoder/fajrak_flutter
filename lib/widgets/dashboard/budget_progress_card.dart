@@ -50,20 +50,31 @@ class BudgetProgressCard extends StatelessWidget {
 
     final fraction = (expenses / income).clamp(0.0, 1.0);
     final remaining = income - expenses;
-    final n = remaining.abs();
-    final remainingFmt =
-        n % 1 == 0 ? n.toStringAsFixed(0) : n.toStringAsFixed(2);
+    final pct = (fraction * 100).round();
+    final expFmt = expenses % 1 == 0
+        ? expenses.toStringAsFixed(0)
+        : expenses.toStringAsFixed(2);
+    final incFmt = income % 1 == 0
+        ? income.toStringAsFixed(0)
+        : income.toStringAsFixed(2);
+    final remFmt = remaining.abs() % 1 == 0
+        ? remaining.abs().toStringAsFixed(0)
+        : remaining.abs().toStringAsFixed(2);
 
     // Colour: <0.7 → budget gradient; 0.7–0.9 → warning amber; ≥0.9 → expense red
     ProgressBarVariant variant;
     Color? overrideColor;
+    Color spentColor;
     if (fraction >= 0.9) {
       variant = ProgressBarVariant.overspent;
+      spentColor = AppColors.expense;
     } else if (fraction >= 0.7) {
       variant = ProgressBarVariant.overspent;
       overrideColor = AppColors.warning;
+      spentColor = AppColors.warning;
     } else {
       variant = ProgressBarVariant.budget;
+      spentColor = AppColors.primary;
     }
 
     return AppCard(
@@ -91,14 +102,38 @@ class BudgetProgressCard extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                expFmt,
+                style: AppTypography.headingMd.copyWith(
+                  color: spentColor,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              Text(
+                ' / $incFmt $currency',
+                style: AppTypography.bodySm.copyWith(
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
           AppProgressBar(
             value: fraction,
             title: '',
             variant: variant,
             fillColor: overrideColor,
+            trackHeight: 10,
+            percentageLabel: '$pct%',
             infoEnd: remaining >= 0
-                ? '$remainingFmt $currency ${'goals_remaining'.tr()}'
+                ? '$remFmt $currency ${'goals_remaining'.tr()}'
                 : null,
           ),
         ],

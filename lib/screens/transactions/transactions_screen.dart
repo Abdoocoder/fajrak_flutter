@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -78,6 +80,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   }
 
   void _watchSyncQueue() {
+    if (kIsWeb) return;
     final db = AppDatabase.instance;
     _syncSubscription =
         (db.select(db.transactionsTable)
@@ -93,6 +96,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   }
 
   Future<void> _triggerSync() async {
+    if (kIsWeb) return;
     await SyncService.fullSync();
     if (mounted) _load(reset: true);
   }

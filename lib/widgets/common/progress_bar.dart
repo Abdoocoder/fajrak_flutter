@@ -16,6 +16,7 @@ class AppProgressBar extends StatelessWidget {
     this.infoStart,
     this.infoEnd,
     this.fillColor,
+    this.trackHeight = 6,
   });
 
   /// 0.0 → 1.0
@@ -27,6 +28,7 @@ class AppProgressBar extends StatelessWidget {
   final String? infoEnd;
   /// Optional override — skips variant colour logic when set.
   final Color? fillColor;
+  final double trackHeight;
 
   Color _fillColor(bool isDark) {
     if (fillColor != null) return fillColor!;
@@ -84,7 +86,7 @@ class AppProgressBar extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(AppRadius.xs),
           child: SizedBox(
-            height: 6,
+            height: trackHeight,
             child: Stack(
               children: [
                 Container(color: trackColor),

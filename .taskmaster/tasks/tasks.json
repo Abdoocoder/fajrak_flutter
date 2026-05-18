@@ -1,0 +1,383 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": "1",
+        "title": "Phase 1 — Foundation: Tokens + Shared Components",
+        "description": "Align all color/typography/spacing/radius tokens to DESIGN.md and build 8 shared components that all screens inherit.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Align app_colors.dart to DESIGN.md tokens",
+            "description": "Update lib/core/theme/app_colors.dart — primary #1A5F8A, accent #D4A843, income #2A7D4F, expense #B83232, warning #E89818, all surface/border/text tokens, full dark mode palette, category tints, lesson card palette.",
+            "status": "pending",
+            "dependencies": [],
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Align app_typography.dart — IBM Plex Sans Arabic scales",
+            "description": "Update lib/core/theme/app_typography.dart — display (40/32/24px w:700), heading (20/17/15px w:600), body (16/14/12px w:400), label (14/13/11px w:500), currency (tabular figures). Never system fonts.",
+            "status": "pending",
+            "dependencies": [
+              1
+            ],
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Create app_spacing.dart and app_radius.dart",
+            "description": "Create lib/core/theme/app_spacing.dart (xs:4, sm:8, md:16, lg:24, xl:32, xxl:48, screenPaddingHorizontal:20, listItemHeight:68) and lib/core/theme/app_radius.dart (xs:4, sm:8, md:12, lg:16, xl:24, full:999).",
+            "status": "pending",
+            "dependencies": [],
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Update app_theme.dart — CardTheme, FAB, NavigationBar, BottomSheet",
+            "description": "CardTheme: elevation 0, 1px borderLight border, radius 16. FAB: accent gold theme. NavigationBar: surface bg, 0 elevation. BottomSheet: 24px top radius.",
+            "status": "pending",
+            "dependencies": [
+              1,
+              3
+            ],
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Build app_card.dart shared widget",
+            "description": "lib/widgets/common/app_card.dart — background surface, 1px borderLight border, 16px radius, 20px padding (16px tight), elevation 0. Press: AnimatedScale to 0.98, 100ms Cubic(0.23,1,0.32,1).",
+            "status": "pending",
+            "dependencies": [
+              1,
+              3,
+              4
+            ],
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "Build app_button.dart — 6 variants with loading state",
+            "description": "lib/widgets/common/app_button.dart — PRIMARY (blue 52px), SECONDARY (bordered), GHOST (transparent), ACCENT (gold pill), DANGER (red bordered), SMALL (32px). Loading: label blurs, spinner appears. Disabled: 0.5 opacity. Press: scale 0.98.",
+            "status": "pending",
+            "dependencies": [
+              1,
+              3,
+              4
+            ],
+            "parentId": "undefined"
+          },
+          {
+            "id": 7,
+            "title": "Update transaction_list_item.dart — 68px fixed, category tints, Emil stagger",
+            "description": "lib/widgets/transactions/transaction_list_item.dart — 68px fixed height (use itemExtent in ListView), 40px full-radius category tint circle, emoji 18px, bodyMd w:600 title, bodySm tertiary subtitle, currency trailing. First-load stagger: 40ms/tile, 6 tiles only.",
+            "status": "pending",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "parentId": "undefined"
+          },
+          {
+            "id": 8,
+            "title": "Build app_text_field.dart — all states, blur-only validation",
+            "description": "lib/widgets/common/app_text_field.dart — 48px height, surfaceVariant fill, 1px border, 12px radius, 16px horizontal padding. States: default/focused/error/disabled/filled. Validate on blur only. Error text: Semantics(liveRegion: true).",
+            "status": "pending",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "parentId": "undefined"
+          },
+          {
+            "id": 9,
+            "title": "Build shimmer_loader.dart — TransactionShimmer + DashboardShimmer",
+            "description": "lib/widgets/common/shimmer_loader.dart — NEVER CircularProgressIndicator for list/data loading. TransactionShimmer: 6 tiles × 68px. DashboardShimmer: 3 placeholder cards. baseColor: surfaceVariant, highlightColor: surface, 1.5s loop.",
+            "status": "pending",
+            "dependencies": [
+              1,
+              3
+            ],
+            "parentId": "undefined"
+          },
+          {
+            "id": 10,
+            "title": "Build empty_state.dart, filter_chips.dart, section_header.dart, progress_bar.dart",
+            "description": "Four shared widgets: EmptyState (bilingual, vertically centered), FilterChips (34px, full radius, horizontal scroll, active=primary), SectionHeader (Row spaceBetween, bilingual), ProgressBar (6px track, gradient fill, label row above, info row below).",
+            "status": "pending",
+            "dependencies": [
+              1,
+              2,
+              3
+            ],
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2026-05-18T15:32:25.915Z"
+      },
+      {
+        "id": "2",
+        "title": "Phase 2 — Navigation Shell",
+        "description": "Fix the app's navigation structure: 4 tabs only, gold FAB with correct visibility logic, correct page transitions and bottom sheet animations.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [
+          "1"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Update main_screen.dart — 4 tabs only",
+            "description": "lib/screens/main_screen.dart — exactly 4 tabs: الرئيسية/Home, المعاملات/Transactions, التقارير/Reports, المزيد/More. RTL order: rightmost = first.",
+            "status": "pending",
+            "dependencies": [],
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Redesign main_bottom_nav_bar.dart",
+            "description": "lib/widgets/main_screen/main_bottom_nav_bar.dart — surface background, 1px top borderLight, elevation 0, 4px dot indicator below active icon (primary color), labelSm text, outlined icons.",
+            "status": "pending",
+            "dependencies": [
+              1
+            ],
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Replace FAB with gold FloatingActionButton.extended",
+            "description": "FAB: FloatingActionButton.extended, bg #D4A843, text/icon color #7A5800, label 'سجّل معاملة / Add Transaction', elevation 0, shadow 0 4px 12px rgba(212,168,67,0.35). Position: center, 16px above nav bar. Enter: scale(0.92)+opacity 0 → 1, 200ms easeOut.",
+            "status": "pending",
+            "dependencies": [
+              1
+            ],
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "FAB visibility logic — show/hide per screen",
+            "description": "Show FAB on Home, Transactions, Reports. Hide on More tab and all secondary screens (pushed routes). Use AnimatedSlide or AnimatedScale out on hide.",
+            "status": "pending",
+            "dependencies": [
+              3
+            ],
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Page transitions + bottom sheet animations",
+            "description": "Route transitions: 250ms fade + slide up 8px, Cubic(0.23,1,0.32,1). Bottom sheet open: 300ms Cubic(0.32,0.72,0,1). Bottom sheet close: 220ms Cubic(0.23,1,0.32,1). Respect MediaQuery.disableAnimations.",
+            "status": "pending",
+            "dependencies": [
+              1
+            ],
+            "parentId": "undefined"
+          }
+        ],
+        "updatedAt": "2026-05-18T15:48:43.766Z"
+      },
+      {
+        "id": "3",
+        "title": "Phase 3 — Dashboard Screen",
+        "description": "Redesign the dashboard with Header Overlap pattern, BalanceCard count-up, BudgetProgressCard, and remove all 6 banned gamification widgets.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [
+          "1",
+          "2"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Remove all 6 banned gamification widgets",
+            "description": "Delete from dashboard: badges_grid, challenges_card, gamification_card, dashboard_health_score, wealth_simulator_card, dashboard_stage_card. Remove their imports and any dead provider calls.",
+            "status": "pending",
+            "dependencies": [],
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Dashboard AppBar — primary blue, white text",
+            "description": "AppBar with primary (#1A5F8A) background. Greeting (bilingual) + date in textInverse (white). Date format: 'EEEE، d MMMM yyyy' in Arabic. Elevation 0.",
+            "status": "pending",
+            "dependencies": [],
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Header Overlap pattern — Stack + Positioned",
+            "description": "Stack layout: AppBar as background, BalanceCard overlaps by -18px (Positioned with top overlap). BalanceCard sits in the blue-to-white transition zone.",
+            "status": "pending",
+            "dependencies": [
+              2
+            ],
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Build BalanceCard with count-up animation",
+            "description": "BalanceCard: labelSm 'رصيدك هذا الشهر / Your balance this month', displayLarge amount (40px/700/letterSpacing:-2.0) with count-up 0→actual 600ms Cubic(0.25,1,0.5,1). Income (↑ green) + expense (↓ red) split row. Negative balance: border switches to expense red + ⚠ icon.",
+            "status": "pending",
+            "dependencies": [
+              3
+            ],
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Build BudgetProgressCard with ProgressRing hero",
+            "description": "BudgetProgressCard: ProgressRing 120px/10px stroke, primary→accent gradient fill, percentage in displaySmall center. Shows max 2 budget categories below. 'الكل ← / See all' link in SectionHeader.",
+            "status": "pending",
+            "dependencies": [],
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "Recent transactions section",
+            "description": "SectionHeader 'آخر المعاملات / Recent Transactions' + 'الكل ←'. Last 3 TransactionTiles inside an AppCard. No stagger on dashboard (stagger only applies to first list load).",
+            "status": "pending",
+            "dependencies": [],
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": "4",
+        "title": "Phase 4 — List Screens: Transactions + Reports",
+        "description": "Redesign the Transactions list screen with search/filter/pagination and build the new combined Reports screen.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "1",
+          "2",
+          "3"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Transactions screen — search bar + FilterChips",
+            "description": "Full-width search bar (AppTextField variant), 20px padding. FilterChips below: All/Income/Expense + category filters, horizontal scroll, 34px height. AppBar: surface bg, textPrimary title.",
+            "status": "pending",
+            "dependencies": [],
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Transactions list — ListView.builder with pagination",
+            "description": "ListView.builder with itemExtent: 68 (NEVER Column+children). Month section headers with summary (total income, total expense). Pull-to-refresh with RefreshIndicator (primary color). Pagination: 20 items/page, load-more on scroll end.",
+            "status": "pending",
+            "dependencies": [
+              1
+            ],
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Transactions empty state + shimmer loading state",
+            "description": "Empty: TransactionShimmer while loading. Empty state when no data: outlined icon 48px textTertiary, bilingual title/subtitle, 'سجّل أول معاملة / Add your first transaction' CTA button, vertically centered.",
+            "status": "pending",
+            "dependencies": [
+              2
+            ],
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Reports screen — month selector + stat row",
+            "description": "Month selector: horizontal scroll chips (FilterChips style, 12 months). 3-column stat row below: income (green) | 1px vertical divider | expense (red) | 1px vertical divider | net (primary or red). All reactive — updates as month changes, no submit.",
+            "status": "pending",
+            "dependencies": [],
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Reports screen — bar chart + top categories",
+            "description": "6-month expense trend bar chart (fl_chart or equivalent). 'أعلى الفئات / Top Categories' SectionHeader below. 5 CategoryPills with amounts, sorted by spend descending. All data reactive to month selector.",
+            "status": "pending",
+            "dependencies": [
+              4
+            ],
+            "parentId": "undefined"
+          }
+        ]
+      },
+      {
+        "id": "5",
+        "title": "Phase 5 — Secondary Screens",
+        "description": "Redesign all remaining screens: Budgets, Goals, Debts, Investments, More, FIRE, Zakat, Settings, and Auth screens.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Budgets screen — ProgressRing cards + bottom sheet",
+            "description": "Budget cards using ProgressRing hero. Add budget: bottom sheet with AppTextField amount + category picker. Swipe left to delete (Dismissible + confirmation). Swipe right to edit.",
+            "status": "pending",
+            "dependencies": [],
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Goals + Debts screens",
+            "description": "Goals: cards with ProgressBar, milestone markers, deposit bottom sheet. Debts: cards with payoff timeline visualization, Dismissible delete with confirmation dialog.",
+            "status": "pending",
+            "dependencies": [],
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Investments + More screens",
+            "description": "Investments: portfolio summary AppCard + asset list. More screen: progressive disclosure grid — tool name only visible, tap opens full screen. Tools: Accounts, Budgets, Debts, Goals, Investments, Learn, Achievements, Alerts, FIRE, Zakat, Settings, Help.",
+            "status": "pending",
+            "dependencies": [],
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "FIRE + Zakat calculators",
+            "description": "FIRE: collapsible AppCard input sections, result card always visible (updates live), displayMedium result, no submit button. Zakat: nisab comparison, zakat amount in accent gold, reactive. Both: no spinner — shimmer if fetching live rates.",
+            "status": "pending",
+            "dependencies": [],
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Settings screen",
+            "description": "Grouped list sections (AppCard per group). Toggle rows (dark mode, notifications, biometrics). Language switcher (AR/EN). Account section. Danger zone (logout, delete account) in DANGER button style.",
+            "status": "pending",
+            "dependencies": [],
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "Auth screens — Login, Register, Forgot Password, Onboarding",
+            "description": "All screens: IBM Plex Sans Arabic, design system tokens, AppButton PRIMARY for submit, AppTextField for inputs, blur-only validation. Onboarding: 3-step carousel with accent gold progress dots. No elevation anywhere.",
+            "status": "pending",
+            "dependencies": [],
+            "parentId": "undefined"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "lastModified": "2026-05-18T15:48:43.766Z",
+      "taskCount": 5,
+      "completedCount": 2,
+      "tags": [
+        "master"
+      ]
+    }
+  }
+}
