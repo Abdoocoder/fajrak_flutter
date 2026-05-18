@@ -23,11 +23,11 @@ class _MainScreenState extends State<MainScreen>
 
   late final List<bool> _visited;
 
-  static const List<Widget> _screens = [
-    DashboardScreen(),
-    TransactionsScreen(),
-    ReportsScreen(),
-    MoreScreen(),
+  List<Widget> get _screens => [
+    DashboardScreen(onSwitchTab: _switchTab),
+    const TransactionsScreen(),
+    const ReportsScreen(),
+    const MoreScreen(),
   ];
 
   late final AnimationController _fabController;
