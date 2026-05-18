@@ -4,7 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../common/app_card.dart';
-import '../common/progress_bar.dart';
+import '../common/progress_ring.dart';
 
 class BudgetProgressCard extends StatelessWidget {
   const BudgetProgressCard({
@@ -25,7 +25,10 @@ class BudgetProgressCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final labelColor =
         isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final dividerColor =
+        isDark ? AppColors.borderDark : AppColors.borderLight;
 
+    // Empty state — no income data yet
     if (income == 0) {
       return AppCard(
         variant: AppCardVariant.tight,
@@ -49,32 +52,14 @@ class BudgetProgressCard extends StatelessWidget {
     }
 
     final fraction = (expenses / income).clamp(0.0, 1.0);
-    final remaining = income - expenses;
     final pct = (fraction * 100).round();
-    final expFmt = expenses % 1 == 0
-        ? expenses.toStringAsFixed(0)
-        : expenses.toStringAsFixed(2);
-    final incFmt = income % 1 == 0
-        ? income.toStringAsFixed(0)
-        : income.toStringAsFixed(2);
-    final remFmt = remaining.abs() % 1 == 0
-        ? remaining.abs().toStringAsFixed(0)
-        : remaining.abs().toStringAsFixed(2);
 
-    // Colour: <0.7 → budget gradient; 0.7–0.9 → warning amber; ≥0.9 → expense red
-    ProgressBarVariant variant;
-    Color? overrideColor;
-    Color spentColor;
+    // Ring fill: gradient (null) / warning / overspent
+    Color? ringFillColor;
     if (fraction >= 0.9) {
-      variant = ProgressBarVariant.overspent;
-      spentColor = AppColors.expense;
+      ringFillColor = AppColors.expense;
     } else if (fraction >= 0.7) {
-      variant = ProgressBarVariant.overspent;
-      overrideColor = AppColors.warning;
-      spentColor = AppColors.warning;
-    } else {
-      variant = ProgressBarVariant.budget;
-      spentColor = AppColors.primary;
+      ringFillColor = AppColors.warning;
     }
 
     return AppCard(
@@ -82,6 +67,7 @@ class BudgetProgressCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -102,42 +88,99 @@ class BudgetProgressCard extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                expFmt,
-                style: AppTypography.headingMd.copyWith(
-                  color: spentColor,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              Text(
-                ' / $incFmt $currency',
-                style: AppTypography.bodySm.copyWith(
-                  color: isDark
-                      ? AppColors.textSecondaryDark
-                      : AppColors.textSecondary,
-                ),
-              ),
-            ],
+          const SizedBox(height: AppSpacing.md),
+
+          // ProgressRing — centered hero
+          Center(
+            child: ProgressRing(
+              value: fraction,
+              label: '$pct%',
+              subLabel: 'budget_used'.tr(),
+              fillColor: ringFillColor,
+            ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          AppProgressBar(
-            value: fraction,
-            title: '',
-            variant: variant,
-            fillColor: overrideColor,
-            trackHeight: 10,
-            percentageLabel: '$pct%',
-            infoEnd: remaining >= 0
-                ? '$remFmt $currency ${'goals_remaining'.tr()}'
-                : null,
+          const SizedBox(height: AppSpacing.md),
+
+          // Income row
+          _StatRow(
+            isIncome: true,
+            label: 'trans_income'.tr(),
+            amount: income,
+            currency: currency,
+            isDark: isDark,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Divider(height: 1, thickness: 1, color: dividerColor),
+          const SizedBox(height: AppSpacing.xs),
+
+          // Expense row
+          _StatRow(
+            isIncome: false,
+            label: 'trans_expense'.tr(),
+            amount: expenses,
+            currency: currency,
+            isDark: isDark,
           ),
         ],
       ),
+    );
+  }
+}
+
+class _StatRow extends StatelessWidget {
+  const _StatRow({
+    required this.isIncome,
+    required this.label,
+    required this.amount,
+    required this.currency,
+    required this.isDark,
+  });
+
+  final bool isIncome;
+  final String label;
+  final double amount;
+  final String currency;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isIncome ? AppColors.income : AppColors.expense;
+    final labelColor =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final n = amount.abs();
+    final formatted =
+        n % 1 == 0 ? n.toStringAsFixed(0) : n.toStringAsFixed(2);
+
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Icon(
+            isIncome ? Icons.arrow_upward : Icons.arrow_downward,
+            size: 11,
+            color: color,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.xs),
+        Text(
+          label,
+          style: AppTypography.labelSm.copyWith(color: labelColor),
+        ),
+        const Spacer(),
+        Text(
+          '$formatted $currency',
+          style: AppTypography.headingSm.copyWith(
+            color: color,
+            letterSpacing: -0.5,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     );
   }
 }
