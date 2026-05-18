@@ -1,0 +1,85 @@
+name: fajrak
+description: فجرك - تطبيق إدارة مالية ذكي
+publish_to: 'fajrak.com'
+version: 3.35.4+46
+
+environment:
+  sdk: '>=3.11.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Supabase
+  supabase_flutter: ^2.3.4
+
+  # Firebase - إصدارات متوافقة مع بعض
+  firebase_core: ^4.5.0
+  firebase_messaging: ^16.1.2
+  flutter_local_notifications: ^21.0.0
+
+  # UI
+  fl_chart: ^1.1.0
+  shimmer: ^3.0.0
+
+  # Utils
+  intl: ^0.20.2
+  shared_preferences: ^2.2.2
+  url_launcher: ^6.2.4
+  package_info_plus: ^10.0.0
+  share_plus: ^13.0.0
+  path_provider: ^2.1.5
+  easy_localization: ^3.0.3
+  provider: ^6.1.1
+  http: ^1.2.1
+  flutter_dotenv: ^6.0.0
+  flutter_app_badge_control: ^0.0.2
+  pdf: ^3.10.8
+  printing: ^5.13.1
+  uuid: ^4.5.3
+
+  # Offline-first local database
+  drift: ^2.18.0
+  sqlcipher_flutter_libs: ^0.7.0  # SQLCipher encryption — mobile/desktop only
+  path: ^1.9.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+  drift_dev: ^2.18.0
+  build_runner: ^2.4.0
+
+flutter_launcher_icons:
+  android: "ic_launcher"
+  image_path: "assets/images/app_icon.png"
+  min_sdk_android: 21
+dependency_overrides:
+  vector_math: ^2.3.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - .env
+    - assets/images/
+    - assets/i18n/
+  fonts:
+    - family: IBMPlexSansArabic
+      fonts:
+        - asset: assets/fonts/IBMPlexSansArabic-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/IBMPlexSansArabic-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/IBMPlexSansArabic-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/IBMPlexSansArabic-Bold.ttf
+          weight: 700
+    - family: Cairo
+      fonts:
+        - asset: assets/fonts/Cairo-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Cairo-Bold.ttf
+          weight: 700
