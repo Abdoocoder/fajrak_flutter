@@ -56,24 +56,68 @@ New stateful widget. Sits inside a `SliverToBoxAdapter` with `EdgeInsetsDirectio
 
 **Negative state:** `AppCard` border switches to `AppColors.expense` (`BorderSide(color: AppColors.expense, width: 1.5)`)
 
-### 3. BudgetProgressCard (`lib/widgets/dashboard/budget_progress_card.dart` — REWRITE)
+### 3. BudgetProgressCard (`lib/widgets/dashboard/budget_progress_card.dart` — UPGRADE)
 
-Simplified card: shows total monthly spend vs income as a single horizontal progress bar.
-Full per-category budgets belong to Phase 4 (Budgets screen); this card is a summary teaser.
+Shows total monthly spend vs income. Data source: existing `income` and `expenses` props
+(no new DB query). Visual hero upgrades from a linear bar to a **ProgressRing**.
 
-**Props:** `income` (double), `expenses` (double), `currency` (String)
+**Props:** `income` (double), `expenses` (double), `currency` (String), `onSeeAll` (VoidCallback?)
 
-**Layout (inside `AppCard` tight variant):**
-- `SectionHeader`-style row: title "الميزانية الشهرية / Monthly Budget" (`AppTypography.headingSm`), action "الكل ← / See all" in `AppColors.primary` → navigates to tab index 2 (Reports, placeholder for now)
-- `AppProgressBar` (budget variant, gradient) showing `fraction = (expenses/income).clamp(0,1)`
-  - Label row above: `AppTypography.labelSm` title (empty — bar label is implicit), percentage chip `${(fraction*100).round()}%`
-  - Info row below: remaining = income − expenses, `AppTypography.bodySm`, `AppColors.textSecondary`
-- If `income == 0`: show `EmptyState` with `Icons.account_balance_wallet_outlined`, "لا توجد بيانات / No data"
+**New shared widget required:** `lib/widgets/common/progress_ring.dart` (see below)
 
-**Colour logic:**
-- `fraction < 0.7` → budget variant (primary→accent gradient)
-- `0.7 ≤ fraction < 0.9` → override fill to `AppColors.warning`
-- `fraction ≥ 0.9` → override fill to `AppColors.expense`
+**Layout (inside `AppCard` tight variant — Approach 1: ring centered):**
+
+```
+┌──────────────────────────────────┐
+│  ميزانية الشهر      الكل ←       │  ← Row: headingSm title + labelMd action
+│                                  │
+│         ╭─────────╮              │
+│        ╱   68%     ╲             │
+│       │  مستخدمة    │            │  ← ProgressRing 120px centered
+│        ╲           ╱             │
+│         ╰─────────╯              │
+│                                  │
+│  ↑ دخل             1,200 JOD    │  ← income row (AppColors.income)
+│  ──────────────────────────────  │  ← 1px Divider
+│  ↓ مصروف             820 JOD    │  ← expense row (AppColors.expense)
+└──────────────────────────────────┘
+```
+
+- `fraction = (expenses / income).clamp(0.0, 1.0)`
+- If `income == 0`: existing empty card (wallet icon row) — unchanged
+- Income/expense rows use same `_StatColumn` pattern as BalanceCard
+
+**Colour logic (passed to ProgressRing as `fillColor`):**
+- `fraction < 0.7` → null (ring uses default primary→accent gradient)
+- `0.7 ≤ fraction < 0.9` → `AppColors.warning`
+- `fraction ≥ 0.9` → `AppColors.expense`
+
+---
+
+### New: ProgressRing widget (`lib/widgets/common/progress_ring.dart`)
+
+Shared widget — used here and later in Goals/Budgets screens.
+
+**API:**
+```dart
+ProgressRing({
+  required double value,      // 0.0 – 1.0
+  required String label,      // center percentage text e.g. "68%"
+  String? subLabel,           // below center e.g. "مستخدمة / Used"
+  Color? fillColor,           // null → primary→accent gradient
+  double size = 120,
+  double strokeWidth = 10,
+})
+```
+
+**Painter:**
+- Track arc: full 2π, `AppColors.surfaceVariant`, stroke 10px, `StrokeCap.round`
+- Fill arc: 0 → `value × 2π`, gradient `AppColors.primary` → `AppColors.accent` (via `SweepGradient` on a `Paint` with shader), `StrokeCap.round`
+- If `fillColor != null`: use solid color instead of gradient
+- Center text: `displaySmall` (24px/700/LS-1.0), `AppColors.textPrimary`
+- Sub-label: `labelSm` (11px/500/LS 0.4), `AppColors.textSecondary`, 6px below center
+- No animation on the ring itself (BudgetProgressCard is a summary, not a hero moment)
+- Respects `MediaQuery.disableAnimations` (no-op since there's no animation)
 
 ### 4. Recent Transactions
 
@@ -104,13 +148,31 @@ Keep existing `_load()` + `_loadPhase2()` structure. Remove unused fields:
 
 ---
 
-## Files Changed
+## Implementation Status (2026-05-18 update)
+
+| Subtask | Status |
+|---|---|
+| 3.1 Remove banned gamification widgets | **Done** (bc20c7c) |
+| 3.2 Blue AppBar with textInverse | **Done** |
+| 3.3 Header Overlap pattern | **Done** |
+| 3.4 BalanceCard with count-up animation | **Done** |
+| 3.5 BudgetProgressCard with ProgressRing | **Remaining** |
+| 3.6 Recent transactions section | **Done** |
+
+## Files Changed (remaining work only)
+
+| File | Action |
+|---|---|
+| `lib/widgets/common/progress_ring.dart` | Create new |
+| `lib/widgets/dashboard/budget_progress_card.dart` | Upgrade: replace linear bar with ProgressRing |
+| `lib/widgets/dashboard/recent_transactions_list.dart` | Delete (dead code — uses legacy app_colors.dart) |
+
+## Previously Changed Files (already shipped)
 
 | File | Action |
 |---|---|
 | `lib/screens/dashboard/dashboard_screen.dart` | Full rewrite |
 | `lib/widgets/dashboard/balance_card.dart` | Create new |
-| `lib/widgets/dashboard/budget_progress_card.dart` | Rewrite |
 | `lib/widgets/dashboard/dashboard_header.dart` | Delete (replaced by SliverAppBar inline) |
 | `lib/widgets/dashboard/gamification_card.dart` | Delete |
 | `lib/widgets/dashboard/challenges_card.dart` | Delete |

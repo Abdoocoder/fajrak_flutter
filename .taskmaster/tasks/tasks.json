@@ -185,7 +185,7 @@
         "id": "3",
         "title": "Phase 3 — Dashboard Screen",
         "description": "Redesign the dashboard with Header Overlap pattern, BalanceCard count-up, BudgetProgressCard, and remove all 6 banned gamification widgets.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "1",
@@ -196,55 +196,62 @@
             "id": 1,
             "title": "Remove all 6 banned gamification widgets",
             "description": "Delete from dashboard: badges_grid, challenges_card, gamification_card, dashboard_health_score, wealth_simulator_card, dashboard_stage_card. Remove their imports and any dead provider calls.",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-05-18T20:22:37.101Z"
           },
           {
             "id": 2,
             "title": "Dashboard AppBar — primary blue, white text",
             "description": "AppBar with primary (#1A5F8A) background. Greeting (bilingual) + date in textInverse (white). Date format: 'EEEE، d MMMM yyyy' in Arabic. Elevation 0.",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-05-18T20:22:37.105Z"
           },
           {
             "id": 3,
             "title": "Header Overlap pattern — Stack + Positioned",
             "description": "Stack layout: AppBar as background, BalanceCard overlaps by -18px (Positioned with top overlap). BalanceCard sits in the blue-to-white transition zone.",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               2
             ],
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-05-18T20:22:37.106Z"
           },
           {
             "id": 4,
             "title": "Build BalanceCard with count-up animation",
             "description": "BalanceCard: labelSm 'رصيدك هذا الشهر / Your balance this month', displayLarge amount (40px/700/letterSpacing:-2.0) with count-up 0→actual 600ms Cubic(0.25,1,0.5,1). Income (↑ green) + expense (↓ red) split row. Negative balance: border switches to expense red + ⚠ icon.",
-            "status": "pending",
+            "status": "done",
             "dependencies": [
               3
             ],
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-05-18T20:22:37.108Z"
           },
           {
             "id": 5,
             "title": "Build BudgetProgressCard with ProgressRing hero",
             "description": "BudgetProgressCard: ProgressRing 120px/10px stroke, primary→accent gradient fill, percentage in displaySmall center. Shows max 2 budget categories below. 'الكل ← / See all' link in SectionHeader.",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-05-18T20:23:57.198Z"
           },
           {
             "id": 6,
             "title": "Recent transactions section",
             "description": "SectionHeader 'آخر المعاملات / Recent Transactions' + 'الكل ←'. Last 3 TransactionTiles inside an AppCard. No stagger on dashboard (stagger only applies to first list load).",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-05-18T20:22:37.109Z"
           }
-        ]
+        ],
+        "updatedAt": "2026-05-18T20:23:57.198Z"
       },
       {
         "id": "4",
@@ -372,9 +379,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-05-18T15:48:43.766Z",
+      "lastModified": "2026-05-18T20:23:57.198Z",
       "taskCount": 5,
-      "completedCount": 2,
+      "completedCount": 3,
       "tags": [
         "master"
       ]
