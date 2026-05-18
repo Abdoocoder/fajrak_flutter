@@ -1,29 +1,32 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import '../../utils/app_colors.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
+import '../common/progress_bar.dart';
 
 class BudgetListItem extends StatelessWidget {
-  final Map<String, dynamic> budget;
-  final double spent;
-  final String currency;
-  final List<Map<String, dynamic>> localizedCategories;
-  final ColorScheme colorScheme;
-  final Function(Map<String, dynamic>) onEdit;
-  final Function(String) onDelete;
-
   const BudgetListItem({
     super.key,
     required this.budget,
     required this.spent,
     required this.currency,
     required this.localizedCategories,
-    required this.colorScheme,
     required this.onEdit,
     required this.onDelete,
   });
 
+  final Map<String, dynamic> budget;
+  final double spent;
+  final String currency;
+  final List<Map<String, dynamic>> localizedCategories;
+  final Function(Map<String, dynamic>) onEdit;
+  final Function(String) onDelete;
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final cat = localizedCategories.firstWhere(
       (c) => c['key'] == budget['category'],
       orElse: () => {'key': budget['category'], 'icon': Icons.edit_note},
@@ -32,26 +35,29 @@ class BudgetListItem extends StatelessWidget {
     final pct = limit > 0 ? (spent / limit).clamp(0.0, 1.0) : 0.0;
     final over = spent > limit;
     final warn = !over && pct > 0.8;
-    final color = over
-        ? AppColors.error
-        : warn
-        ? AppColors.warning
-        : AppColors.success;
     final remaining = (limit - spent).clamp(0.0, double.infinity);
 
+    final statusColor = over
+        ? AppColors.expense
+        : warn
+            ? AppColors.warning
+            : AppColors.income;
+
+    final borderColor = over
+        ? AppColors.expense.withValues(alpha: 0.3)
+        : warn
+            ? AppColors.warning.withValues(alpha: 0.2)
+            : isDark
+                ? AppColors.borderDark
+                : AppColors.borderLight;
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsetsDirectional.only(bottom: 10),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: over
-              ? colorScheme.error.withValues(alpha: 0.3)
-              : warn
-              ? Colors.orange.withValues(alpha: 0.2)
-              : colorScheme.outlineVariant,
-        ),
+        color: isDark ? AppColors.surfaceDark : AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         children: [
@@ -61,140 +67,100 @@ class BudgetListItem extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  color: statusColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 child: Center(
-                  child: Icon(cat['icon'] as IconData, size: 22, color: color),
+                  child: Icon(
+                    cat['icon'] as IconData,
+                    size: 22,
+                    color: statusColor,
+                  ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       budget['category'] as String,
-                      style: TextStyle(
-                        color: colorScheme.onSurface,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 14,
+                      style: AppTypography.bodyMd.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: isDark
+                            ? AppColors.textPrimaryDark
+                            : AppColors.textPrimary,
                       ),
                     ),
                     Text(
-                      '${spent.toStringAsFixed(0)} / ${limit.toStringAsFixed(0)} $currency${over
-                          ? ' ⚠ تجاوزت!'
-                          : warn
-                          ? ' ◼ اقتربت'
-                          : ''}',
-                      style: TextStyle(
-                        color: color,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
+                      '${spent.toStringAsFixed(0)} / ${limit.toStringAsFixed(0)} $currency'
+                      '${over ? ' ⚠ تجاوزت!' : warn ? ' ◼ اقتربت' : ''}',
+                      style: AppTypography.bodySm.copyWith(color: statusColor),
                     ),
                   ],
                 ),
               ),
-              Text(
-                '${(pct * 100).round()}%',
-                style: TextStyle(
-                  color: over ? AppColors.errorLight : AppColors.successLight,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(width: 8),
-              GestureDetector(
+              const SizedBox(width: AppSpacing.sm),
+              _ActionButton(
+                icon: Icons.edit,
+                color: AppColors.primary,
                 onTap: () => onEdit(budget),
-                child: Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    color: colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: colorScheme.primary.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  child: Icon(Icons.edit, color: colorScheme.primary, size: 14),
-                ),
               ),
-              const SizedBox(width: 6),
-              GestureDetector(
+              const SizedBox(width: AppSpacing.xs),
+              _ActionButton(
+                icon: Icons.close,
+                color: AppColors.expense,
                 onTap: () => onDelete(budget['id'].toString()),
-                child: Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(
-                    color: AppColors.error.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: AppColors.error.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.close,
-                    color: AppColors.error,
-                    size: 14,
-                  ),
-                ),
               ),
             ],
           ),
           const SizedBox(height: 10),
-          Semantics(
-            value: '${(pct * 100).toStringAsFixed(0)}%',
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(5),
-              child: LinearProgressIndicator(
-                value: pct,
-                backgroundColor: colorScheme.outlineVariant,
-                color: color,
-                minHeight: 8,
-              ),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    'budget_remaining_label'.tr(),
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 11,
-                    ),
-                  ),
-                  Text(
-                    '${remaining.toStringAsFixed(0)} $currency',
-                    style: TextStyle(
-                      color: over
-                          ? AppColors.errorLight
-                          : AppColors.successLight,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
-              Text(
-                'budget_limit_label'.tr(
-                  namedArgs: {
-                    'amount': limit.toStringAsFixed(0),
-                    'currency': currency,
-                  },
-                ),
-                style: TextStyle(
-                  color: colorScheme.onSurfaceVariant,
-                  fontSize: 11,
-                ),
-              ),
-            ],
+          AppProgressBar(
+            value: pct,
+            title: '',
+            percentageLabel: '${(pct * 100).round()}%',
+            variant: over
+                ? ProgressBarVariant.overspent
+                : ProgressBarVariant.budget,
+            fillColor: over
+                ? AppColors.expense
+                : warn
+                    ? AppColors.warning
+                    : null,
+            infoStart: 'budget_remaining_label'.tr(),
+            infoEnd:
+                '${remaining.toStringAsFixed(0)} $currency — ${'budget_limit_label'.tr(namedArgs: {'amount': limit.toStringAsFixed(0), 'currency': currency})}',
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 30,
+        height: 30,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
+        ),
+        child: Icon(icon, color: color, size: 14),
       ),
     );
   }
