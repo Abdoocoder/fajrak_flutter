@@ -26,7 +26,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String _memberSince = '';
   String _appVersion = 'v...';
 
-
   double _cashBalance = 0, _savings = 0, _investments = 0, _totalDebt = 0;
   String _currency = 'JOD';
 
@@ -41,7 +40,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       final user = Supabase.instance.client.auth.currentUser;
       if (user == null) return;
-      
+
       final packageInfo = await PackageInfo.fromPlatform();
       _appVersion = 'v${packageInfo.version}+${packageInfo.buildNumber}';
 
@@ -54,10 +53,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           .select('*')
           .eq('id', user.id)
           .single();
-      
+
       _initialProfile = profile;
       _currency = profile['currency'] as String? ?? 'JOD';
-
 
       // Net worth
       final txRes = await Supabase.instance.client
@@ -87,19 +85,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
       }
       _cashBalance = income - expenses;
-      _savings = (goalsRes as List)
-          .fold(0.0, (a, g) => a + (g['current_amount'] as num).toDouble());
+      _savings = (goalsRes as List).fold(
+        0.0,
+        (a, g) => a + (g['current_amount'] as num).toDouble(),
+      );
       _investments = (invRes as List).fold(
-          0.0,
-          (a, i) =>
-              a +
-              (i['shares'] as num).toDouble() *
-                  (i['current_price'] as num).toDouble());
-      _totalDebt = (debtsRes as List)
-          .fold(0.0, (a, d) => a + (d['remaining_amount'] as num).toDouble());
-
+        0.0,
+        (a, i) =>
+            a +
+            (i['shares'] as num).toDouble() *
+                (i['current_price'] as num).toDouble(),
+      );
+      _totalDebt = (debtsRes as List).fold(
+        0.0,
+        (a, d) => a + (d['remaining_amount'] as num).toDouble(),
+      );
     } catch (e) {
-      if (mounted) ErrorHandler.handle(e, context: context, developerMessage: 'Settings Load');
+      if (mounted)
+        ErrorHandler.handle(
+          e,
+          context: context,
+          developerMessage: 'Settings Load',
+        );
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -123,7 +130,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         iconTheme: IconThemeData(color: colorScheme.onSurface),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -137,7 +146,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const PreferencesSection(),
                   AssetsForm(
                     initialProfile: _initialProfile,
-                    netWorth: _cashBalance + _savings + _investments - _totalDebt,
+                    netWorth:
+                        _cashBalance + _savings + _investments - _totalDebt,
                     cashBalance: _cashBalance,
                     savings: _savings,
                     investments: _investments,
@@ -152,7 +162,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     child: Text(
                       '🌄 — $_appVersion',
                       style: TextStyle(
-                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                        color: colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.5,
+                        ),
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                       ),

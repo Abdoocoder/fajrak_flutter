@@ -107,7 +107,12 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
         });
       }
     } catch (e) {
-      if (mounted) ErrorHandler.handle(e, context: context, developerMessage: 'Achievements Load');
+      if (mounted)
+        ErrorHandler.handle(
+          e,
+          context: context,
+          developerMessage: 'Achievements Load',
+        );
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -120,34 +125,41 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
 
     if (_loading) {
       return Scaffold(
-          backgroundColor: theme.scaffoldBackgroundColor,
-          body: Center(child: CircularProgressIndicator(color: colorScheme.primary)));
+        backgroundColor: theme.scaffoldBackgroundColor,
+        body: Center(
+          child: CircularProgressIndicator(color: colorScheme.primary),
+        ),
+      );
     }
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: colorScheme.surface,
-        title: const Text('الإنجازات',
-            style: TextStyle(fontWeight: FontWeight.w900)),
+        title: const Text(
+          'الإنجازات',
+          style: TextStyle(fontWeight: FontWeight.w900),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Column(children: [
-          LevelCard(
-            level: _level,
-            levelTitle: _levelTitle,
-            points: _points,
-            nextLevel: _nextLevel,
-            colorScheme: colorScheme,
-          ),
-          const SizedBox(height: 20),
-          BadgeGrid(
-            earnedBadges: _badges,
-            badgeInfo: _badgeInfo,
-            colorScheme: colorScheme,
-          ),
-        ]),
+        child: Column(
+          children: [
+            LevelCard(
+              level: _level,
+              levelTitle: _levelTitle,
+              points: _points,
+              nextLevel: _nextLevel,
+              colorScheme: colorScheme,
+            ),
+            const SizedBox(height: 20),
+            BadgeGrid(
+              earnedBadges: _badges,
+              badgeInfo: _badgeInfo,
+              colorScheme: colorScheme,
+            ),
+          ],
+        ),
       ),
     );
   }

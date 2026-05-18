@@ -6,10 +6,7 @@ import 'dart:math';
 class WealthSimulatorCard extends StatefulWidget {
   final String currency;
 
-  const WealthSimulatorCard({
-    super.key,
-    required this.currency,
-  });
+  const WealthSimulatorCard({super.key, required this.currency});
 
   @override
   State<WealthSimulatorCard> createState() => _WealthSimulatorCardState();
@@ -60,11 +57,14 @@ class _WealthSimulatorCardState extends State<WealthSimulatorCard> {
             children: [
               Icon(Icons.attach_money, size: 18, color: colorScheme.primary),
               const SizedBox(width: 8),
-              Text('wealth_title'.tr(),
-                  style: TextStyle(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 14)),
+              Text(
+                'wealth_title'.tr(),
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 14,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -72,54 +72,91 @@ class _WealthSimulatorCardState extends State<WealthSimulatorCard> {
             child: Text(
               '${futureValue.toStringAsFixed(0)} ${widget.currency}',
               style: TextStyle(
-                  color: isDark ? AppColors.success : colorScheme.primary,
-                  fontSize: 26,
-                  fontWeight: FontWeight.w900),
+                color: isDark ? AppColors.success : colorScheme.primary,
+                fontSize: 26,
+                fontWeight: FontWeight.w900,
+              ),
             ),
           ),
           Center(
-            child: Text('wealth_simulator_subtitle'.tr(),
-                style: TextStyle(
-                    color: colorScheme.onSurfaceVariant,
-                    fontSize: 11)),
+            child: Text(
+              'wealth_simulator_subtitle'.tr(),
+              style: TextStyle(
+                color: colorScheme.onSurfaceVariant,
+                fontSize: 11,
+              ),
+            ),
           ),
           const SizedBox(height: 24),
-          _buildSlider('wealth_monthly_investment'.tr(), _monthlyContribution, 0, 5000,
-              _monthlyContribution.toStringAsFixed(0), (val) {
-            setState(() => _monthlyContribution = val);
-          }, colorScheme, sliderTheme),
           _buildSlider(
-              'wealth_expected_years'.tr(), _years, 1, 40, 'wealth_years_val'.tr(args: [_years.toStringAsFixed(0)]),
-              (val) {
-            setState(() => _years = val);
-          }, colorScheme, sliderTheme),
-          _buildSlider('wealth_expected_yield'.tr(), _expectedReturn, 1, 20,
-              '${_expectedReturn.toStringAsFixed(1)}%', (val) {
-            setState(() => _expectedReturn = val);
-          }, colorScheme, sliderTheme),
+            'wealth_monthly_investment'.tr(),
+            _monthlyContribution,
+            0,
+            5000,
+            _monthlyContribution.toStringAsFixed(0),
+            (val) {
+              setState(() => _monthlyContribution = val);
+            },
+            colorScheme,
+            sliderTheme,
+          ),
+          _buildSlider(
+            'wealth_expected_years'.tr(),
+            _years,
+            1,
+            40,
+            'wealth_years_val'.tr(args: [_years.toStringAsFixed(0)]),
+            (val) {
+              setState(() => _years = val);
+            },
+            colorScheme,
+            sliderTheme,
+          ),
+          _buildSlider(
+            'wealth_expected_yield'.tr(),
+            _expectedReturn,
+            1,
+            20,
+            '${_expectedReturn.toStringAsFixed(1)}%',
+            (val) {
+              setState(() => _expectedReturn = val);
+            },
+            colorScheme,
+            sliderTheme,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildSlider(String label, double value, double min, double max,
-      String formattedValue, ValueChanged<double> onChanged,
-      ColorScheme colorScheme, SliderThemeData sliderTheme) {
+  Widget _buildSlider(
+    String label,
+    double value,
+    double min,
+    double max,
+    String formattedValue,
+    ValueChanged<double> onChanged,
+    ColorScheme colorScheme,
+    SliderThemeData sliderTheme,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label,
-                style: TextStyle(
-                    color: colorScheme.onSurface,
-                    fontSize: 12)),
-            Text(formattedValue,
-                style: TextStyle(
-                    color: colorScheme.primary,
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold)),
+            Text(
+              label,
+              style: TextStyle(color: colorScheme.onSurface, fontSize: 12),
+            ),
+            Text(
+              formattedValue,
+              style: TextStyle(
+                color: colorScheme.primary,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
         SliderTheme(

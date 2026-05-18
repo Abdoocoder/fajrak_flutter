@@ -75,19 +75,20 @@ class ConfirmDialog extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          
+
           // Icon
           Container(
             width: 64,
             height: 64,
             margin: const EdgeInsets.only(bottom: 20),
             decoration: BoxDecoration(
-              color: danger 
-                  ? colorScheme.error.withValues(alpha: 0.1) 
+              color: danger
+                  ? colorScheme.error.withValues(alpha: 0.1)
                   : colorScheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: (danger ? colorScheme.error : colorScheme.primary).withValues(alpha: 0.2),
+                color: (danger ? colorScheme.error : colorScheme.primary)
+                    .withValues(alpha: 0.2),
               ),
             ),
             child: Icon(
@@ -96,15 +97,12 @@ class ConfirmDialog extends StatelessWidget {
               color: danger ? colorScheme.error : colorScheme.primary,
             ),
           ),
-          
+
           // Content
           Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w900,
-            ),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 12),
           Text(
@@ -117,7 +115,7 @@ class ConfirmDialog extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 32),
-          
+
           // Buttons
           Column(
             children: [
@@ -126,15 +124,22 @@ class ConfirmDialog extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: onConfirm,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: danger ? colorScheme.error : colorScheme.primary,
+                    backgroundColor: danger
+                        ? colorScheme.error
+                        : colorScheme.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                   child: Text(
                     confirmLabel ?? (danger ? 'delete'.tr() : 'confirm'.tr()),
-                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               ),
@@ -145,7 +150,9 @@ class ConfirmDialog extends StatelessWidget {
                   onPressed: onCancel,
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                   child: Text(
                     cancelLabel ?? 'cancel'.tr(),

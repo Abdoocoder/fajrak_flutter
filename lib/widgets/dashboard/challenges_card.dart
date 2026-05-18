@@ -36,10 +36,30 @@ class _ChallengesCardState extends State<ChallengesCard> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _challenges = [
-      {'id': 1, 'icon': Icons.restaurant, 'title': 'challenge_1_title'.tr(), 'days': 7},
-      {'id': 2, 'icon': Icons.account_balance_wallet, 'title': 'challenge_2_title'.tr(), 'days': 30},
-      {'id': 3, 'icon': Icons.trending_down, 'title': 'challenge_3_title'.tr(), 'days': 30},
-      {'id': 4, 'icon': Icons.track_changes, 'title': 'challenge_4_title'.tr(), 'days': 14},
+      {
+        'id': 1,
+        'icon': Icons.restaurant,
+        'title': 'challenge_1_title'.tr(),
+        'days': 7,
+      },
+      {
+        'id': 2,
+        'icon': Icons.account_balance_wallet,
+        'title': 'challenge_2_title'.tr(),
+        'days': 30,
+      },
+      {
+        'id': 3,
+        'icon': Icons.trending_down,
+        'title': 'challenge_3_title'.tr(),
+        'days': 30,
+      },
+      {
+        'id': 4,
+        'icon': Icons.track_changes,
+        'title': 'challenge_4_title'.tr(),
+        'days': 14,
+      },
     ];
   }
 
@@ -65,7 +85,6 @@ class _ChallengesCardState extends State<ChallengesCard> {
     return 0.0;
   }
 
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -83,23 +102,31 @@ class _ChallengesCardState extends State<ChallengesCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('dash_challenges'.tr(),
-                  style: TextStyle(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 14)),
+              Text(
+                'dash_challenges'.tr(),
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 14,
+                ),
+              ),
               if (_activeChallenge != null)
                 GestureDetector(
                   onTap: () => setState(() => _activeChallenge = null),
-                  child: Text('trans_all'.tr(),
-                      style: TextStyle(
-                          color: colorScheme.onSurfaceVariant,
-                          fontSize: 12)),
-                )
+                  child: Text(
+                    'trans_all'.tr(),
+                    style: TextStyle(
+                      color: colorScheme.onSurfaceVariant,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 16),
-          _activeChallenge != null ? _buildActiveChallenge(colorScheme) : _buildGrid(colorScheme),
+          _activeChallenge != null
+              ? _buildActiveChallenge(colorScheme)
+              : _buildGrid(colorScheme),
         ],
       ),
     );
@@ -114,17 +141,25 @@ class _ChallengesCardState extends State<ChallengesCard> {
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Column(
         children: [
-          Icon(active['icon'] as IconData, size: 36, color: colorScheme.primary),
+          Icon(
+            active['icon'] as IconData,
+            size: 36,
+            color: colorScheme.primary,
+          ),
           const SizedBox(height: 8),
-          Text(active['title'] as String,
-              style: TextStyle(
-                  color: colorScheme.onSurface,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold)),
+          Text(
+            active['title'] as String,
+            style: TextStyle(
+              color: colorScheme.onSurface,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text('${active['days']} ${"learn_streak_day".tr()}',
-              style: TextStyle(
-                  color: colorScheme.onSurfaceVariant, fontSize: 12)),
+          Text(
+            '${active['days']} ${"learn_streak_day".tr()}',
+            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12),
+          ),
           const SizedBox(height: 12),
           Semantics(
             value: '${pct.toStringAsFixed(0)}%',
@@ -139,11 +174,14 @@ class _ChallengesCardState extends State<ChallengesCard> {
             ),
           ),
           const SizedBox(height: 6),
-          Text('${pct.toStringAsFixed(0)}%',
-              style: TextStyle(
-                  color: isDark ? AppColors.success : colorScheme.primary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w900)),
+          Text(
+            '${pct.toStringAsFixed(0)}%',
+            style: TextStyle(
+              color: isDark ? AppColors.success : colorScheme.primary,
+              fontSize: 13,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
         ],
       ),
     );
@@ -165,56 +203,63 @@ class _ChallengesCardState extends State<ChallengesCard> {
         return SizedBox(
           width: itemWidth,
           child: GestureDetector(
-          onTap: () => setState(() => _activeChallenge = c['id'] as int),
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: colorScheme.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: colorScheme.outlineVariant),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Icon(c['icon'] as IconData, size: 22, color: color),
-                const SizedBox(height: 6),
-                Text(
+            onTap: () => setState(() => _activeChallenge = c['id'] as int),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: colorScheme.outlineVariant),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Icon(c['icon'] as IconData, size: 22, color: color),
+                  const SizedBox(height: 6),
+                  Text(
                     c['title'] as String,
                     style: TextStyle(
-                        color: colorScheme.onSurface,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        height: 1.3),
+                      color: colorScheme.onSurface,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      height: 1.3,
+                    ),
                     textAlign: TextAlign.right,
                     maxLines: 2,
-                ),
-                const SizedBox(height: 6),
-                Semantics(
-                  value: '${pct.toStringAsFixed(0)}%',
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(2),
-                    child: LinearProgressIndicator(
-                      value: pct / 100,
-                      backgroundColor: colorScheme.outlineVariant,
-                      color: color,
-                      minHeight: 4,
+                  ),
+                  const SizedBox(height: 6),
+                  Semantics(
+                    value: '${pct.toStringAsFixed(0)}%',
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(2),
+                      child: LinearProgressIndicator(
+                        value: pct / 100,
+                        backgroundColor: colorScheme.outlineVariant,
+                        color: color,
+                        minHeight: 4,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${isCompleted ? '✓ ' : ''}${pct.toStringAsFixed(0)}%',
-                  style: TextStyle(
+                  const SizedBox(height: 4),
+                  Text(
+                    '${isCompleted ? '✓ ' : ''}${pct.toStringAsFixed(0)}%',
+                    style: TextStyle(
                       color: isCompleted
-                          ? (isDark ? AppColors.successLight : colorScheme.primary)
-                          : (isDark ? colorScheme.secondary : colorScheme.primary),
+                          ? (isDark
+                                ? AppColors.successLight
+                                : colorScheme.primary)
+                          : (isDark
+                                ? colorScheme.secondary
+                                : colorScheme.primary),
                       fontSize: 10,
-                      fontWeight: FontWeight.w900),
-                ),
-              ],
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ));
+        );
       }).toList(),
     );
   }

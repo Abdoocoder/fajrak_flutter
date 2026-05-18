@@ -20,23 +20,33 @@ class AlertActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(children: [
-      if (unreadCount > 0)
-        TextButton(
+    return Row(
+      children: [
+        if (unreadCount > 0)
+          TextButton(
             onPressed: onMarkAllRead,
-            child: Text('alerts_mark_all_read'.tr(),
-                style: TextStyle(
-                    color: colorScheme.primary,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900))),
-      if (hasAlerts)
-        TextButton(
+            child: Text(
+              'alerts_mark_all_read'.tr(),
+              style: TextStyle(
+                color: colorScheme.primary,
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        if (hasAlerts)
+          TextButton(
             onPressed: onDeleteAll,
-            child: Text('alerts_delete_all'.tr(),
-                style: const TextStyle(
-                    color: AppColors.error,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w900))),
-    ]);
+            child: Text(
+              'alerts_delete_all'.tr(),
+              style: const TextStyle(
+                color: AppColors.error,
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+      ],
+    );
   }
 }

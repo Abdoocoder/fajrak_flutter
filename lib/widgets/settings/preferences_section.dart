@@ -44,7 +44,7 @@ class _PreferencesSectionState extends State<PreferencesSection> {
               _buildLangOption('en', 'settings_lang_en', appState),
             ],
           ),
-          
+
           const SizedBox(height: 24),
 
           // --- Theme ---
@@ -59,34 +59,54 @@ class _PreferencesSectionState extends State<PreferencesSection> {
           const SizedBox(height: 8),
           Row(
             children: [
-              _buildThemeOption(ThemeMode.system, 'settings_theme_system', appState),
+              _buildThemeOption(
+                ThemeMode.system,
+                'settings_theme_system',
+                appState,
+              ),
               const SizedBox(width: 8),
-              _buildThemeOption(ThemeMode.light, 'settings_theme_light', appState),
+              _buildThemeOption(
+                ThemeMode.light,
+                'settings_theme_light',
+                appState,
+              ),
               const SizedBox(width: 8),
-              _buildThemeOption(ThemeMode.dark, 'settings_theme_dark', appState),
+              _buildThemeOption(
+                ThemeMode.dark,
+                'settings_theme_dark',
+                appState,
+              ),
             ],
           ),
-        const Divider(height: 32),
+          const Divider(height: 32),
 
-        // --- Notifications ---
-        ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: Icon(Icons.notifications_active_outlined, color: colorScheme.primary),
-          title: Text(
-            'settings_notifications'.tr(),
-            style: TextStyle(
-              color: colorScheme.onSurface,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
+          // --- Notifications ---
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(
+              Icons.notifications_active_outlined,
+              color: colorScheme.primary,
             ),
+            title: Text(
+              'settings_notifications'.tr(),
+              style: TextStyle(
+                color: colorScheme.onSurface,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            trailing: Icon(
+              Icons.arrow_forward_ios,
+              size: 14,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            onTap: () =>
+                Navigator.pushNamed(context, '/settings/notifications'),
           ),
-          trailing: Icon(Icons.arrow_forward_ios, size: 14, color: colorScheme.onSurfaceVariant),
-          onTap: () => Navigator.pushNamed(context, '/settings/notifications'),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 
   Widget _buildLangOption(String? code, String labelKey, AppState appState) {
     final isSelected = appState.languageCode == code;
@@ -127,7 +147,9 @@ class _PreferencesSectionState extends State<PreferencesSection> {
     final bgColor = selected
         ? (isThemeToggle ? colorScheme.primaryContainer : colorScheme.primary)
         : colorScheme.surface;
-    final borderColor = selected ? colorScheme.primary : colorScheme.outlineVariant;
+    final borderColor = selected
+        ? colorScheme.primary
+        : colorScheme.outlineVariant;
     final textColor = selected
         ? (isThemeToggle ? colorScheme.onPrimaryContainer : Colors.white)
         : colorScheme.onSurfaceVariant;
@@ -140,16 +162,17 @@ class _PreferencesSectionState extends State<PreferencesSection> {
         border: Border.all(color: borderColor, width: selected ? 1.5 : 1.0),
       ),
       child: Center(
-          child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          color: textColor,
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
+        child: Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: textColor,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
         ),
-      )),
+      ),
     );
   }
 

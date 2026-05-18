@@ -53,11 +53,10 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
       useSafeArea: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (_) => AddInvestmentDialog(
-        existing: widget.inv,
-        onSaved: widget.onChanged,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
+      builder: (_) =>
+          AddInvestmentDialog(existing: widget.inv, onSaved: widget.onChanged),
     );
   }
 
@@ -68,7 +67,8 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
       useSafeArea: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (_) => InvestmentTxHistoryModal(
         invId: widget.inv['id'].toString(),
         symbol: widget.inv['symbol'],
@@ -103,11 +103,14 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
           ? ((oldShares * oldAvg) + (shares * price)) / totalShares
           : price;
 
-      await Supabase.instance.client.from('investments').update({
-        'shares': totalShares,
-        'avg_buy_price': newAvg,
-        'current_price': price,
-      }).eq('id', widget.inv['id']);
+      await Supabase.instance.client
+          .from('investments')
+          .update({
+            'shares': totalShares,
+            'avg_buy_price': newAvg,
+            'current_price': price,
+          })
+          .eq('id', widget.inv['id']);
 
       _buySharesCtrl.clear();
       _buyPriceCtrl.clear();
@@ -134,7 +137,12 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
     if (shares == null || shares <= 0 || price == null || price <= 0) return;
     if (shares > ownedShares) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('inv_sell_exceeds_shares'.tr(), style: const TextStyle())),
+        SnackBar(
+          content: Text(
+            'inv_sell_exceeds_shares'.tr(),
+            style: const TextStyle(),
+          ),
+        ),
       );
       return;
     }
@@ -149,29 +157,47 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
       builder: (ctx) => AlertDialog(
         backgroundColor: Theme.of(ctx).colorScheme.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('inv_sell_confirm_btn'.tr(),
-            style: TextStyle(fontWeight: FontWeight.w900,
-                color: Theme.of(ctx).colorScheme.onSurface)),
-        content: Column(mainAxisSize: MainAxisSize.min, children: [
-          _summaryRow(ctx, 'inv_sell_avg_buy'.tr(),
-              '\$${avgBuyPrice.toStringAsFixed(2)}',
-              Theme.of(ctx).colorScheme.onSurfaceVariant),
-          const SizedBox(height: 8),
-          _summaryRow(ctx, 'inv_price'.tr(),
-              '\$${price.toStringAsFixed(2)}',
-              Theme.of(ctx).colorScheme.onSurfaceVariant),
-          const SizedBox(height: 8),
-          _summaryRow(ctx, 'inv_sell_proceeds'.tr(),
-              '\$${proceeds.toStringAsFixed(2)}',
-              Theme.of(ctx).colorScheme.onSurface),
-          const Divider(height: 20),
-          _summaryRow(
-            ctx,
-            isGain ? 'inv_sell_realized_gain'.tr() : 'inv_sell_realized_loss'.tr(),
-            '${isGain ? '+' : ''}\$${realizedPnl.toStringAsFixed(2)}',
-            isGain ? AppColors.success : AppColors.error,
+        title: Text(
+          'inv_sell_confirm_btn'.tr(),
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            color: Theme.of(ctx).colorScheme.onSurface,
           ),
-        ]),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _summaryRow(
+              ctx,
+              'inv_sell_avg_buy'.tr(),
+              '\$${avgBuyPrice.toStringAsFixed(2)}',
+              Theme.of(ctx).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 8),
+            _summaryRow(
+              ctx,
+              'inv_price'.tr(),
+              '\$${price.toStringAsFixed(2)}',
+              Theme.of(ctx).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 8),
+            _summaryRow(
+              ctx,
+              'inv_sell_proceeds'.tr(),
+              '\$${proceeds.toStringAsFixed(2)}',
+              Theme.of(ctx).colorScheme.onSurface,
+            ),
+            const Divider(height: 20),
+            _summaryRow(
+              ctx,
+              isGain
+                  ? 'inv_sell_realized_gain'.tr()
+                  : 'inv_sell_realized_loss'.tr(),
+              '${isGain ? '+' : ''}\$${realizedPnl.toStringAsFixed(2)}',
+              isGain ? AppColors.success : AppColors.error,
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -180,11 +206,16 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.error,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-            child: Text('inv_sell_confirm_btn'.tr(),
-                style: const TextStyle(fontWeight: FontWeight.w900)),
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              'inv_sell_confirm_btn'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.w900),
+            ),
           ),
         ],
       ),
@@ -210,9 +241,10 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
       });
 
       final newShares = ownedShares - shares;
-      await Supabase.instance.client.from('investments').update({
-        'shares': newShares,
-      }).eq('id', widget.inv['id']);
+      await Supabase.instance.client
+          .from('investments')
+          .update({'shares': newShares})
+          .eq('id', widget.inv['id']);
 
       // إضافة معاملة دخل تلقائياً عند البيع
       final profileRes = await Supabase.instance.client
@@ -224,7 +256,10 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
 
       double convertedProceeds = proceeds;
       if (currency != userCurrency) {
-        final rate = await CurrencyService.fetchExchangeRate(currency, userCurrency);
+        final rate = await CurrencyService.fetchExchangeRate(
+          currency,
+          userCurrency,
+        );
         if (rate != null) convertedProceeds = proceeds * rate;
       }
 
@@ -238,11 +273,14 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
         'transaction_date': today,
       });
 
-      await Supabase.instance.client.rpc('upsert_investment_cash', params: {
-        'p_user_id': user.id,
-        'p_currency': currency,
-        'p_amount': proceeds,
-      });
+      await Supabase.instance.client.rpc(
+        'upsert_investment_cash',
+        params: {
+          'p_user_id': user.id,
+          'p_currency': currency,
+          'p_amount': proceeds,
+        },
+      );
 
       _sellSharesCtrl.clear();
       _sellPriceCtrl.clear();
@@ -258,34 +296,54 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
     }
   }
 
-  Widget _summaryRow(BuildContext ctx, String label, String value, Color valueColor) {
-    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-      Text(label, style: TextStyle(fontSize: 13,
-          color: Theme.of(ctx).colorScheme.onSurfaceVariant)),
-      Text(value, style: TextStyle(fontSize: 13,
-          fontWeight: FontWeight.w900, color: valueColor)),
-    ]);
+  Widget _summaryRow(
+    BuildContext ctx,
+    String label,
+    String value,
+    Color valueColor,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w900,
+            color: valueColor,
+          ),
+        ),
+      ],
+    );
   }
 
   TextField _miniField(
-      TextEditingController ctrl, String hint, TextInputType type) {
+    TextEditingController ctrl,
+    String hint,
+    TextInputType type,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     return TextField(
       controller: ctrl,
       keyboardType: type,
       textAlign: TextAlign.center,
-      style: TextStyle(
-          color: colorScheme.onSurface, fontSize: 12),
+      style: TextStyle(color: colorScheme.onSurface, fontSize: 12),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(
-            color: colorScheme.onSurfaceVariant,
-            fontSize: 10),
+        hintStyle: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 10),
         filled: true,
         fillColor: colorScheme.surface,
         border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide.none),
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide.none,
+        ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       ),
     );
@@ -310,281 +368,383 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: colorScheme.outlineVariant)),
-      child: Column(children: [
-        Row(children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-                color: colorScheme.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12)),
-            child: Center(
-                child: Text(inv['symbol']?.toString().substring(0, 1) ?? '?',
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: colorScheme.outlineVariant),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: Text(
+                    inv['symbol']?.toString().substring(0, 1) ?? '?',
                     style: TextStyle(
-                        color: colorScheme.primary,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 18))),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-              child: Column(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                Row(children: [
-                  Text(inv['symbol'] ?? '',
+                    Row(
+                      children: [
+                        Text(
+                          inv['symbol'] ?? '',
+                          style: TextStyle(
+                            color: colorScheme.onSurface,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 14,
+                          ),
+                        ),
+                        if (isHalal) ...[
+                          const SizedBox(width: 6),
+                          Icon(
+                            Icons.mosque,
+                            size: 12,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ],
+                      ],
+                    ),
+                    Text(
+                      '${shares.toStringAsFixed(4)} ${"inv_shares_suffix".tr()} • \$${currentPrice.toStringAsFixed(2)}',
                       style: TextStyle(
-                          color: colorScheme.onSurface,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 14)),
-                  if (isHalal) ...[
-                    const SizedBox(width: 6),
-                    Icon(Icons.mosque, size: 12, color: colorScheme.onSurfaceVariant)
-                  ],
-                ]),
-                Text(
-                    '${shares.toStringAsFixed(4)} ${"inv_shares_suffix".tr()} • \$${currentPrice.toStringAsFixed(2)}',
-                    style: TextStyle(
                         color: colorScheme.onSurfaceVariant,
-                        fontSize: 11)),
-              ])),
-          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Text('\$${value.toStringAsFixed(2)}',
-                style: TextStyle(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w900)),
-            Text('${gain >= 0 ? '+' : ''}${gainPct.toStringAsFixed(1)}%',
-                style: TextStyle(
-                    color: gain >= 0
-                        ? AppColors.success
-                        : AppColors.error,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700)),
-          ]),
-          const SizedBox(width: 8),
-          GestureDetector(
-              onTap: _showAddDialog,
-              child: Container(
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '\$${value.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  Text(
+                    '${gain >= 0 ? '+' : ''}${gainPct.toStringAsFixed(1)}%',
+                    style: TextStyle(
+                      color: gain >= 0 ? AppColors.success : AppColors.error,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: _showAddDialog,
+                child: Container(
                   width: 28,
                   height: 28,
                   decoration: BoxDecoration(
-                      color: colorScheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(7),
-                      border: Border.all(
-                          color: colorScheme.primary.withValues(alpha: 0.2))),
-                  child:
-                      Icon(Icons.edit, color: colorScheme.primary, size: 14))),
-          const SizedBox(width: 6),
-          GestureDetector(
-              onTap: () => widget.onDelete(inv['id'].toString()),
-              child: Container(
+                    color: colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(7),
+                    border: Border.all(
+                      color: colorScheme.primary.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Icon(Icons.edit, color: colorScheme.primary, size: 14),
+                ),
+              ),
+              const SizedBox(width: 6),
+              GestureDetector(
+                onTap: () => widget.onDelete(inv['id'].toString()),
+                child: Container(
                   width: 28,
                   height: 28,
                   decoration: BoxDecoration(
-                      color: colorScheme.error.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(7),
-                      border: Border.all(
-                          color: colorScheme.error.withValues(alpha: 0.2))),
-                  child:
-                      Icon(Icons.close, color: colorScheme.error, size: 14))),
-        ]),
-        const SizedBox(height: 6),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '${"inv_sell_avg_buy".tr()}: \$${avgPrice.toStringAsFixed(2)}',
-              style: TextStyle(
+                    color: colorScheme.error.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(7),
+                    border: Border.all(
+                      color: colorScheme.error.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Icon(Icons.close, color: colorScheme.error, size: 14),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${"inv_sell_avg_buy".tr()}: \$${avgPrice.toStringAsFixed(2)}',
+                style: TextStyle(
                   color: colorScheme.onSurfaceVariant,
-                  fontSize: 10),
-            ),
-            Text(
-              '${'inv_roi_label'.tr()}: ${gain >= 0 ? "+" : ""}\$${gain.toStringAsFixed(2)}',
-              style: TextStyle(
-                  color: gain >= 0
-                      ? AppColors.success
-                      : AppColors.error,
                   fontSize: 10,
-                  fontWeight: FontWeight.w700),
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Semantics(
-          value: cost > 0
-              ? '${((value / cost - 1) * 100).toStringAsFixed(1)}%'
-              : '0%',
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: cost > 0 ? (value / (cost * 2)).clamp(0.0, 1.0) : 0,
-              backgroundColor: colorScheme.outlineVariant,
-              valueColor: AlwaysStoppedAnimation(
-                  gain >= 0 ? AppColors.success : colorScheme.error),
-              minHeight: 4,
+                ),
+              ),
+              Text(
+                '${'inv_roi_label'.tr()}: ${gain >= 0 ? "+" : ""}\$${gain.toStringAsFixed(2)}',
+                style: TextStyle(
+                  color: gain >= 0 ? AppColors.success : AppColors.error,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Semantics(
+            value: cost > 0
+                ? '${((value / cost - 1) * 100).toStringAsFixed(1)}%'
+                : '0%',
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: cost > 0 ? (value / (cost * 2)).clamp(0.0, 1.0) : 0,
+                backgroundColor: colorScheme.outlineVariant,
+                valueColor: AlwaysStoppedAnimation(
+                  gain >= 0 ? AppColors.success : colorScheme.error,
+                ),
+                minHeight: 4,
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 12),
-        Row(children: [
-          Expanded(
-              child: OutlinedButton(
-            onPressed: _showTxHistory,
-            style: OutlinedButton.styleFrom(
-                foregroundColor: colorScheme.onSurfaceVariant,
-                side: BorderSide(color: colorScheme.outlineVariant),
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8))),
-            child: Text('inv_tx_history'.tr(),
-                style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700)),
-          )),
-          const SizedBox(width: 8),
-          Expanded(
-              child: OutlinedButton(
-            onPressed: () => setState(() {
-              _showBuyForm = !_showBuyForm;
-              _showSellForm = false;
-            }),
-            style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.success,
-                side: BorderSide(
-                    color: AppColors.success.withValues(alpha: 0.3)),
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8))),
-            child: Text('inv_record_buy'.tr(),
-                style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700)),
-          )),
-        ]),
-        const SizedBox(height: 6),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton(
-            onPressed: () => setState(() {
-              _showSellForm = !_showSellForm;
-              _showBuyForm = false;
-            }),
-            style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.error,
-                side: BorderSide(
-                    color: AppColors.error.withValues(alpha: 0.3)),
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8))),
-            child: Text('inv_record_sell'.tr(),
-                style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700)),
-          ),
-        ),
-        if (_showBuyForm) ...[
           const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: _showTxHistory,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: colorScheme.onSurfaceVariant,
+                    side: BorderSide(color: colorScheme.outlineVariant),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    'inv_tx_history'.tr(),
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => setState(() {
+                    _showBuyForm = !_showBuyForm;
+                    _showSellForm = false;
+                  }),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.success,
+                    side: BorderSide(
+                      color: AppColors.success.withValues(alpha: 0.3),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    'inv_record_buy'.tr(),
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () => setState(() {
+                _showSellForm = !_showSellForm;
+                _showBuyForm = false;
+              }),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.error,
+                side: BorderSide(color: AppColors.error.withValues(alpha: 0.3)),
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                'inv_record_sell'.tr(),
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+          if (_showBuyForm) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
                 color: colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(10)),
-            child: Column(children: [
-              Row(children: [
-                Expanded(
-                    child: _miniField(_buySharesCtrl, 'inv_shares_count_hint'.tr(),
-                        const TextInputType.numberWithOptions(decimal: true))),
-                const SizedBox(width: 8),
-                Expanded(
-                    child: _miniField(_buyPriceCtrl, 'inv_price_with_dollar_hint'.tr(),
-                        const TextInputType.numberWithOptions(decimal: true))),
-                const SizedBox(width: 8),
-                Expanded(
-                    child: _miniField(_buyCommCtrl, 'inv_comm_hint'.tr(),
-                        const TextInputType.numberWithOptions(decimal: true))),
-              ]),
-              const SizedBox(height: 10),
-              SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _savingBuy ? null : _recordBuy,
-                    style: ElevatedButton.styleFrom(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _miniField(
+                          _buySharesCtrl,
+                          'inv_shares_count_hint'.tr(),
+                          const TextInputType.numberWithOptions(decimal: true),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _miniField(
+                          _buyPriceCtrl,
+                          'inv_price_with_dollar_hint'.tr(),
+                          const TextInputType.numberWithOptions(decimal: true),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _miniField(
+                          _buyCommCtrl,
+                          'inv_comm_hint'.tr(),
+                          const TextInputType.numberWithOptions(decimal: true),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _savingBuy ? null : _recordBuy,
+                      style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.success,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8))),
-                    child: _savingBuy
-                        ? const SizedBox(
-                            width: 14,
-                            height: 14,
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Colors.white))
-                        : Text('inv_submit_btn'.tr(),
-                            style: TextStyle(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: _savingBuy
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              'inv_submit_btn'.tr(),
+                              style: TextStyle(
                                 fontWeight: FontWeight.w900,
-                                fontSize: 12)),
-                  )),
-            ]),
-          ),
-        ],
-        if (_showSellForm) ...[
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
+                                fontSize: 12,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          if (_showSellForm) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
                 color: AppColors.error.withValues(alpha: 0.07),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.error.withValues(alpha: 0.2))),
-            child: Column(children: [
-              Row(children: [
-                Expanded(
-                    child: _miniField(_sellSharesCtrl, 'inv_shares_count_hint'.tr(),
-                        const TextInputType.numberWithOptions(decimal: true))),
-                const SizedBox(width: 8),
-                Expanded(
-                    child: _miniField(_sellPriceCtrl, 'inv_price_with_dollar_hint'.tr(),
-                        const TextInputType.numberWithOptions(decimal: true))),
-                const SizedBox(width: 8),
-                Expanded(
-                    child: _miniField(_sellCommCtrl, 'inv_comm_hint'.tr(),
-                        const TextInputType.numberWithOptions(decimal: true))),
-              ]),
-              const SizedBox(height: 8),
-              Text(
-                '${'inv_sell_max_shares'.tr()}: ${shares.toStringAsFixed(4)} ${'inv_shares_suffix'.tr()}',
-                style: TextStyle(
-                    fontSize: 10,
-                    color: colorScheme.onSurfaceVariant),
+                border: Border.all(
+                  color: AppColors.error.withValues(alpha: 0.2),
+                ),
               ),
-              const SizedBox(height: 10),
-              SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _savingSell ? null : _recordSell,
-                    style: ElevatedButton.styleFrom(
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _miniField(
+                          _sellSharesCtrl,
+                          'inv_shares_count_hint'.tr(),
+                          const TextInputType.numberWithOptions(decimal: true),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _miniField(
+                          _sellPriceCtrl,
+                          'inv_price_with_dollar_hint'.tr(),
+                          const TextInputType.numberWithOptions(decimal: true),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _miniField(
+                          _sellCommCtrl,
+                          'inv_comm_hint'.tr(),
+                          const TextInputType.numberWithOptions(decimal: true),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${'inv_sell_max_shares'.tr()}: ${shares.toStringAsFixed(4)} ${'inv_shares_suffix'.tr()}',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _savingSell ? null : _recordSell,
+                      style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.error,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8))),
-                    child: _savingSell
-                        ? const SizedBox(
-                            width: 14,
-                            height: 14,
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Colors.white))
-                        : Text('inv_sell_confirm_btn'.tr(),
-                            style: TextStyle(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: _savingSell
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              'inv_sell_confirm_btn'.tr(),
+                              style: TextStyle(
                                 fontWeight: FontWeight.w900,
-                                fontSize: 12)),
-                  )),
-            ]),
-          ),
+                                fontSize: 12,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
-      ]),
+      ),
     );
   }
 }

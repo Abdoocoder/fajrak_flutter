@@ -19,16 +19,24 @@ class ErrorHandler {
 
   /// Standardized error handling method.
   /// Shows a Snackbar and logs the error to analytics.
-  static void handle(dynamic error, {StackTrace? st, BuildContext? context, String? developerMessage}) {
+  static void handle(
+    dynamic error, {
+    StackTrace? st,
+    BuildContext? context,
+    String? developerMessage,
+  }) {
     final String errorMessage = error.toString();
-    dev.log('Error: $errorMessage', name: 'ErrorHandler', error: error, stackTrace: st);
+    dev.log(
+      'Error: $errorMessage',
+      name: 'ErrorHandler',
+      error: error,
+      stackTrace: st,
+    );
 
     // Log to Supabase Analytics
-    AnalyticsService.logError(
-      error.runtimeType.toString(),
-      errorMessage,
-      {'developer_message': developerMessage},
-    );
+    AnalyticsService.logError(error.runtimeType.toString(), errorMessage, {
+      'developer_message': developerMessage,
+    });
 
     if (context != null && context.mounted) {
       final bool isNetwork = _isNetworkError(error);
@@ -36,7 +44,10 @@ class ErrorHandler {
         SnackBar(
           content: Row(
             children: [
-              Icon(isNetwork ? Icons.wifi_off : Icons.error_outline, color: Colors.white),
+              Icon(
+                isNetwork ? Icons.wifi_off : Icons.error_outline,
+                color: Colors.white,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -48,12 +59,13 @@ class ErrorHandler {
           ),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
           duration: const Duration(seconds: 4),
           action: null,
         ),
       );
     }
   }
-
 }

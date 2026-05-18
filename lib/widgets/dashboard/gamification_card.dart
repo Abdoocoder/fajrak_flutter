@@ -5,10 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 class GamificationCard extends StatelessWidget {
   final int score;
 
-  const GamificationCard({
-    super.key,
-    required this.score,
-  });
+  const GamificationCard({super.key, required this.score});
 
   @override
   Widget build(BuildContext context) {
@@ -59,8 +56,7 @@ class GamificationCard extends StatelessWidget {
               color: color.withValues(alpha: isDark ? 0.1 : 0.08),
               shape: BoxShape.circle,
             ),
-            child:
-                Center(child: Icon(icon, size: 24, color: color)),
+            child: Center(child: Icon(icon, size: 24, color: color)),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -70,16 +66,22 @@ class GamificationCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('${"learn_stage_label".tr()} $rank',
-                        style: TextStyle(
-                            color: color,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 13)),
-                    Text('$score ${"gamif_points".tr()}',
-                        style: TextStyle(
-                            color: colorScheme.onSurface,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700)),
+                    Text(
+                      '${"learn_stage_label".tr()} $rank',
+                      style: TextStyle(
+                        color: color,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 13,
+                      ),
+                    ),
+                    Text(
+                      '$score ${"gamif_points".tr()}',
+                      style: TextStyle(
+                        color: colorScheme.onSurface,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -97,12 +99,14 @@ class GamificationCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                    score >= 100
-                        ? 'gamif_max_level'.tr()
-                        : 'gamif_next_level_tip'.tr(),
-                    style: TextStyle(
-                        color: colorScheme.onSurfaceVariant,
-                        fontSize: 10)),
+                  score >= 100
+                      ? 'gamif_max_level'.tr()
+                      : 'gamif_next_level_tip'.tr(),
+                  style: TextStyle(
+                    color: colorScheme.onSurfaceVariant,
+                    fontSize: 10,
+                  ),
+                ),
               ],
             ),
           ),

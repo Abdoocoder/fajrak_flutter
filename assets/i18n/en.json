@@ -303,6 +303,8 @@
   "goals_add_amount_to": "Add Savings to {}",
   "goals_amount_to_add": "Amount to Add",
   "goals_delete_title": "Delete Goal",
+  "trans_delete_title": "Delete Transaction",
+  "budget_delete_title": "Delete Budget",
   "goals_count_label": "Goals",
   "goals_completed_label": "Completed",
   "goals_saved_label": "Saved",

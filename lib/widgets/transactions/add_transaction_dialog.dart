@@ -19,8 +19,30 @@ class AddTransactionDialog extends StatefulWidget {
   State<AddTransactionDialog> createState() => _AddTransactionDialogState();
 }
 
-const _incomeCategories  = ['راتب','عمل حر','استثمار','مكافأة','هدية','أخرى'];
-const _expenseCategories = ['طعام','مواصلات','فواتير','صحة','تعليم','ترفيه','ملابس','إيجار','اشتراكات','عناية','سفر','دين','ديون','أخرى'];
+const _incomeCategories = [
+  'راتب',
+  'عمل حر',
+  'استثمار',
+  'مكافأة',
+  'هدية',
+  'أخرى',
+];
+const _expenseCategories = [
+  'طعام',
+  'مواصلات',
+  'فواتير',
+  'صحة',
+  'تعليم',
+  'ترفيه',
+  'ملابس',
+  'إيجار',
+  'اشتراكات',
+  'عناية',
+  'سفر',
+  'دين',
+  'ديون',
+  'أخرى',
+];
 
 List<String> _categoriesFor(String type) =>
     type == 'income' ? _incomeCategories : _expenseCategories;
@@ -31,7 +53,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
   late final TextEditingController _descController;
   late final TextEditingController _catController;
   late final ValueNotifier<DateTime> _dateController;
-  
+
   String _selectedCurrency = '';
   double _exchangeRate = 1.0;
   final _exchangeRateController = TextEditingController(text: '1.0');
@@ -43,10 +65,18 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
   @override
   void initState() {
     super.initState();
-    _typeController = ValueNotifier<String>(widget.existing?['type'] ?? 'expense');
-    _amountController = TextEditingController(text: widget.existing?['amount']?.toString() ?? '');
-    _descController = TextEditingController(text: widget.existing?['description'] ?? '');
-    _catController = TextEditingController(text: widget.existing?['category'] ?? '');
+    _typeController = ValueNotifier<String>(
+      widget.existing?['type'] ?? 'expense',
+    );
+    _amountController = TextEditingController(
+      text: widget.existing?['amount']?.toString() ?? '',
+    );
+    _descController = TextEditingController(
+      text: widget.existing?['description'] ?? '',
+    );
+    _catController = TextEditingController(
+      text: widget.existing?['category'] ?? '',
+    );
 
     // Only reset category for new transactions — when editing, keep the original value.
     if (widget.existing == null) {
@@ -63,18 +93,23 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
       }
     });
 
-    _dateController = ValueNotifier<DateTime>(widget.existing != null
-        ? DateTime.parse(widget.existing!['transaction_date'])
-        : DateTime.now());
+    _dateController = ValueNotifier<DateTime>(
+      widget.existing != null
+          ? DateTime.parse(widget.existing!['transaction_date'])
+          : DateTime.now(),
+    );
 
     _isRecurring = widget.existing?['is_recurring'] == true;
-    _recurringDay = (widget.existing?['recurring_day'] as int?) ??
+    _recurringDay =
+        (widget.existing?['recurring_day'] as int?) ??
         (widget.existing != null
             ? DateTime.parse(widget.existing!['transaction_date']).day
             : DateTime.now().day);
 
-    _selectedCurrency = widget.existing?['original_currency'] ?? widget.baseCurrency;
-    _exchangeRate = (widget.existing?['exchange_rate'] as num?)?.toDouble() ?? 1.0;
+    _selectedCurrency =
+        widget.existing?['original_currency'] ?? widget.baseCurrency;
+    _exchangeRate =
+        (widget.existing?['exchange_rate'] as num?)?.toDouble() ?? 1.0;
     _exchangeRateController.text = _exchangeRate.toString();
     if (_selectedCurrency != widget.baseCurrency && widget.existing == null) {
       _fetchRate();
@@ -89,7 +124,10 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
       });
       return;
     }
-    final rate = await CurrencyService.fetchExchangeRate(_selectedCurrency, widget.baseCurrency);
+    final rate = await CurrencyService.fetchExchangeRate(
+      _selectedCurrency,
+      widget.baseCurrency,
+    );
     if (mounted && !_isRateManual) {
       setState(() {
         _exchangeRate = rate ?? 1.0;
@@ -117,7 +155,9 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
     final user = Supabase.instance.client.auth.currentUser!;
     final origAmount = double.tryParse(_amountController.text) ?? 0;
     final rate = double.tryParse(_exchangeRateController.text) ?? 1.0;
-    final baseAmount = _selectedCurrency == widget.baseCurrency ? origAmount : (origAmount * rate);
+    final baseAmount = _selectedCurrency == widget.baseCurrency
+        ? origAmount
+        : (origAmount * rate);
 
     final data = {
       'user_id': user.id,
@@ -159,13 +199,14 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Container(
       padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-          left: 20,
-          right: 20,
-          top: 12),
+        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+        left: 20,
+        right: 20,
+        top: 12,
+      ),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -197,14 +238,16 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               ),
             ),
             const SizedBox(height: 28),
-            
+
             // Toggle Type
             ValueListenableBuilder<String>(
               valueListenable: _typeController,
               builder: (context, type, _) => Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+                  color: theme.colorScheme.outlineVariant.withValues(
+                    alpha: 0.5,
+                  ),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
@@ -250,27 +293,38 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                   if (picked != null) _dateController.value = picked;
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                    color: theme.colorScheme.outlineVariant.withValues(
+                      alpha: 0.3,
+                    ),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: theme.colorScheme.outlineVariant),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.calendar_month_rounded,
-                          color: Color(0xFF3B7EF6), size: 20),
+                      const Icon(
+                        Icons.calendar_month_rounded,
+                        color: Color(0xFF3B7EF6),
+                        size: 20,
+                      ),
                       const SizedBox(width: 12),
                       Text(
                         DateFormat('yyyy-MM-dd').format(date),
                         style: TextStyle(
-                          color: theme.colorScheme.onSurface, 
+                          color: theme.colorScheme.onSurface,
                           fontSize: 16,
                         ),
                       ),
                       const Spacer(),
-                      const Icon(Icons.arrow_forward_ios_rounded, 
-                          color: Color(0xFF475569), size: 14),
+                      const Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        color: Color(0xFF475569),
+                        size: 14,
+                      ),
                     ],
                   ),
                 ),
@@ -287,17 +341,30 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                   flex: 3,
                   child: TextFormField(
                     controller: _amountController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     style: TextStyle(
-                      color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0F172A), 
-                      fontSize: 24, 
-                      fontWeight: FontWeight.w900
+                      color: isDark
+                          ? const Color(0xFF38BDF8)
+                          : const Color(0xFF0F172A),
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
                     ),
                     decoration: InputDecoration(
                       hintText: '0.00',
-                      hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4)),
-                      fillColor: theme.colorScheme.outlineVariant.withValues(alpha: isDark ? 0.3 : 0.6),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      hintStyle: TextStyle(
+                        color: theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.4,
+                        ),
+                      ),
+                      fillColor: theme.colorScheme.outlineVariant.withValues(
+                        alpha: isDark ? 0.3 : 0.6,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
                     ),
                   ),
                 ),
@@ -308,23 +375,34 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                     height: 58,
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                      color: theme.colorScheme.outlineVariant.withValues(
+                        alpha: 0.3,
+                      ),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: theme.colorScheme.outlineVariant),
+                      border: Border.all(
+                        color: theme.colorScheme.outlineVariant,
+                      ),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
                         value: _selectedCurrency,
-                        icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF94A3B8)),
+                        icon: const Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: Color(0xFF94A3B8),
+                        ),
                         dropdownColor: theme.colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
                         isExpanded: true,
                         style: TextStyle(
-                          color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0F172A), 
-                          fontWeight: FontWeight.w900
+                          color: isDark
+                              ? const Color(0xFF38BDF8)
+                              : const Color(0xFF0F172A),
+                          fontWeight: FontWeight.w900,
                         ),
-                        items: ['JOD','USD','SAR','AED','EGP','TRY','EUR']
-                            .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                        items: ['JOD', 'USD', 'SAR', 'AED', 'EGP', 'TRY', 'EUR']
+                            .map(
+                              (c) => DropdownMenuItem(value: c, child: Text(c)),
+                            )
                             .toList(),
                         onChanged: (v) {
                           if (v != null) {
@@ -360,17 +438,27 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                         Expanded(
                           child: TextFormField(
                             controller: _exchangeRateController,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             style: TextStyle(
-                              color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0F172A), 
-                              fontSize: 16, 
-                              fontWeight: FontWeight.bold
+                              color: isDark
+                                  ? const Color(0xFF38BDF8)
+                                  : const Color(0xFF0F172A),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
                             ),
                             decoration: InputDecoration(
                               labelText: 'trans_exchange_rate'.tr(),
                               labelStyle: TextStyle(
-                                fontSize: 12, 
-                                color: isDark ? const Color(0xFF38BDF8).withValues(alpha: 0.7) : const Color(0xFF0F172A).withValues(alpha: 0.7)
+                                fontSize: 12,
+                                color: isDark
+                                    ? const Color(
+                                        0xFF38BDF8,
+                                      ).withValues(alpha: 0.7)
+                                    : const Color(
+                                        0xFF0F172A,
+                                      ).withValues(alpha: 0.7),
                               ),
                               isDense: true,
                               fillColor: Colors.transparent,
@@ -391,14 +479,19 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('trans_equivalent'.tr(), 
-                                  style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 10)),
+                              Text(
+                                'trans_equivalent'.tr(),
+                                style: TextStyle(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  fontSize: 10,
+                                ),
+                              ),
                               const SizedBox(height: 4),
                               Text(
                                 '${((double.tryParse(_amountController.text) ?? 0) * (double.tryParse(_exchangeRateController.text) ?? 1.0)).toStringAsFixed(2)} ${widget.baseCurrency}',
                                 style: TextStyle(
-                                  color: theme.colorScheme.secondary, 
-                                  fontWeight: FontWeight.bold, 
+                                  color: theme.colorScheme.secondary,
+                                  fontWeight: FontWeight.bold,
                                   fontSize: 16,
                                 ),
                               ),
@@ -430,20 +523,31 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                   height: 56,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.outlineVariant.withValues(alpha: isDark ? 0.3 : 0.7),
+                    color: theme.colorScheme.outlineVariant.withValues(
+                      alpha: isDark ? 0.3 : 0.7,
+                    ),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: currentValue,
-                      icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF94A3B8)),
+                      icon: const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: Color(0xFF94A3B8),
+                      ),
                       dropdownColor: theme.colorScheme.surface,
                       isExpanded: true,
                       style: TextStyle(
-                        color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0F172A), 
-                        fontWeight: FontWeight.bold
+                        color: isDark
+                            ? const Color(0xFF38BDF8)
+                            : const Color(0xFF0F172A),
+                        fontWeight: FontWeight.bold,
                       ),
-                      items: categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+                      items: categories
+                          .map(
+                            (c) => DropdownMenuItem(value: c, child: Text(c)),
+                          )
+                          .toList(),
                       onChanged: (v) {
                         if (v != null) {
                           setState(() => _catController.text = v);
@@ -461,15 +565,21 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               controller: _descController,
               maxLines: 2,
               style: TextStyle(
-                color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0F172A), 
-                fontWeight: FontWeight.bold
+                color: isDark
+                    ? const Color(0xFF38BDF8)
+                    : const Color(0xFF0F172A),
+                fontWeight: FontWeight.bold,
               ),
               decoration: InputDecoration(
                 hintText: 'trans_add_note_hint'.tr(),
                 hintStyle: TextStyle(
-                  color: isDark ? const Color(0xFF38BDF8).withValues(alpha: 0.35) : const Color(0xFF0F172A).withValues(alpha: 0.35)
+                  color: isDark
+                      ? const Color(0xFF38BDF8).withValues(alpha: 0.35)
+                      : const Color(0xFF0F172A).withValues(alpha: 0.35),
                 ),
-                fillColor: theme.colorScheme.outlineVariant.withValues(alpha: isDark ? 0.3 : 0.7),
+                fillColor: theme.colorScheme.outlineVariant.withValues(
+                  alpha: isDark ? 0.3 : 0.7,
+                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -479,11 +589,16 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               onTap: () => setState(() => _isRecurring = !_isRecurring),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
                   color: _isRecurring
                       ? const Color(0xFF3B7EF6).withValues(alpha: 0.12)
-                      : theme.colorScheme.outlineVariant.withValues(alpha: isDark ? 0.3 : 0.6),
+                      : theme.colorScheme.outlineVariant.withValues(
+                          alpha: isDark ? 0.3 : 0.6,
+                        ),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: _isRecurring
@@ -538,17 +653,24 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 height: 56,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.outlineVariant.withValues(alpha: isDark ? 0.3 : 0.7),
+                  color: theme.colorScheme.outlineVariant.withValues(
+                    alpha: isDark ? 0.3 : 0.7,
+                  ),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<int>(
                     value: _recurringDay,
-                    icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF94A3B8)),
+                    icon: const Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: Color(0xFF94A3B8),
+                    ),
                     dropdownColor: theme.colorScheme.surface,
                     isExpanded: true,
                     style: TextStyle(
-                      color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0F172A),
+                      color: isDark
+                          ? const Color(0xFF38BDF8)
+                          : const Color(0xFF0F172A),
                       fontWeight: FontWeight.bold,
                     ),
                     items: List.generate(
@@ -597,7 +719,9 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                   ),
                 ),
                 child: Text(
-                  widget.existing != null ? 'trans_save_edit'.tr() : 'trans_save'.tr(),
+                  widget.existing != null
+                      ? 'trans_save_edit'.tr()
+                      : 'trans_save'.tr(),
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
@@ -642,9 +766,15 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
           decoration: BoxDecoration(
             color: isSelected ? activeColor : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: isSelected 
-              ? [BoxShadow(color: activeColor.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 2))]
-              : null,
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: activeColor.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
           ),
           child: Center(
             child: Text(

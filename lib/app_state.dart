@@ -17,7 +17,7 @@ class AppState extends ChangeNotifier {
     _transactionVersion++;
     notifyListeners();
   }
-  
+
   // For legacy support or simple checks
   bool isDarkMode(BuildContext context) {
     if (_themeMode == ThemeMode.system) {
@@ -30,7 +30,8 @@ class AppState extends ChangeNotifier {
   int get unreadAlerts => _unreadAlerts;
 
   SharedPreferences? _prefs;
-  Future<SharedPreferences> get _sharedPrefs async => _prefs ??= await SharedPreferences.getInstance();
+  Future<SharedPreferences> get _sharedPrefs async =>
+      _prefs ??= await SharedPreferences.getInstance();
 
   AppState() {
     _loadPrefs();
@@ -38,30 +39,36 @@ class AppState extends ChangeNotifier {
 
   Future<void> _loadPrefs() async {
     final prefs = await _sharedPrefs;
-    
+
     // Load Theme
     final themeStr = prefs.getString('themeMode') ?? 'system';
     _themeMode = _parseThemeMode(themeStr);
-    
+
     // Load Language
     _languageCode = prefs.getString('language_code'); // null if not set
-    
+
     notifyListeners();
   }
 
   ThemeMode _parseThemeMode(String theme) {
     switch (theme) {
-      case 'light': return ThemeMode.light;
-      case 'dark': return ThemeMode.dark;
-      default: return ThemeMode.system;
+      case 'light':
+        return ThemeMode.light;
+      case 'dark':
+        return ThemeMode.dark;
+      default:
+        return ThemeMode.system;
     }
   }
 
   String _themeModeToString(ThemeMode mode) {
     switch (mode) {
-      case ThemeMode.light: return 'light';
-      case ThemeMode.dark: return 'dark';
-      default: return 'system';
+      case ThemeMode.light:
+        return 'light';
+      case ThemeMode.dark:
+        return 'dark';
+      default:
+        return 'system';
     }
   }
 

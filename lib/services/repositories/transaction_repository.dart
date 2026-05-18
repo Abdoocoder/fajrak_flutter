@@ -13,15 +13,17 @@ class TransactionRepository {
     required String entityId,
     required Map<String, dynamic> payload,
   }) async {
-    final pendingDeletes = await (_db.select(_db.syncQueueTable)
-          ..where((t) => t.entityId.equals(entityId))
-          ..where((t) => t.operationType.equals('delete')))
-        .get();
+    final pendingDeletes =
+        await (_db.select(_db.syncQueueTable)
+              ..where((t) => t.entityId.equals(entityId))
+              ..where((t) => t.operationType.equals('delete')))
+            .get();
 
     if (pendingDeletes.isNotEmpty) {
       for (final del in pendingDeletes) {
-        await (_db.delete(_db.syncQueueTable)..where((t) => t.id.equals(del.id)))
-            .go();
+        await (_db.delete(
+          _db.syncQueueTable,
+        )..where((t) => t.id.equals(del.id))).go();
       }
     }
 
@@ -47,15 +49,17 @@ class TransactionRepository {
     required String entityId,
     Map<String, dynamic>? payload,
   }) async {
-    final pendingCreates = await (_db.select(_db.syncQueueTable)
-          ..where((t) => t.entityId.equals(entityId))
-          ..where((t) => t.operationType.equals('create')))
-        .get();
+    final pendingCreates =
+        await (_db.select(_db.syncQueueTable)
+              ..where((t) => t.entityId.equals(entityId))
+              ..where((t) => t.operationType.equals('create')))
+            .get();
 
     if (pendingCreates.isNotEmpty) {
       for (final create in pendingCreates) {
-        await (_db.delete(_db.syncQueueTable)..where((t) => t.id.equals(create.id)))
-            .go();
+        await (_db.delete(
+          _db.syncQueueTable,
+        )..where((t) => t.id.equals(create.id))).go();
       }
       return;
     }
@@ -72,10 +76,11 @@ class TransactionRepository {
     required String operationType,
     required Map<String, dynamic> payload,
   }) async {
-    final existing = await (_db.select(_db.syncQueueTable)
-          ..where((t) => t.entityId.equals(entityId))
-          ..where((t) => t.operationType.equals(operationType)))
-        .get();
+    final existing =
+        await (_db.select(_db.syncQueueTable)
+              ..where((t) => t.entityId.equals(entityId))
+              ..where((t) => t.operationType.equals(operationType)))
+            .get();
 
     if (existing.isNotEmpty) {
       final merged = _mergePayload(
@@ -83,24 +88,30 @@ class TransactionRepository {
         payload,
       );
 
-      await (_db.update(_db.syncQueueTable)
-            ..where((t) => t.id.equals(existing.first.id)))
-          .write(SyncQueueTableCompanion(
-        payload: Value(jsonEncode(merged)),
-        attemptCount: const Value(0),
-        lastError: const Value(null),
-        lastAttemptAt: const Value(null),
-      ));
+      await (_db.update(
+        _db.syncQueueTable,
+      )..where((t) => t.id.equals(existing.first.id))).write(
+        SyncQueueTableCompanion(
+          payload: Value(jsonEncode(merged)),
+          attemptCount: const Value(0),
+          lastError: const Value(null),
+          lastAttemptAt: const Value(null),
+        ),
+      );
     } else {
-      await _db.into(_db.syncQueueTable).insert(SyncQueueTableCompanion.insert(
-        entityId: entityId,
-        operationType: operationType,
-        entityType: 'transaction',
-        payload: jsonEncode(payload),
-        createdAt: DateTime.now(),
-        attemptCount: const Value(0),
-        isProcessing: const Value(false),
-      ));
+      await _db
+          .into(_db.syncQueueTable)
+          .insert(
+            SyncQueueTableCompanion.insert(
+              entityId: entityId,
+              operationType: operationType,
+              entityType: 'transaction',
+              payload: jsonEncode(payload),
+              createdAt: DateTime.now(),
+              attemptCount: const Value(0),
+              isProcessing: const Value(false),
+            ),
+          );
     }
   }
 
@@ -130,11 +141,12 @@ class TransactionRepository {
   }
 
   Future<void> markProcessing(int id) async {
-    await (_db.update(_db.syncQueueTable)..where((t) => t.id.equals(id)))
-        .write(SyncQueueTableCompanion(
-      isProcessing: const Value(true),
-      lastAttemptAt: Value(DateTime.now()),
-    ));
+    await (_db.update(_db.syncQueueTable)..where((t) => t.id.equals(id))).write(
+      SyncQueueTableCompanion(
+        isProcessing: const Value(true),
+        lastAttemptAt: Value(DateTime.now()),
+      ),
+    );
   }
 
   Future<void> markCompleted(int id) async {
@@ -142,22 +154,24 @@ class TransactionRepository {
   }
 
   Future<void> markFailed(int id, String error, int currentAttemptCount) async {
-    await (_db.update(_db.syncQueueTable)..where((t) => t.id.equals(id)))
-        .write(SyncQueueTableCompanion(
-      isProcessing: const Value(false),
-      lastError: Value(error),
-      attemptCount: Value(currentAttemptCount + 1),
-    ));
+    await (_db.update(_db.syncQueueTable)..where((t) => t.id.equals(id))).write(
+      SyncQueueTableCompanion(
+        isProcessing: const Value(false),
+        lastError: Value(error),
+        attemptCount: Value(currentAttemptCount + 1),
+      ),
+    );
   }
 
   Future<List<SyncQueueTableData>> getOrderedOperations() async {
-    final operations = await (_db.select(_db.syncQueueTable)
-          ..where((t) => t.isProcessing.equals(false))
-          ..orderBy([
-            (t) => OrderingTerm.asc(t.operationType),
-            (t) => OrderingTerm.asc(t.createdAt),
-          ]))
-        .get();
+    final operations =
+        await (_db.select(_db.syncQueueTable)
+              ..where((t) => t.isProcessing.equals(false))
+              ..orderBy([
+                (t) => OrderingTerm.asc(t.operationType),
+                (t) => OrderingTerm.asc(t.createdAt),
+              ]))
+            .get();
 
     const order = {'create': 0, 'update': 1, 'delete': 2};
     operations.sort((a, b) {

@@ -19,17 +19,22 @@ class AccountsService {
         .order('created_at');
 
     // جلب الأرصدة المحسوبة من القاعدة مباشرة (Best Practice)
-    final List<dynamic> balancesData = await _db.rpc('get_account_balances', params: {'p_user_id': userId});
-    
+    final List<dynamic> balancesData = await _db.rpc(
+      'get_account_balances',
+      params: {'p_user_id': userId},
+    );
+
     final Map<String, double> balanceMap = {
-      for (var b in balancesData) b['account_id'] as String: (b['current_balance'] as num).toDouble()
+      for (var b in balancesData)
+        b['account_id'] as String: (b['current_balance'] as num).toDouble(),
     };
 
     return (accounts as List).map<Map<String, dynamic>>((acc) {
       final id = acc['id'] as String;
       return {
         ...acc,
-        'balance': balanceMap[id] ?? (acc['opening_balance'] as num? ?? 0).toDouble(),
+        'balance':
+            balanceMap[id] ?? (acc['opening_balance'] as num? ?? 0).toDouble(),
       };
     }).toList();
   }
@@ -55,7 +60,10 @@ class AccountsService {
     });
   }
 
-  static Future<void> updateAccount(String id, Map<String, dynamic> data) async {
+  static Future<void> updateAccount(
+    String id,
+    Map<String, dynamic> data,
+  ) async {
     await _db.from('accounts').update(data).eq('id', id);
   }
 

@@ -32,15 +32,23 @@ class TransactionSummary extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-              child: _statCard('trans_total_net'.tr(), net,
-                  net >= 0 ? AppColors.success : AppColors.error,
-                  isNet: true)),
+            child: _statCard(
+              'trans_total_net'.tr(),
+              net,
+              net >= 0 ? AppColors.success : AppColors.error,
+              isNet: true,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(child: _expensesCard(realExpenses, debtPayments)),
           const SizedBox(width: 8),
           Expanded(
-              child: _expensesCard(realExpenses, debtPayments)),
-          const SizedBox(width: 8),
-          Expanded(
-              child: _statCard('trans_total_income'.tr(), income, AppColors.success)),
+            child: _statCard(
+              'trans_total_income'.tr(),
+              income,
+              AppColors.success,
+            ),
+          ),
         ],
       ),
     );
@@ -61,15 +69,16 @@ class TransactionSummary extends StatelessWidget {
             child: Text(
               '-${realExpenses.abs().toStringAsFixed(0)}',
               style: const TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 15),
+                color: color,
+                fontWeight: FontWeight.w900,
+                fontSize: 15,
+              ),
             ),
           ),
-          Text('trans_total_expenses'.tr(),
-              style: TextStyle(
-                  color: colorScheme.onSurfaceVariant,
-                  fontSize: 10)),
+          Text(
+            'trans_total_expenses'.tr(),
+            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 10),
+          ),
           if (debtPayments > 0) ...[
             const SizedBox(height: 4),
             Container(
@@ -78,20 +87,28 @@ class TransactionSummary extends StatelessWidget {
                 color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(5),
               ),
-              child: Column(children: [
-                Text('💳 ${'dash_debt_payments'.tr()}',
+              child: Column(
+                children: [
+                  Text(
+                    '💳 ${'dash_debt_payments'.tr()}',
                     style: const TextStyle(
-                        color: AppColors.primary,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700)),
-                FittedBox(
-                  child: Text(debtPayments.toStringAsFixed(0),
+                      color: AppColors.primary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  FittedBox(
+                    child: Text(
+                      debtPayments.toStringAsFixed(0),
                       style: const TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 11)),
-                ),
-              ]),
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ],
@@ -99,7 +116,12 @@ class TransactionSummary extends StatelessWidget {
     );
   }
 
-  Widget _statCard(String label, double value, Color color, {bool isNet = false}) {
+  Widget _statCard(
+    String label,
+    double value,
+    Color color, {
+    bool isNet = false,
+  }) {
     String sign = "";
     if (isNet) {
       sign = value > 0 ? "+" : (value < 0 ? "-" : "");
@@ -120,15 +142,16 @@ class TransactionSummary extends StatelessWidget {
             child: Text(
               '$sign${value.abs().toStringAsFixed(0)}',
               style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 15),
+                color: color,
+                fontWeight: FontWeight.w900,
+                fontSize: 15,
+              ),
             ),
           ),
-          Text(label,
-              style: TextStyle(
-                  color: colorScheme.onSurfaceVariant,
-                  fontSize: 10)),
+          Text(
+            label,
+            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 10),
+          ),
         ],
       ),
     );

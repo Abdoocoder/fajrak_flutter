@@ -10,7 +10,8 @@ import '../../app_state.dart';
 String _friendlyAuthError(dynamic e) {
   if (e is AuthException) {
     final msg = e.message.toLowerCase();
-    if (msg.contains('invalid login credentials') || msg.contains('invalid credentials')) {
+    if (msg.contains('invalid login credentials') ||
+        msg.contains('invalid credentials')) {
       return 'auth_error_invalid_credentials'.tr();
     }
     if (msg.contains('email not confirmed')) {
@@ -65,7 +66,11 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         setState(() => _error = _friendlyAuthError(e));
         if (e is! AuthException) {
-          ErrorHandler.handle(e, context: context, developerMessage: 'Login Action');
+          ErrorHandler.handle(
+            e,
+            context: context,
+            developerMessage: 'Login Action',
+          );
         }
       }
     } finally {
@@ -120,16 +125,22 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              Text('auth_login_welcome'.tr(),
-                  style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w900,
-                      color: colorScheme.onSurface)),
-               const SizedBox(height: 8),
-              Text('auth_login_subtitle'.tr(),
-                  style: TextStyle(
-                      fontSize: 14,
-                      color: colorScheme.onSurfaceVariant)),
+              Text(
+                'auth_login_welcome'.tr(),
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'auth_login_subtitle'.tr(),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
               const SizedBox(height: 40),
               if (_error != null) ...[
                 AuthErrorBanner(message: _error!),
@@ -140,9 +151,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 keyboardType: TextInputType.emailAddress,
                 style: TextStyle(color: colorScheme.onSurface),
                 decoration: InputDecoration(
-                    labelText: 'auth_email'.tr(),
-                    prefixIcon:
-                        Icon(Icons.email_outlined, color: colorScheme.onSurfaceVariant)),
+                  labelText: 'auth_email'.tr(),
+                  prefixIcon: Icon(
+                    Icons.email_outlined,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -151,15 +165,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: TextStyle(color: colorScheme.onSurface),
                 decoration: InputDecoration(
                   labelText: 'auth_password'.tr(),
-                  prefixIcon:
-                      Icon(Icons.lock_outlined, color: colorScheme.onSurfaceVariant),
+                  prefixIcon: Icon(
+                    Icons.lock_outlined,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                   suffixIcon: IconButton(
                     icon: Icon(
-                        _obscure
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                        color: colorScheme.onSurfaceVariant),
-                    tooltip: _obscure ? 'tooltip_show_password'.tr() : 'tooltip_hide_password'.tr(),
+                      _obscure
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    tooltip: _obscure
+                        ? 'tooltip_show_password'.tr()
+                        : 'tooltip_hide_password'.tr(),
                     onPressed: () => setState(() => _obscure = !_obscure),
                   ),
                 ),
@@ -170,9 +189,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: TextButton(
                   onPressed: () =>
                       Navigator.pushNamed(context, '/forgot-password'),
-                  child: Text('auth_forgot_password'.tr(),
-                      style: TextStyle(
-                          color: colorScheme.primary)),
+                  child: Text(
+                    'auth_forgot_password'.tr(),
+                    style: TextStyle(color: colorScheme.primary),
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -183,23 +203,30 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
-                            strokeWidth: 2, color: colorScheme.onPrimary))
-                    :  Text('auth_login_button'.tr()),
+                          strokeWidth: 2,
+                          color: colorScheme.onPrimary,
+                        ),
+                      )
+                    : Text('auth_login_button'.tr()),
               ),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('auth_no_account'.tr(),
-                      style: TextStyle(
-                          color: colorScheme.onSurfaceVariant)),
+                  Text(
+                    'auth_no_account'.tr(),
+                    style: TextStyle(color: colorScheme.onSurfaceVariant),
+                  ),
                   TextButton(
                     onPressed: () =>
                         Navigator.pushReplacementNamed(context, '/register'),
-                    child: Text('auth_register_now'.tr(),
-                        style: TextStyle(
-                            color: colorScheme.primary,
-                            fontWeight: FontWeight.w700)),
+                    child: Text(
+                      'auth_register_now'.tr(),
+                      style: TextStyle(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ],
               ),

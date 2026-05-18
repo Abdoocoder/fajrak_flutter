@@ -32,10 +32,18 @@ class DetectCurrency {
       }
       // Arabic locale بدون country code → JOD كـ fallback
       if (locale.startsWith('ar')) {
-        return const DetectionResult(currency: 'JOD', confidence: 'low', countryName: '');
+        return const DetectionResult(
+          currency: 'JOD',
+          confidence: 'low',
+          countryName: '',
+        );
       }
     } catch (_) {}
-    return const DetectionResult(currency: 'USD', confidence: 'low', countryName: '');
+    return const DetectionResult(
+      currency: 'USD',
+      confidence: 'low',
+      countryName: '',
+    );
   }
 }
 

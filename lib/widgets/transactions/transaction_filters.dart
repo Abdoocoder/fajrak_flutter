@@ -49,9 +49,18 @@ class TransactionFilters extends StatelessWidget {
     final isCurrentMonth = filterMonth == now.month && filterYear == now.year;
 
     const monthKeys = [
-      'month_jan', 'month_feb', 'month_mar', 'month_apr',
-      'month_may', 'month_jun', 'month_jul', 'month_aug',
-      'month_sep', 'month_oct', 'month_nov', 'month_dec',
+      'month_jan',
+      'month_feb',
+      'month_mar',
+      'month_apr',
+      'month_may',
+      'month_jun',
+      'month_jul',
+      'month_aug',
+      'month_sep',
+      'month_oct',
+      'month_nov',
+      'month_dec',
     ];
     final monthLabel = '${monthKeys[filterMonth - 1].tr()} $filterYear';
 
@@ -67,34 +76,36 @@ class TransactionFilters extends StatelessWidget {
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: colorScheme.outlineVariant),
             ),
-            child: Row(children: [
-              _NavButton(
-                icon: Icons.chevron_right,
-                onTap: () => _goPrev(context),
-                colorScheme: colorScheme,
-              ),
-              Expanded(
-                child: GestureDetector(
-                  onTap: onShowDatePicker,
-                  child: Center(
-                    child: Text(
-                      monthLabel,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900,
-                        color: colorScheme.onSurface,
+            child: Row(
+              children: [
+                _NavButton(
+                  icon: Icons.chevron_right,
+                  onTap: () => _goPrev(context),
+                  colorScheme: colorScheme,
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: onShowDatePicker,
+                    child: Center(
+                      child: Text(
+                        monthLabel,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                          color: colorScheme.onSurface,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              _NavButton(
-                icon: Icons.chevron_left,
-                onTap: isCurrentMonth ? null : () => _goNext(context),
-                colorScheme: colorScheme,
-                disabled: isCurrentMonth,
-              ),
-            ]),
+                _NavButton(
+                  icon: Icons.chevron_left,
+                  onTap: isCurrentMonth ? null : () => _goNext(context),
+                  colorScheme: colorScheme,
+                  disabled: isCurrentMonth,
+                ),
+              ],
+            ),
           ),
 
           Row(
@@ -106,12 +117,16 @@ class TransactionFilters extends StatelessWidget {
                   style: TextStyle(color: colorScheme.onSurface),
                   decoration: InputDecoration(
                     hintText: 'search_hint'.tr(),
-                    prefixIcon: Icon(Icons.search, color: colorScheme.onSurfaceVariant),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                     filled: true,
                     fillColor: colorScheme.surface,
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: colorScheme.outlineVariant)),
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: colorScheme.outlineVariant),
+                    ),
                     contentPadding: const EdgeInsets.symmetric(vertical: 8),
                   ),
                 ),
@@ -146,13 +161,17 @@ class TransactionFilters extends StatelessWidget {
           color: selected ? colorScheme.primary : colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-              color: selected ? colorScheme.primary : colorScheme.outlineVariant),
+            color: selected ? colorScheme.primary : colorScheme.outlineVariant,
+          ),
         ),
-        child: Text(label,
-            style: TextStyle(
-                color: selected ? Colors.white : colorScheme.onSurfaceVariant,
-                fontSize: 12,
-                fontWeight: FontWeight.bold)),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? Colors.white : colorScheme.onSurfaceVariant,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
     );
   }

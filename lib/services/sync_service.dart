@@ -131,13 +131,16 @@ class SyncService {
     required int pageSize,
     required int offset,
   }) async {
-    final response = await _supabase.rpc('get_changed_records', params: {
-      'p_user_id': userId,
-      'p_table_name': table,
-      'p_since': since.toIso8601String(),
-      'p_page_size': pageSize,
-      'p_offset': offset,
-    });
+    final response = await _supabase.rpc(
+      'get_changed_records',
+      params: {
+        'p_user_id': userId,
+        'p_table_name': table,
+        'p_since': since.toIso8601String(),
+        'p_page_size': pageSize,
+        'p_offset': offset,
+      },
+    );
 
     return List<Map<String, dynamic>>.from(response as List);
   }
@@ -150,17 +153,17 @@ class SyncService {
     final deleted = <Map<String, dynamic>>[];
 
     for (final table in tables) {
-      final response = await _supabase.rpc('get_deleted_records', params: {
-        'p_user_id': userId,
-        'p_table_name': table,
-        'p_since': since.toIso8601String(),
-      });
+      final response = await _supabase.rpc(
+        'get_deleted_records',
+        params: {
+          'p_user_id': userId,
+          'p_table_name': table,
+          'p_since': since.toIso8601String(),
+        },
+      );
 
       for (final record in response as List) {
-        deleted.add({
-          'table': table,
-          'id': record['id'],
-        });
+        deleted.add({'table': table, 'id': record['id']});
       }
     }
 
@@ -194,15 +197,15 @@ class SyncService {
     String operation,
     Map<String, dynamic> data,
   ) async {
-    final local = await (localDb.select(localDb.transactionsTable)
-          ..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    final local = await (localDb.select(
+      localDb.transactionsTable,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
 
     if (operation == 'delete') {
       if (local != null) {
-        await (localDb.delete(localDb.transactionsTable)
-              ..where((t) => t.id.equals(id)))
-            .go();
+        await (localDb.delete(
+          localDb.transactionsTable,
+        )..where((t) => t.id.equals(id))).go();
       }
       return MergeResult.success;
     }
@@ -211,46 +214,50 @@ class SyncService {
     final localVersion = local?.localVersion ?? 0;
 
     if (local == null) {
-      await localDb.into(localDb.transactionsTable).insert(
-        TransactionsTableCompanion.insert(
-          id: id,
-          userId: data['user_id'] ?? '',
-          type: data['type'] ?? 'expense',
-          category: data['category'] ?? '',
-          amount: (data['amount'] as num).toDouble(),
-          description: Value(data['description']),
-          transactionDate: DateTime.parse(data['transaction_date']),
-          isRecurring: Value(data['is_recurring'] ?? false),
-          recurringDay: Value(data['recurring_day']),
-          accountId: Value(data['account_id']),
-          transferToAccountId: Value(data['transfer_to_account_id']),
-          transferPairId: Value(data['transfer_pair_id']),
-          sourceRecurringId: Value(data['source_recurring_id']),
-          originalAmount: Value(data['original_amount']),
-          originalCurrency: Value(data['original_currency']),
-          exchangeRate: Value(data['exchange_rate']),
-          createdAt: DateTime.parse(data['created_at']),
-          syncStatus: const Value('synced'),
-          localVersion: Value(remoteVersion),
-        ),
-      );
+      await localDb
+          .into(localDb.transactionsTable)
+          .insert(
+            TransactionsTableCompanion.insert(
+              id: id,
+              userId: data['user_id'] ?? '',
+              type: data['type'] ?? 'expense',
+              category: data['category'] ?? '',
+              amount: (data['amount'] as num).toDouble(),
+              description: Value(data['description']),
+              transactionDate: DateTime.parse(data['transaction_date']),
+              isRecurring: Value(data['is_recurring'] ?? false),
+              recurringDay: Value(data['recurring_day']),
+              accountId: Value(data['account_id']),
+              transferToAccountId: Value(data['transfer_to_account_id']),
+              transferPairId: Value(data['transfer_pair_id']),
+              sourceRecurringId: Value(data['source_recurring_id']),
+              originalAmount: Value(data['original_amount']),
+              originalCurrency: Value(data['original_currency']),
+              exchangeRate: Value(data['exchange_rate']),
+              createdAt: DateTime.parse(data['created_at']),
+              syncStatus: const Value('synced'),
+              localVersion: Value(remoteVersion),
+            ),
+          );
       return MergeResult.success;
     }
 
     if (remoteVersion > localVersion) {
-      await (localDb.update(localDb.transactionsTable)
-            ..where((t) => t.id.equals(id)))
-          .write(TransactionsTableCompanion(
-        type: Value(data['type']),
-        category: Value(data['category']),
-        amount: Value((data['amount'] as num).toDouble()),
-        description: Value(data['description']),
-        transactionDate: Value(DateTime.parse(data['transaction_date'])),
-        isRecurring: Value(data['is_recurring']),
-        accountId: Value(data['account_id']),
-        syncStatus: const Value('synced'),
-        localVersion: Value(remoteVersion),
-      ));
+      await (localDb.update(
+        localDb.transactionsTable,
+      )..where((t) => t.id.equals(id))).write(
+        TransactionsTableCompanion(
+          type: Value(data['type']),
+          category: Value(data['category']),
+          amount: Value((data['amount'] as num).toDouble()),
+          description: Value(data['description']),
+          transactionDate: Value(DateTime.parse(data['transaction_date'])),
+          isRecurring: Value(data['is_recurring']),
+          accountId: Value(data['account_id']),
+          syncStatus: const Value('synced'),
+          localVersion: Value(remoteVersion),
+        ),
+      );
       return MergeResult.success;
     }
 
@@ -262,15 +269,15 @@ class SyncService {
     String operation,
     Map<String, dynamic> data,
   ) async {
-    final local = await (localDb.select(localDb.debtsTable)
-          ..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    final local = await (localDb.select(
+      localDb.debtsTable,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
 
     if (operation == 'delete') {
       if (local != null) {
-        await (localDb.delete(localDb.debtsTable)
-              ..where((t) => t.id.equals(id)))
-            .go();
+        await (localDb.delete(
+          localDb.debtsTable,
+        )..where((t) => t.id.equals(id))).go();
       }
       return MergeResult.success;
     }
@@ -279,49 +286,57 @@ class SyncService {
     final localVersion = local?.localVersion ?? 0;
 
     if (local == null) {
-      await localDb.into(localDb.debtsTable).insert(
-        DebtsTableCompanion.insert(
-          id: id,
-          userId: data['user_id'] ?? '',
-          name: data['name'] ?? '',
-          originalAmount: (data['original_amount'] as num).toDouble(),
-          remainingAmount: (data['remaining_amount'] as num).toDouble(),
-          monthlyPayment: Value(data['monthly_payment']),
-          dueDate: Value(data['due_date'] != null
-              ? DateTime.parse(data['due_date'])
-              : null),
-          priority: Value(data['priority'] ?? 3),
-          notes: Value(data['notes']),
-          isPaid: Value(data['is_paid'] ?? false),
-          originalAmountForeign: Value(data['original_amount_foreign']),
-          remainingAmountForeign: Value(data['remaining_amount_foreign']),
-          currency: Value(data['currency']),
-          createdAt: DateTime.parse(data['created_at']),
-          updatedAt: DateTime.parse(data['updated_at'] ?? data['created_at']),
-          syncStatus: const Value('synced'),
-          localVersion: Value(remoteVersion),
-        ),
-      );
+      await localDb
+          .into(localDb.debtsTable)
+          .insert(
+            DebtsTableCompanion.insert(
+              id: id,
+              userId: data['user_id'] ?? '',
+              name: data['name'] ?? '',
+              originalAmount: (data['original_amount'] as num).toDouble(),
+              remainingAmount: (data['remaining_amount'] as num).toDouble(),
+              monthlyPayment: Value(data['monthly_payment']),
+              dueDate: Value(
+                data['due_date'] != null
+                    ? DateTime.parse(data['due_date'])
+                    : null,
+              ),
+              priority: Value(data['priority'] ?? 3),
+              notes: Value(data['notes']),
+              isPaid: Value(data['is_paid'] ?? false),
+              originalAmountForeign: Value(data['original_amount_foreign']),
+              remainingAmountForeign: Value(data['remaining_amount_foreign']),
+              currency: Value(data['currency']),
+              createdAt: DateTime.parse(data['created_at']),
+              updatedAt: DateTime.parse(
+                data['updated_at'] ?? data['created_at'],
+              ),
+              syncStatus: const Value('synced'),
+              localVersion: Value(remoteVersion),
+            ),
+          );
       return MergeResult.success;
     }
 
     if (remoteVersion > localVersion) {
-      await (localDb.update(localDb.debtsTable)
-            ..where((t) => t.id.equals(id)))
-          .write(DebtsTableCompanion(
-        name: Value(data['name']),
-        originalAmount: Value((data['original_amount'] as num).toDouble()),
-        remainingAmount: Value((data['remaining_amount'] as num).toDouble()),
-        monthlyPayment: Value(data['monthly_payment']),
-        dueDate: Value(data['due_date'] != null
-            ? DateTime.parse(data['due_date'])
-            : null),
-        priority: Value(data['priority']),
-        notes: Value(data['notes']),
-        isPaid: Value(data['is_paid']),
-        syncStatus: const Value('synced'),
-        localVersion: Value(remoteVersion),
-      ));
+      await (localDb.update(
+        localDb.debtsTable,
+      )..where((t) => t.id.equals(id))).write(
+        DebtsTableCompanion(
+          name: Value(data['name']),
+          originalAmount: Value((data['original_amount'] as num).toDouble()),
+          remainingAmount: Value((data['remaining_amount'] as num).toDouble()),
+          monthlyPayment: Value(data['monthly_payment']),
+          dueDate: Value(
+            data['due_date'] != null ? DateTime.parse(data['due_date']) : null,
+          ),
+          priority: Value(data['priority']),
+          notes: Value(data['notes']),
+          isPaid: Value(data['is_paid']),
+          syncStatus: const Value('synced'),
+          localVersion: Value(remoteVersion),
+        ),
+      );
       return MergeResult.success;
     }
 
@@ -333,15 +348,15 @@ class SyncService {
     String operation,
     Map<String, dynamic> data,
   ) async {
-    final local = await (localDb.select(localDb.savingsGoalsTable)
-          ..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    final local = await (localDb.select(
+      localDb.savingsGoalsTable,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
 
     if (operation == 'delete') {
       if (local != null) {
-        await (localDb.delete(localDb.savingsGoalsTable)
-              ..where((t) => t.id.equals(id)))
-            .go();
+        await (localDb.delete(
+          localDb.savingsGoalsTable,
+        )..where((t) => t.id.equals(id))).go();
       }
       return MergeResult.success;
     }
@@ -350,42 +365,56 @@ class SyncService {
     final localVersion = local?.localVersion ?? 0;
 
     if (local == null) {
-      await localDb.into(localDb.savingsGoalsTable).insert(
-        SavingsGoalsTableCompanion.insert(
-          id: id,
-          userId: data['user_id'] ?? '',
-          name: data['name'] ?? '',
-          targetAmount: (data['target_amount'] as num).toDouble(),
-          currentAmount: Value((data['current_amount'] as num?)?.toDouble() ?? 0),
-          targetDate: Value(data['target_date'] != null
-              ? DateTime.parse(data['target_date'])
-              : null),
-          icon: Value(data['icon'] ?? '🎯'),
-          color: Value(data['color'] ?? '#2E75B6'),
-          createdAt: DateTime.parse(data['created_at']),
-          updatedAt: DateTime.parse(data['updated_at'] ?? data['created_at']),
-          syncStatus: const Value('synced'),
-          localVersion: Value(remoteVersion),
-        ),
-      );
+      await localDb
+          .into(localDb.savingsGoalsTable)
+          .insert(
+            SavingsGoalsTableCompanion.insert(
+              id: id,
+              userId: data['user_id'] ?? '',
+              name: data['name'] ?? '',
+              targetAmount: (data['target_amount'] as num).toDouble(),
+              currentAmount: Value(
+                (data['current_amount'] as num?)?.toDouble() ?? 0,
+              ),
+              targetDate: Value(
+                data['target_date'] != null
+                    ? DateTime.parse(data['target_date'])
+                    : null,
+              ),
+              icon: Value(data['icon'] ?? '🎯'),
+              color: Value(data['color'] ?? '#2E75B6'),
+              createdAt: DateTime.parse(data['created_at']),
+              updatedAt: DateTime.parse(
+                data['updated_at'] ?? data['created_at'],
+              ),
+              syncStatus: const Value('synced'),
+              localVersion: Value(remoteVersion),
+            ),
+          );
       return MergeResult.success;
     }
 
     if (remoteVersion > localVersion) {
-      await (localDb.update(localDb.savingsGoalsTable)
-            ..where((t) => t.id.equals(id)))
-          .write(SavingsGoalsTableCompanion(
-        name: Value(data['name']),
-        targetAmount: Value((data['target_amount'] as num).toDouble()),
-        currentAmount: Value((data['current_amount'] as num?)?.toDouble() ?? 0),
-        targetDate: Value(data['target_date'] != null
-            ? DateTime.parse(data['target_date'])
-            : null),
-        icon: Value(data['icon']),
-        color: Value(data['color']),
-        syncStatus: const Value('synced'),
-        localVersion: Value(remoteVersion),
-      ));
+      await (localDb.update(
+        localDb.savingsGoalsTable,
+      )..where((t) => t.id.equals(id))).write(
+        SavingsGoalsTableCompanion(
+          name: Value(data['name']),
+          targetAmount: Value((data['target_amount'] as num).toDouble()),
+          currentAmount: Value(
+            (data['current_amount'] as num?)?.toDouble() ?? 0,
+          ),
+          targetDate: Value(
+            data['target_date'] != null
+                ? DateTime.parse(data['target_date'])
+                : null,
+          ),
+          icon: Value(data['icon']),
+          color: Value(data['color']),
+          syncStatus: const Value('synced'),
+          localVersion: Value(remoteVersion),
+        ),
+      );
       return MergeResult.success;
     }
 
@@ -397,15 +426,15 @@ class SyncService {
     String operation,
     Map<String, dynamic> data,
   ) async {
-    final local = await (localDb.select(localDb.budgetsTable)
-          ..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
+    final local = await (localDb.select(
+      localDb.budgetsTable,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
 
     if (operation == 'delete') {
       if (local != null) {
-        await (localDb.delete(localDb.budgetsTable)
-              ..where((t) => t.id.equals(id)))
-            .go();
+        await (localDb.delete(
+          localDb.budgetsTable,
+        )..where((t) => t.id.equals(id))).go();
       }
       return MergeResult.success;
     }
@@ -414,33 +443,37 @@ class SyncService {
     final localVersion = local?.localVersion ?? 0;
 
     if (local == null) {
-      await localDb.into(localDb.budgetsTable).insert(
-        BudgetsTableCompanion.insert(
-          id: id,
-          userId: data['user_id'] ?? '',
-          category: data['category'] ?? '',
-          monthlyLimit: (data['monthly_limit'] as num).toDouble(),
-          month: data['month'] ?? 1,
-          year: data['year'] ?? DateTime.now().year,
-          createdAt: DateTime.parse(data['created_at']),
-          syncStatus: const Value('synced'),
-          localVersion: Value(remoteVersion),
-        ),
-      );
+      await localDb
+          .into(localDb.budgetsTable)
+          .insert(
+            BudgetsTableCompanion.insert(
+              id: id,
+              userId: data['user_id'] ?? '',
+              category: data['category'] ?? '',
+              monthlyLimit: (data['monthly_limit'] as num).toDouble(),
+              month: data['month'] ?? 1,
+              year: data['year'] ?? DateTime.now().year,
+              createdAt: DateTime.parse(data['created_at']),
+              syncStatus: const Value('synced'),
+              localVersion: Value(remoteVersion),
+            ),
+          );
       return MergeResult.success;
     }
 
     if (remoteVersion > localVersion) {
-      await (localDb.update(localDb.budgetsTable)
-            ..where((t) => t.id.equals(id)))
-          .write(BudgetsTableCompanion(
-        category: Value(data['category']),
-        monthlyLimit: Value((data['monthly_limit'] as num).toDouble()),
-        month: Value(data['month']),
-        year: Value(data['year']),
-        syncStatus: const Value('synced'),
-        localVersion: Value(remoteVersion),
-      ));
+      await (localDb.update(
+        localDb.budgetsTable,
+      )..where((t) => t.id.equals(id))).write(
+        BudgetsTableCompanion(
+          category: Value(data['category']),
+          monthlyLimit: Value((data['monthly_limit'] as num).toDouble()),
+          month: Value(data['month']),
+          year: Value(data['year']),
+          syncStatus: const Value('synced'),
+          localVersion: Value(remoteVersion),
+        ),
+      );
       return MergeResult.success;
     }
 
@@ -450,24 +483,24 @@ class SyncService {
   static Future<void> _applyDelete(String table, String id) async {
     switch (table) {
       case 'transactions':
-        await (localDb.delete(localDb.transactionsTable)
-              ..where((t) => t.id.equals(id)))
-            .go();
+        await (localDb.delete(
+          localDb.transactionsTable,
+        )..where((t) => t.id.equals(id))).go();
         break;
       case 'debts':
-        await (localDb.delete(localDb.debtsTable)
-              ..where((t) => t.id.equals(id)))
-            .go();
+        await (localDb.delete(
+          localDb.debtsTable,
+        )..where((t) => t.id.equals(id))).go();
         break;
       case 'savings_goals':
-        await (localDb.delete(localDb.savingsGoalsTable)
-              ..where((t) => t.id.equals(id)))
-            .go();
+        await (localDb.delete(
+          localDb.savingsGoalsTable,
+        )..where((t) => t.id.equals(id))).go();
         break;
       case 'budgets':
-        await (localDb.delete(localDb.budgetsTable)
-              ..where((t) => t.id.equals(id)))
-            .go();
+        await (localDb.delete(
+          localDb.budgetsTable,
+        )..where((t) => t.id.equals(id))).go();
         break;
     }
   }
@@ -493,10 +526,10 @@ class SyncService {
           totalPushed++;
         } catch (e) {
           await txRepo.markFailed(item.id, e.toString(), item.attemptCount);
-          
+
           final backoff = txRepo.getBackoffDuration(item.attemptCount);
           await Future.delayed(backoff);
-          
+
           if (item.attemptCount >= 3) {
             await txRepo.markCompleted(item.id);
           }
@@ -527,7 +560,10 @@ class SyncService {
         await _supabase.from(table).update(payload).eq('id', id);
         break;
       case 'delete':
-        await _supabase.from(table).update({'deleted_at': DateTime.now().toIso8601String()}).eq('id', id);
+        await _supabase
+            .from(table)
+            .update({'deleted_at': DateTime.now().toIso8601String()})
+            .eq('id', id);
         break;
     }
   }

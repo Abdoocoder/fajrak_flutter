@@ -44,9 +44,11 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
     if (data.isEmpty) {
       if (mounted) {
         setState(() => _loading = false);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('settings_no_export'.tr(),
-                style: const TextStyle())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('settings_no_export'.tr(), style: const TextStyle()),
+          ),
+        );
       }
       return;
     }
@@ -54,17 +56,26 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
     final buffer = StringBuffer();
     buffer.writeln('csv_header'.tr());
     for (final tx in data) {
-      final type = tx['type'] == 'income' ? 'csv_income'.tr() : 'csv_expense'.tr();
+      final type = tx['type'] == 'income'
+          ? 'csv_income'.tr()
+          : 'csv_expense'.tr();
       buffer.writeln(
-          '${tx['transaction_date']},$type,${tx['amount']},${tx['category'] ?? ''},${tx['description'] ?? ''}');
+        '${tx['transaction_date']},$type,${tx['amount']},${tx['category'] ?? ''},${tx['description'] ?? ''}',
+      );
     }
 
     final directory = await getTemporaryDirectory();
     final file = File(
-        '${directory.path}/fajrak_export_${DateTime.now().millisecondsSinceEpoch}.csv');
+      '${directory.path}/fajrak_export_${DateTime.now().millisecondsSinceEpoch}.csv',
+    );
     await file.writeAsString('\uFEFF${buffer.toString()}');
 
-    await SharePlus.instance.share(ShareParams(files: [XFile(file.path)], subject: 'settings_export_msg'.tr()));
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(file.path)],
+        subject: 'settings_export_msg'.tr(),
+      ),
+    );
     if (mounted) setState(() => _loading = false);
   }
 
@@ -74,7 +85,8 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
   }
 
   Future<void> _deleteAccount() async {
-    if (_deleteInputCtrl.text.trim() != 'settings_delete_confirm_text'.tr()) return;
+    if (_deleteInputCtrl.text.trim() != 'settings_delete_confirm_text'.tr())
+      return;
     setState(() => _deleting = true);
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) {
@@ -83,8 +95,10 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
     }
 
     try {
-      await Supabase.instance.client
-          .rpc('delete_user_account', params: {'user_id': user.id});
+      await Supabase.instance.client.rpc(
+        'delete_user_account',
+        params: {'user_id': user.id},
+      );
       await Supabase.instance.client.auth.signOut();
       if (mounted) {
         Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
@@ -93,7 +107,9 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
       if (mounted) {
         setState(() => _deleting = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('error_generic'.tr(), style: const TextStyle())),
+          SnackBar(
+            content: Text('error_generic'.tr(), style: const TextStyle()),
+          ),
         );
       }
     }
@@ -148,14 +164,16 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
                     foregroundColor: colorScheme.onSurface,
                     side: BorderSide(color: colorScheme.outlineVariant),
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),
             ],
           ),
         ),
-        
+
         // Share
         SettingsAccordion(
           icon: Icons.share_outlined,
@@ -203,7 +221,9 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: Text(
                     'share_btn'.tr(),
@@ -240,7 +260,10 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.error),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.error,
+                          ),
                         )
                       : Text(
                           'settings_logout'.tr(),
@@ -262,7 +285,10 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
                     ),
                     child: Text(
                       'delete'.tr(),
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 )
@@ -288,9 +314,15 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
                     fillColor: colorScheme.surface,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: colorScheme.error, width: 0.5),
+                      borderSide: BorderSide(
+                        color: colorScheme.error,
+                        width: 0.5,
+                      ),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -298,24 +330,34 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
                   children: [
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: (_deleteInputCtrl.text.trim() != 'settings_delete_confirm_text'.tr() || _deleting)
+                        onPressed:
+                            (_deleteInputCtrl.text.trim() !=
+                                    'settings_delete_confirm_text'.tr() ||
+                                _deleting)
                             ? null
                             : _deleteAccount,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.error,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                         child: _deleting
                             ? const SizedBox(
                                 width: 18,
                                 height: 18,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
                               )
                             : Text(
                                 'confirm_delete'.tr(),
-                                style: const TextStyle(fontWeight: FontWeight.w700),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                       ),
                     ),
@@ -332,7 +374,9 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
                           foregroundColor: colorScheme.onSurfaceVariant,
                           side: BorderSide(color: colorScheme.outlineVariant),
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                         child: Text('cancel'.tr(), style: const TextStyle()),
                       ),

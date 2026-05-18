@@ -33,6 +33,10 @@ class FinanceUtils {
     required double investmentValue,
     required double savingsGoalsValue,
   }) {
-    return totalAccountBalances + investmentValue + savingsGoalsValue - totalDebt + totalReceivable;
+    return totalAccountBalances +
+        investmentValue +
+        savingsGoalsValue -
+        totalDebt +
+        totalReceivable;
   }
 }

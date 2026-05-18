@@ -40,8 +40,11 @@ class InvestmentsService {
 
   static Future<double?> _getCryptoPrice(String id) async {
     try {
-      final res = await http.get(Uri.parse(
-          'https://api.coingecko.com/api/v3/simple/price?ids=$id&vs_currencies=usd'));
+      final res = await http.get(
+        Uri.parse(
+          'https://api.coingecko.com/api/v3/simple/price?ids=$id&vs_currencies=usd',
+        ),
+      );
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
         return (data[id]?['usd'] as num?)?.toDouble();
@@ -52,8 +55,11 @@ class InvestmentsService {
 
   static Future<double?> _getStockPrice(String symbol) async {
     try {
-      final res = await http.get(Uri.parse(
-          'https://api.twelvedata.com/price?symbol=$symbol&apikey=${dotenv.env['TWELVE_DATA_KEY']}'));
+      final res = await http.get(
+        Uri.parse(
+          'https://api.twelvedata.com/price?symbol=$symbol&apikey=${dotenv.env['TWELVE_DATA_KEY']}',
+        ),
+      );
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
         if (data['price'] != null) {
@@ -67,12 +73,16 @@ class InvestmentsService {
   static Future<double?> _getStockPriceYahoo(String symbol) async {
     try {
       final res = await http.get(
-        Uri.parse('https://query1.finance.yahoo.com/v8/finance/chart/$symbol?interval=1d&range=1d'),
+        Uri.parse(
+          'https://query1.finance.yahoo.com/v8/finance/chart/$symbol?interval=1d&range=1d',
+        ),
         headers: {'User-Agent': 'Mozilla/5.0'},
       );
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
-        return (data['chart']?['result']?[0]?['meta']?['regularMarketPrice'] as num?)?.toDouble();
+        return (data['chart']?['result']?[0]?['meta']?['regularMarketPrice']
+                as num?)
+            ?.toDouble();
       }
     } catch (_) {}
     return null;

@@ -25,7 +25,9 @@ class SettingsAccordion extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -43,39 +45,44 @@ class SettingsAccordion extends StatelessWidget {
           collapsedBackgroundColor: Colors.transparent,
           iconColor: colorScheme.onSurfaceVariant,
           collapsedIconColor: colorScheme.onSurfaceVariant,
-          title: Row(children: [
-            Icon(icon, size: 18, color: colorScheme.primary),
-            const SizedBox(width: 10),
-            Text(
-              title,
-              style: TextStyle(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.w800,
-                fontSize: 13,
-              ),
-            ),
-            if (badge != null) ...[
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: colorScheme.primary.withValues(alpha: 0.2),
-                  ),
-                ),
-                child: Text(
-                  badge!,
-                  style: TextStyle(
-                    color: colorScheme.primary,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                  ),
+          title: Row(
+            children: [
+              Icon(icon, size: 18, color: colorScheme.primary),
+              const SizedBox(width: 10),
+              Text(
+                title,
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
                 ),
               ),
+              if (badge != null) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: colorScheme.primary.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Text(
+                    badge!,
+                    style: TextStyle(
+                      color: colorScheme.primary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
             ],
-          ]),
+          ),
           childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
           children: [child],
         ),

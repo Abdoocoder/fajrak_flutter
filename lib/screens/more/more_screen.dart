@@ -24,7 +24,6 @@ class MoreScreen extends StatefulWidget {
 }
 
 class _MoreScreenState extends State<MoreScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -37,7 +36,8 @@ class _MoreScreenState extends State<MoreScreen> {
     try {
       // No explicit Supabase calls in this screen's initial load
     } catch (e) {
-      if (mounted) ErrorHandler.handle(e, context: context, developerMessage: 'More Load');
+      if (mounted)
+        ErrorHandler.handle(e, context: context, developerMessage: 'More Load');
     }
   }
 
@@ -47,7 +47,12 @@ class _MoreScreenState extends State<MoreScreen> {
     final colorScheme = theme.colorScheme;
     return SafeArea(
       child: ListView(
-        padding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 24),
+        padding: const EdgeInsets.only(
+          top: 16,
+          left: 16,
+          right: 16,
+          bottom: 24,
+        ),
         children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 16, right: 4, left: 4),
@@ -61,55 +66,95 @@ class _MoreScreenState extends State<MoreScreen> {
             ),
           ),
           MoreMenuItem(
-              icon: Icons.credit_card_outlined,
-              title: 'nav_debts'.tr(),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DebtsScreen())),
-              colorScheme: colorScheme),
+            icon: Icons.credit_card_outlined,
+            title: 'nav_debts'.tr(),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const DebtsScreen()),
+            ),
+            colorScheme: colorScheme,
+          ),
           MoreMenuItem(
-              icon: Icons.pie_chart_outline,
-              title: 'nav_budgets'.tr(),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BudgetsScreen())),
-              colorScheme: colorScheme),
+            icon: Icons.pie_chart_outline,
+            title: 'nav_budgets'.tr(),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const BudgetsScreen()),
+            ),
+            colorScheme: colorScheme,
+          ),
           MoreMenuItem(
-              icon: Icons.track_changes,
-              title: 'nav_goals'.tr(),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GoalsScreen())),
-              colorScheme: colorScheme),
+            icon: Icons.track_changes,
+            title: 'nav_goals'.tr(),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const GoalsScreen()),
+            ),
+            colorScheme: colorScheme,
+          ),
           MoreMenuItem(
-              icon: Icons.trending_up,
-              title: 'nav_investments'.tr(),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const InvestmentsScreen())),
-              colorScheme: colorScheme),
+            icon: Icons.trending_up,
+            title: 'nav_investments'.tr(),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const InvestmentsScreen()),
+            ),
+            colorScheme: colorScheme,
+          ),
           MoreMenuItem(
-              icon: Icons.local_fire_department_outlined,
-              title: 'fire_title'.tr(),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FIRECalculatorScreen())),
-              colorScheme: colorScheme),
+            icon: Icons.local_fire_department_outlined,
+            title: 'fire_title'.tr(),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const FIRECalculatorScreen()),
+            ),
+            colorScheme: colorScheme,
+          ),
           MoreMenuItem(
-              icon: Icons.cruelty_free_outlined,
-              title: 'zakat_title'.tr(),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ZakatCalculatorScreen())),
-              colorScheme: colorScheme),
+            icon: Icons.cruelty_free_outlined,
+            title: 'zakat_title'.tr(),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ZakatCalculatorScreen()),
+            ),
+            colorScheme: colorScheme,
+          ),
           MoreMenuItem(
-              icon: Icons.menu_book_outlined,
-              title: 'nav_learn'.tr(),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LearnScreen())),
-              colorScheme: colorScheme),
+            icon: Icons.menu_book_outlined,
+            title: 'nav_learn'.tr(),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const LearnScreen()),
+            ),
+            colorScheme: colorScheme,
+          ),
           MoreMenuItem(
-              icon: Icons.notifications_none,
-              title: 'nav_alerts'.tr(),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AlertsScreen())),
-              colorScheme: colorScheme),
+            icon: Icons.notifications_none,
+            title: 'nav_alerts'.tr(),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AlertsScreen()),
+            ),
+            colorScheme: colorScheme,
+          ),
           MoreMenuItem(
-              icon: Icons.settings_outlined,
-              title: 'nav_settings'.tr(),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
-              colorScheme: colorScheme),
+            icon: Icons.settings_outlined,
+            title: 'nav_settings'.tr(),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+            ),
+            colorScheme: colorScheme,
+          ),
           MoreMenuItem(
-              icon: Icons.help_outline,
-              title: 'nav_help'.tr(),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HelpScreen())),
-              colorScheme: colorScheme),
+            icon: Icons.help_outline,
+            title: 'nav_help'.tr(),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const HelpScreen()),
+            ),
+            colorScheme: colorScheme,
+          ),
         ],
       ),
     );

@@ -6,44 +6,68 @@ import 'app_radius.dart';
 
 abstract final class AppTheme {
   static ThemeData get light => _build(Brightness.light);
-  static ThemeData get dark  => _build(Brightness.dark);
+  static ThemeData get dark => _build(Brightness.dark);
 
   static ThemeData _build(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
 
-    final primary          = isDark ? AppColors.primaryLight : AppColors.primary;
-    final scaffoldBg       = isDark ? AppColors.bg0          : AppColors.bgLight;
-    final surface          = isDark ? AppColors.card0        : AppColors.cardLight;
-    final onSurface        = isDark ? Colors.white           : AppColors.textPrimaryLight;
-    final onSurfaceVariant = isDark ? AppColors.textSecondary : AppColors.textSecondaryLight;
-    final outlineVariant   = isDark ? AppColors.border       : AppColors.borderLight;
-    final outline          = isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1);
+    final primary = isDark ? AppColors.primaryLight : AppColors.primary;
+    final scaffoldBg = isDark ? AppColors.bg0 : AppColors.bgLight;
+    final surface = isDark ? AppColors.card0 : AppColors.cardLight;
+    final onSurface = isDark ? Colors.white : AppColors.textPrimaryLight;
+    final onSurfaceVariant = isDark
+        ? AppColors.textSecondary
+        : AppColors.textSecondaryLight;
+    final outlineVariant = isDark ? AppColors.border : AppColors.borderLight;
+    final outline = isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1);
 
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
       scaffoldBackgroundColor: scaffoldBg,
       fontFamily: 'IBMPlexSansArabic',
-      fontFamilyFallback: const ['Cairo', 'Roboto', 'Noto Color Emoji', 'Noto Sans Arabic', 'sans-serif'],
+      fontFamilyFallback: const [
+        'Cairo',
+        'Roboto',
+        'Noto Color Emoji',
+        'Noto Sans Arabic',
+        'sans-serif',
+      ],
       textTheme: AppTypography.textTheme,
       colorScheme: ColorScheme(
         brightness: brightness,
         primary: primary,
         onPrimary: Colors.white,
-        primaryContainer: isDark ? AppColors.primaryDark : const Color(0xFFD6E8F7),
-        onPrimaryContainer: isDark ? const Color(0xFFD6E8F7) : const Color(0xFF002244),
+        primaryContainer: isDark
+            ? AppColors.primaryDark
+            : const Color(0xFFD6E8F7),
+        onPrimaryContainer: isDark
+            ? const Color(0xFFD6E8F7)
+            : const Color(0xFF002244),
         secondary: AppColors.gold,
         onSecondary: isDark ? const Color(0xFF2D1F00) : Colors.white,
-        secondaryContainer: isDark ? const Color(0xFF4D3500) : const Color(0xFFFFF3CD),
-        onSecondaryContainer: isDark ? const Color(0xFFFFE082) : const Color(0xFF5C3D00),
+        secondaryContainer: isDark
+            ? const Color(0xFF4D3500)
+            : const Color(0xFFFFF3CD),
+        onSecondaryContainer: isDark
+            ? const Color(0xFFFFE082)
+            : const Color(0xFF5C3D00),
         tertiary: AppColors.success,
         onTertiary: Colors.white,
-        tertiaryContainer: isDark ? const Color(0xFF00594A) : const Color(0xFFD4F7ED),
-        onTertiaryContainer: isDark ? const Color(0xFFD4F7ED) : const Color(0xFF003D2E),
+        tertiaryContainer: isDark
+            ? const Color(0xFF00594A)
+            : const Color(0xFFD4F7ED),
+        onTertiaryContainer: isDark
+            ? const Color(0xFFD4F7ED)
+            : const Color(0xFF003D2E),
         error: AppColors.error,
         onError: Colors.white,
-        errorContainer: isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFDECEA),
-        onErrorContainer: isDark ? const Color(0xFFFCA5A5) : const Color(0xFF7A0000),
+        errorContainer: isDark
+            ? const Color(0xFF7F1D1D)
+            : const Color(0xFFFDECEA),
+        onErrorContainer: isDark
+            ? const Color(0xFFFCA5A5)
+            : const Color(0xFF7A0000),
         surface: surface,
         onSurface: onSurface,
         onSurfaceVariant: onSurfaceVariant,
@@ -109,7 +133,9 @@ abstract final class AppTheme {
           borderSide: const BorderSide(color: AppColors.error, width: 1.5),
         ),
         labelStyle: AppTypography.callout.copyWith(color: onSurfaceVariant),
-        hintStyle: AppTypography.callout.copyWith(color: onSurfaceVariant.withValues(alpha: 0.6)),
+        hintStyle: AppTypography.callout.copyWith(
+          color: onSurfaceVariant.withValues(alpha: 0.6),
+        ),
         errorStyle: AppTypography.caption1.copyWith(color: AppColors.error),
       ),
 
@@ -141,7 +167,9 @@ abstract final class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: primary,
-          textStyle: AppTypography.callout.copyWith(fontWeight: FontWeight.w600),
+          textStyle: AppTypography.callout.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
           minimumSize: const Size(44, 44),
         ),
       ),
@@ -163,7 +191,9 @@ abstract final class AppTheme {
         unselectedItemColor: onSurfaceVariant,
         elevation: 0,
         type: BottomNavigationBarType.fixed,
-        selectedLabelStyle: AppTypography.caption1.copyWith(fontWeight: FontWeight.w600),
+        selectedLabelStyle: AppTypography.caption1.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
         unselectedLabelStyle: AppTypography.caption1,
       ),
 
@@ -175,14 +205,22 @@ abstract final class AppTheme {
         height: AppSpacing.navBarHeight,
         surfaceTintColor: Colors.transparent,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        iconTheme: WidgetStateProperty.resolveWith((states) => IconThemeData(
-          color: states.contains(WidgetState.selected) ? primary : onSurfaceVariant,
-          size: 24,
-        )),
-        labelTextStyle: WidgetStateProperty.resolveWith((states) =>
-          AppTypography.caption1.copyWith(
-            fontWeight: states.contains(WidgetState.selected) ? FontWeight.w600 : FontWeight.w400,
-            color: states.contains(WidgetState.selected) ? primary : onSurfaceVariant,
+        iconTheme: WidgetStateProperty.resolveWith(
+          (states) => IconThemeData(
+            color: states.contains(WidgetState.selected)
+                ? primary
+                : onSurfaceVariant,
+            size: 24,
+          ),
+        ),
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => AppTypography.caption1.copyWith(
+            fontWeight: states.contains(WidgetState.selected)
+                ? FontWeight.w600
+                : FontWeight.w400,
+            color: states.contains(WidgetState.selected)
+                ? primary
+                : onSurfaceVariant,
           ),
         ),
       ),
@@ -192,17 +230,27 @@ abstract final class AppTheme {
         backgroundColor: surface,
         selectedColor: primary.withValues(alpha: 0.15),
         disabledColor: outlineVariant.withValues(alpha: 0.5),
-        labelStyle: AppTypography.caption1.copyWith(fontWeight: FontWeight.w500),
+        labelStyle: AppTypography.caption1.copyWith(
+          fontWeight: FontWeight.w500,
+        ),
         side: BorderSide(color: outlineVariant),
         shape: const RoundedRectangleBorder(borderRadius: AppRadius.borderPill),
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 2),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: 2,
+        ),
       ),
 
       // ── ListTile ───────────────────────────────────────────
       listTileTheme: ListTileThemeData(
         contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-        titleTextStyle: AppTypography.callout.copyWith(color: onSurface, fontWeight: FontWeight.w500),
-        subtitleTextStyle: AppTypography.footnote.copyWith(color: onSurfaceVariant),
+        titleTextStyle: AppTypography.callout.copyWith(
+          color: onSurface,
+          fontWeight: FontWeight.w500,
+        ),
+        subtitleTextStyle: AppTypography.footnote.copyWith(
+          color: onSurfaceVariant,
+        ),
         iconColor: onSurfaceVariant,
         minLeadingWidth: 24,
         minTileHeight: AppSpacing.tapTarget,
@@ -210,13 +258,15 @@ abstract final class AppTheme {
 
       // ── Switch ─────────────────────────────────────────────
       switchTheme: SwitchThemeData(
-        thumbColor: WidgetStateProperty.resolveWith((states) =>
-          states.contains(WidgetState.selected) ? primary : onSurfaceVariant,
+        thumbColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? primary
+              : onSurfaceVariant,
         ),
-        trackColor: WidgetStateProperty.resolveWith((states) =>
-          states.contains(WidgetState.selected)
-            ? primary.withValues(alpha: 0.35)
-            : outlineVariant,
+        trackColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? primary.withValues(alpha: 0.35)
+              : outlineVariant,
         ),
       ),
 
@@ -242,7 +292,9 @@ abstract final class AppTheme {
         modalBackgroundColor: surface,
         elevation: 0,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppRadius.xl),
+          ),
         ),
         showDragHandle: true,
         dragHandleColor: outlineVariant,
@@ -264,7 +316,10 @@ abstract final class AppTheme {
           borderRadius: AppRadius.borderSm,
         ),
         textStyle: AppTypography.caption1.copyWith(color: Colors.white),
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xs,
+        ),
       ),
 
       // ── ProgressIndicator ──────────────────────────────────

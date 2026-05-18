@@ -40,10 +40,18 @@ class _AssetsFormState extends State<AssetsForm> {
   void initState() {
     super.initState();
     final p = widget.initialProfile ?? {};
-    _realEstateCtrl = TextEditingController(text: p['asset_real_estate']?.toString() ?? '');
-    _vehiclesCtrl = TextEditingController(text: p['asset_vehicles']?.toString() ?? '');
-    _jewelryCtrl = TextEditingController(text: p['asset_jewelry']?.toString() ?? '');
-    _otherAssetsCtrl = TextEditingController(text: p['asset_other']?.toString() ?? '');
+    _realEstateCtrl = TextEditingController(
+      text: p['asset_real_estate']?.toString() ?? '',
+    );
+    _vehiclesCtrl = TextEditingController(
+      text: p['asset_vehicles']?.toString() ?? '',
+    );
+    _jewelryCtrl = TextEditingController(
+      text: p['asset_jewelry']?.toString() ?? '',
+    );
+    _otherAssetsCtrl = TextEditingController(
+      text: p['asset_other']?.toString() ?? '',
+    );
   }
 
   @override
@@ -70,10 +78,12 @@ class _AssetsFormState extends State<AssetsForm> {
         'assets_updated_at': DateTime.now().toIso8601String(),
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('toast_saved'.tr(), style: const TextStyle()),
-          backgroundColor: AppColors.success,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('toast_saved'.tr(), style: const TextStyle()),
+            backgroundColor: AppColors.success,
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _savingAssets = false);
@@ -83,11 +93,17 @@ class _AssetsFormState extends State<AssetsForm> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final totalDynamicAssets = (double.tryParse(_realEstateCtrl.text) ?? 0) +
+    final totalDynamicAssets =
+        (double.tryParse(_realEstateCtrl.text) ?? 0) +
         (double.tryParse(_vehiclesCtrl.text) ?? 0) +
         (double.tryParse(_jewelryCtrl.text) ?? 0) +
         (double.tryParse(_otherAssetsCtrl.text) ?? 0);
-    final displayedNetWorth = widget.cashBalance + widget.savings + widget.investments + totalDynamicAssets - widget.totalDebt;
+    final displayedNetWorth =
+        widget.cashBalance +
+        widget.savings +
+        widget.investments +
+        totalDynamicAssets -
+        widget.totalDebt;
 
     return SettingsAccordion(
       icon: Icons.diamond_outlined,
@@ -105,7 +121,9 @@ class _AssetsFormState extends State<AssetsForm> {
                 ],
               ),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.15),
+              ),
             ),
             child: Column(
               children: [
@@ -121,7 +139,9 @@ class _AssetsFormState extends State<AssetsForm> {
                 Text(
                   '${displayedNetWorth.toStringAsFixed(0)} ${widget.currency}',
                   style: TextStyle(
-                    color: displayedNetWorth >= 0 ? AppColors.success : AppColors.error,
+                    color: displayedNetWorth >= 0
+                        ? AppColors.success
+                        : AppColors.error,
                     fontSize: 24,
                     fontWeight: FontWeight.w900,
                   ),
@@ -130,10 +150,30 @@ class _AssetsFormState extends State<AssetsForm> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _netWorthStat('health_tracking'.tr(), widget.cashBalance, AppColors.primary, colorScheme),
-                    _netWorthStat('health_savings'.tr(), widget.savings, AppColors.purple, colorScheme),
-                    _netWorthStat('health_investing'.tr(), widget.investments, AppColors.success, colorScheme),
-                    _netWorthStat('health_debt'.tr(), -widget.totalDebt, AppColors.error, colorScheme),
+                    _netWorthStat(
+                      'health_tracking'.tr(),
+                      widget.cashBalance,
+                      AppColors.primary,
+                      colorScheme,
+                    ),
+                    _netWorthStat(
+                      'health_savings'.tr(),
+                      widget.savings,
+                      AppColors.purple,
+                      colorScheme,
+                    ),
+                    _netWorthStat(
+                      'health_investing'.tr(),
+                      widget.investments,
+                      AppColors.success,
+                      colorScheme,
+                    ),
+                    _netWorthStat(
+                      'health_debt'.tr(),
+                      -widget.totalDebt,
+                      AppColors.error,
+                      colorScheme,
+                    ),
                   ],
                 ),
               ],
@@ -142,17 +182,41 @@ class _AssetsFormState extends State<AssetsForm> {
           const SizedBox(height: 20),
           Row(
             children: [
-              Expanded(child: _assetField(_realEstateCtrl, 'settings_assets_realestate'.tr(), colorScheme)),
+              Expanded(
+                child: _assetField(
+                  _realEstateCtrl,
+                  'settings_assets_realestate'.tr(),
+                  colorScheme,
+                ),
+              ),
               const SizedBox(width: 8),
-              Expanded(child: _assetField(_vehiclesCtrl, 'settings_assets_vehicles'.tr(), colorScheme)),
+              Expanded(
+                child: _assetField(
+                  _vehiclesCtrl,
+                  'settings_assets_vehicles'.tr(),
+                  colorScheme,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              Expanded(child: _assetField(_jewelryCtrl, 'settings_assets_jewelry'.tr(), colorScheme)),
+              Expanded(
+                child: _assetField(
+                  _jewelryCtrl,
+                  'settings_assets_jewelry'.tr(),
+                  colorScheme,
+                ),
+              ),
               const SizedBox(width: 8),
-              Expanded(child: _assetField(_otherAssetsCtrl, 'settings_assets_other'.tr(), colorScheme)),
+              Expanded(
+                child: _assetField(
+                  _otherAssetsCtrl,
+                  'settings_assets_other'.tr(),
+                  colorScheme,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -164,15 +228,23 @@ class _AssetsFormState extends State<AssetsForm> {
                 backgroundColor: AppColors.success,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               child: _savingAssets
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
                     )
-                  : Text('save'.tr(), style: const TextStyle(fontWeight: FontWeight.w900)),
+                  : Text(
+                      'save'.tr(),
+                      style: const TextStyle(fontWeight: FontWeight.w900),
+                    ),
             ),
           ),
         ],
@@ -180,12 +252,21 @@ class _AssetsFormState extends State<AssetsForm> {
     );
   }
 
-  Widget _netWorthStat(String label, double value, Color color, ColorScheme colorScheme) {
+  Widget _netWorthStat(
+    String label,
+    double value,
+    Color color,
+    ColorScheme colorScheme,
+  ) {
     return Column(
       children: [
         Text(
           value.toStringAsFixed(0),
-          style: TextStyle(color: color, fontWeight: FontWeight.w900, fontSize: 12),
+          style: TextStyle(
+            color: color,
+            fontWeight: FontWeight.w900,
+            fontSize: 12,
+          ),
         ),
         Text(
           label,
@@ -195,7 +276,11 @@ class _AssetsFormState extends State<AssetsForm> {
     );
   }
 
-  Widget _assetField(TextEditingController ctrl, String label, ColorScheme colorScheme) {
+  Widget _assetField(
+    TextEditingController ctrl,
+    String label,
+    ColorScheme colorScheme,
+  ) {
     return TextField(
       controller: ctrl,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -204,14 +289,20 @@ class _AssetsFormState extends State<AssetsForm> {
       style: TextStyle(color: colorScheme.onSurface, fontSize: 13),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12),
+        labelStyle: TextStyle(
+          color: colorScheme.onSurfaceVariant,
+          fontSize: 12,
+        ),
         filled: true,
         fillColor: colorScheme.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: colorScheme.outlineVariant),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 10,
+        ),
       ),
     );
   }

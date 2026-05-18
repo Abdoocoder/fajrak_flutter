@@ -50,7 +50,13 @@ class _AlertsScreenState extends State<AlertsScreen> {
         });
       }
     } catch (e, st) {
-      if (mounted) ErrorHandler.handle(e, st: st, context: context, developerMessage: 'Load Alerts');
+      if (mounted)
+        ErrorHandler.handle(
+          e,
+          st: st,
+          context: context,
+          developerMessage: 'Load Alerts',
+        );
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -74,7 +80,13 @@ class _AlertsScreenState extends State<AlertsScreen> {
         context.read<AppState>().loadUnreadAlerts();
       }
     } catch (e, st) {
-      if (mounted) ErrorHandler.handle(e, st: st, context: context, developerMessage: 'Mark All Read');
+      if (mounted)
+        ErrorHandler.handle(
+          e,
+          st: st,
+          context: context,
+          developerMessage: 'Mark All Read',
+        );
     }
   }
 
@@ -82,7 +94,8 @@ class _AlertsScreenState extends State<AlertsScreen> {
     try {
       await Supabase.instance.client
           .from('alerts')
-          .update({'is_read': true}).eq('id', id);
+          .update({'is_read': true})
+          .eq('id', id);
       if (mounted) {
         setState(() {
           final idx = _alerts.indexWhere((a) => a['id'].toString() == id);
@@ -91,7 +104,13 @@ class _AlertsScreenState extends State<AlertsScreen> {
         context.read<AppState>().decrementUnreadAlerts();
       }
     } catch (e, st) {
-      if (mounted) ErrorHandler.handle(e, st: st, context: context, developerMessage: 'Mark Read');
+      if (mounted)
+        ErrorHandler.handle(
+          e,
+          st: st,
+          context: context,
+          developerMessage: 'Mark Read',
+        );
     }
   }
 
@@ -99,13 +118,22 @@ class _AlertsScreenState extends State<AlertsScreen> {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
     try {
-      await Supabase.instance.client.from('alerts').delete().eq('user_id', user.id);
+      await Supabase.instance.client
+          .from('alerts')
+          .delete()
+          .eq('user_id', user.id);
       if (mounted) {
         setState(() => _alerts.clear());
         context.read<AppState>().clearUnreadAlerts();
       }
     } catch (e, st) {
-      if (mounted) ErrorHandler.handle(e, st: st, context: context, developerMessage: 'Delete All Alerts');
+      if (mounted)
+        ErrorHandler.handle(
+          e,
+          st: st,
+          context: context,
+          developerMessage: 'Delete All Alerts',
+        );
     }
   }
 
@@ -117,7 +145,13 @@ class _AlertsScreenState extends State<AlertsScreen> {
         context.read<AppState>().loadUnreadAlerts();
       }
     } catch (e, st) {
-      if (mounted) ErrorHandler.handle(e, st: st, context: context, developerMessage: 'Delete Alert');
+      if (mounted)
+        ErrorHandler.handle(
+          e,
+          st: st,
+          context: context,
+          developerMessage: 'Delete Alert',
+        );
     }
   }
 
@@ -137,9 +171,14 @@ class _AlertsScreenState extends State<AlertsScreen> {
 
       if (mounted) {
         if (response.statusCode == 200) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('alerts_generate_success'.tr(),
-                  style: const TextStyle())));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'alerts_generate_success'.tr(),
+                style: const TextStyle(),
+              ),
+            ),
+          );
           _load();
           context.read<AppState>().loadUnreadAlerts();
         } else {
@@ -147,7 +186,13 @@ class _AlertsScreenState extends State<AlertsScreen> {
         }
       }
     } catch (e, st) {
-      if (mounted) ErrorHandler.handle(e, st: st, context: context, developerMessage: 'Generate Alerts Error');
+      if (mounted)
+        ErrorHandler.handle(
+          e,
+          st: st,
+          context: context,
+          developerMessage: 'Generate Alerts Error',
+        );
     } finally {
       if (mounted) setState(() => _generating = false);
     }
@@ -217,11 +262,15 @@ class _AlertsScreenState extends State<AlertsScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-          title: Text('alerts_title'.tr(),
-              style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  color: colorScheme.onSurface)),
-          iconTheme: IconThemeData(color: colorScheme.onSurface)),
+        title: Text(
+          'alerts_title'.tr(),
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            color: colorScheme.onSurface,
+          ),
+        ),
+        iconTheme: IconThemeData(color: colorScheme.onSurface),
+      ),
       body: _loading
           ? Center(child: CircularProgressIndicator(color: colorScheme.primary))
           : RefreshIndicator(
@@ -232,79 +281,89 @@ class _AlertsScreenState extends State<AlertsScreen> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(16),
                 child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          AlertHeader(
-                            totalCount: _alerts.length,
-                            unreadCount: unreadCount,
-                            colorScheme: colorScheme,
-                          ),
-                          AlertActions(
-                            unreadCount: unreadCount,
-                            hasAlerts: _alerts.isNotEmpty,
-                            onMarkAllRead: _markAllRead,
-                            onDeleteAll: _deleteAll,
-                            colorScheme: colorScheme,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      AIGeneratorCard(
-                        generating: _generating,
-                        onGenerate: _generateAlerts,
-                        colorScheme: colorScheme,
-                      ),
-                      const SizedBox(height: 20),
-                      AlertFilterTabs(
-                        currentFilter: _filter,
-                        totalCount: _alerts.length,
-                        unreadCount: unreadCount,
-                        onFilterChanged: (v) => setState(() => _filter = v),
-                        colorScheme: colorScheme,
-                      ),
-                      const SizedBox(height: 16),
-                      if (filtered.isEmpty)
-                        Center(
-                            child: Padding(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        AlertHeader(
+                          totalCount: _alerts.length,
+                          unreadCount: unreadCount,
+                          colorScheme: colorScheme,
+                        ),
+                        AlertActions(
+                          unreadCount: unreadCount,
+                          hasAlerts: _alerts.isNotEmpty,
+                          onMarkAllRead: _markAllRead,
+                          onDeleteAll: _deleteAll,
+                          colorScheme: colorScheme,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    AIGeneratorCard(
+                      generating: _generating,
+                      onGenerate: _generateAlerts,
+                      colorScheme: colorScheme,
+                    ),
+                    const SizedBox(height: 20),
+                    AlertFilterTabs(
+                      currentFilter: _filter,
+                      totalCount: _alerts.length,
+                      unreadCount: unreadCount,
+                      onFilterChanged: (v) => setState(() => _filter = v),
+                      colorScheme: colorScheme,
+                    ),
+                    const SizedBox(height: 16),
+                    if (filtered.isEmpty)
+                      Center(
+                        child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 40),
-                          child: Column(children: [
-                            Icon(
+                          child: Column(
+                            children: [
+                              Icon(
                                 _filter == 'all'
                                     ? Icons.notifications_none
                                     : _filter == 'warning'
-                                        ? Icons.warning_amber_outlined
-                                        : _filter == 'achievement'
-                                            ? Icons.emoji_events_outlined
-                                            : Icons.lightbulb_outline,
-                                size: 40, color: colorScheme.onSurfaceVariant),
-                            const SizedBox(height: 12),
-                            Text('alerts_empty'.tr(),
+                                    ? Icons.warning_amber_outlined
+                                    : _filter == 'achievement'
+                                    ? Icons.emoji_events_outlined
+                                    : Icons.lightbulb_outline,
+                                size: 40,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'alerts_empty'.tr(),
                                 style: TextStyle(
-                                    color: colorScheme.onSurfaceVariant,
-                                    fontSize: 14)),
-                          ]),
-                        ))
-                      else
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: filtered.length,
-                          itemBuilder: (context, i) {
-                            final alert = filtered[i];
-                            return AlertListItem(
-                              alert: alert,
-                              color: _getColor(alert['type'] as String?),
-                              icon: _getIcon(alert['type'] as String?),
-                              onTap: () => _navigateAlert(alert),
-                              onDelete: () => _deleteAlert(alert['id'].toString()),
-                              colorScheme: colorScheme,
-                            );
-                          },
+                                  color: colorScheme.onSurfaceVariant,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                    ]),
+                      )
+                    else
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: filtered.length,
+                        itemBuilder: (context, i) {
+                          final alert = filtered[i];
+                          return AlertListItem(
+                            alert: alert,
+                            color: _getColor(alert['type'] as String?),
+                            icon: _getIcon(alert['type'] as String?),
+                            onTap: () => _navigateAlert(alert),
+                            onDelete: () =>
+                                _deleteAlert(alert['id'].toString()),
+                            colorScheme: colorScheme,
+                          );
+                        },
+                      ),
+                  ],
+                ),
               ),
             ),
     );

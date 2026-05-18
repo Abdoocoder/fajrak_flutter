@@ -19,14 +19,15 @@ class BudgetProgressCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final double remaining = income - expenses;
-    final double percentage =
-        income > 0 ? (expenses / income).clamp(0.0, 1.0) : 0.0;
+    final double percentage = income > 0
+        ? (expenses / income).clamp(0.0, 1.0)
+        : 0.0;
     final isDark = theme.brightness == Brightness.dark;
     final Color progressColor = percentage > 0.9
         ? (isDark ? AppColors.error : const Color(0xFFDC2626))
         : percentage > 0.7
-            ? (isDark ? AppColors.warning : const Color(0xFFD97706))
-            : (isDark ? AppColors.success : AppColors.successDark);
+        ? (isDark ? AppColors.warning : const Color(0xFFD97706))
+        : (isDark ? AppColors.success : AppColors.successDark);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -41,16 +42,21 @@ class BudgetProgressCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('dash_summary_month'.tr(),
-                  style: TextStyle(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 14)),
               Text(
-                  '${percentage >= 1 ? 0 : remaining.toStringAsFixed(0)} $currency ${"goals_remaining".tr()}',
-                  style: TextStyle(
-                      color: colorScheme.onSurfaceVariant,
-                      fontSize: 12)),
+                'dash_summary_month'.tr(),
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 14,
+                ),
+              ),
+              Text(
+                '${percentage >= 1 ? 0 : remaining.toStringAsFixed(0)} $currency ${"goals_remaining".tr()}',
+                style: TextStyle(
+                  color: colorScheme.onSurfaceVariant,
+                  fontSize: 12,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -70,14 +76,20 @@ class BudgetProgressCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('${"trans_expense".tr()}: ${expenses.toStringAsFixed(0)} $currency',
-                  style: TextStyle(
-                      color: colorScheme.onSurfaceVariant,
-                      fontSize: 11)),
-              Text('${"trans_income".tr()}: ${income.toStringAsFixed(0)} $currency',
-                  style: TextStyle(
-                      color: colorScheme.onSurfaceVariant,
-                      fontSize: 11)),
+              Text(
+                '${"trans_expense".tr()}: ${expenses.toStringAsFixed(0)} $currency',
+                style: TextStyle(
+                  color: colorScheme.onSurfaceVariant,
+                  fontSize: 11,
+                ),
+              ),
+              Text(
+                '${"trans_income".tr()}: ${income.toStringAsFixed(0)} $currency',
+                style: TextStyle(
+                  color: colorScheme.onSurfaceVariant,
+                  fontSize: 11,
+                ),
+              ),
             ],
           ),
         ],

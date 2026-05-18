@@ -36,26 +36,36 @@ class ReportData {
 class PdfReportService {
   // Arabic month names
   static const _monthsAr = [
-    'يناير','فبراير','مارس','أبريل','مايو','يونيو',
-    'يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر',
+    'يناير',
+    'فبراير',
+    'مارس',
+    'أبريل',
+    'مايو',
+    'يونيو',
+    'يوليو',
+    'أغسطس',
+    'سبتمبر',
+    'أكتوبر',
+    'نوفمبر',
+    'ديسمبر',
   ];
 
   // Brand colors
-  static const _green  = PdfColor.fromInt(0xFF10B981);
-  static const _red    = PdfColor.fromInt(0xFFEF4444);
-  static const _blue   = PdfColor.fromInt(0xFF3B7EF6);
-  static const _bg     = PdfColor.fromInt(0xFFF8FAFC);
-  static const _card   = PdfColors.white;
-  static const _text   = PdfColor.fromInt(0xFF0F172A);
-  static const _muted  = PdfColor.fromInt(0xFF64748B);
+  static const _green = PdfColor.fromInt(0xFF10B981);
+  static const _red = PdfColor.fromInt(0xFFEF4444);
+  static const _blue = PdfColor.fromInt(0xFF3B7EF6);
+  static const _bg = PdfColor.fromInt(0xFFF8FAFC);
+  static const _card = PdfColors.white;
+  static const _text = PdfColor.fromInt(0xFF0F172A);
+  static const _muted = PdfColor.fromInt(0xFF64748B);
   static const _border = PdfColor.fromInt(0xFFE2E8F0);
 
   static Future<void> shareMonthlyReport({required ReportData data}) async {
     // Load Cairo font
     final regularData = await rootBundle.load('assets/fonts/Cairo-Regular.ttf');
-    final boldData    = await rootBundle.load('assets/fonts/Cairo-Bold.ttf');
+    final boldData = await rootBundle.load('assets/fonts/Cairo-Bold.ttf');
     final regular = pw.Font.ttf(regularData);
-    final bold    = pw.Font.ttf(boldData);
+    final bold = pw.Font.ttf(boldData);
 
     final doc = pw.Document(
       title: 'تقرير فجرك — ${_monthsAr[data.month - 1]} ${data.year}',
@@ -91,8 +101,7 @@ class PdfReportService {
           color: color ?? _text,
         );
 
-    String fmt(double n) =>
-        n.abs().toStringAsFixed(n.abs() < 1000 ? 2 : 0);
+    String fmt(double n) => n.abs().toStringAsFixed(n.abs() < 1000 ? 2 : 0);
 
     // ── Page ──────────────────────────────────────────────────────────────────
     doc.addPage(
@@ -101,7 +110,6 @@ class PdfReportService {
         margin: const pw.EdgeInsets.all(32),
         textDirection: pw.TextDirection.rtl,
         build: (ctx) => [
-
           // ── HEADER ──────────────────────────────────────────────────────────
           pw.Container(
             padding: const pw.EdgeInsets.all(20),
@@ -117,19 +125,28 @@ class PdfReportService {
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text('فجرك 🌅',
-                          style: ts(22, isBold: true, color: PdfColors.white)),
+                      pw.Text(
+                        'فجرك 🌅',
+                        style: ts(22, isBold: true, color: PdfColors.white),
+                      ),
                       pw.SizedBox(height: 4),
                       pw.Text(
-                          'التقرير الشهري — ${_monthsAr[data.month - 1]} ${data.year}',
-                          style: ts(13, color: const PdfColor(1, 1, 1, 0.75))),
+                        'التقرير الشهري — ${_monthsAr[data.month - 1]} ${data.year}',
+                        style: ts(13, color: const PdfColor(1, 1, 1, 0.75)),
+                      ),
                     ],
                   ),
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.end,
                     children: [
-                      pw.Text(data.userName, style: ts(13, isBold: true, color: PdfColors.white)),
-                      pw.Text(data.currency,  style: ts(11, color: const PdfColor(1, 1, 1, 0.75))),
+                      pw.Text(
+                        data.userName,
+                        style: ts(13, isBold: true, color: PdfColors.white),
+                      ),
+                      pw.Text(
+                        data.currency,
+                        style: ts(11, color: const PdfColor(1, 1, 1, 0.75)),
+                      ),
                     ],
                   ),
                 ],
@@ -144,18 +161,41 @@ class PdfReportService {
             textDirection: pw.TextDirection.rtl,
             child: pw.Row(
               children: [
-                _summaryCard('الدخل',     '+${fmt(data.income)}',    _green, data.currency, bold, regular),
+                _summaryCard(
+                  'الدخل',
+                  '+${fmt(data.income)}',
+                  _green,
+                  data.currency,
+                  bold,
+                  regular,
+                ),
                 pw.SizedBox(width: 10),
-                _summaryCard('المصاريف',  '-${fmt(realExpenses)}',   _red,   data.currency, bold, regular),
+                _summaryCard(
+                  'المصاريف',
+                  '-${fmt(realExpenses)}',
+                  _red,
+                  data.currency,
+                  bold,
+                  regular,
+                ),
                 pw.SizedBox(width: 10),
                 _summaryCard(
                   saved >= 0 ? 'وفّرت' : 'عجز',
                   '${saved >= 0 ? '+' : '-'}${fmt(saved)}',
                   saved >= 0 ? _green : _red,
-                  data.currency, bold, regular,
+                  data.currency,
+                  bold,
+                  regular,
                 ),
                 pw.SizedBox(width: 10),
-                _summaryCard('نسبة الادخار', '$savingsRate%', _blue, 'من الدخل', bold, regular),
+                _summaryCard(
+                  'نسبة الادخار',
+                  '$savingsRate%',
+                  _blue,
+                  'من الدخل',
+                  bold,
+                  regular,
+                ),
               ],
             ),
           ),
@@ -179,8 +219,10 @@ class PdfReportService {
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Text('💳 إجمالي أقساط الديون المدفوعة', style: ts(11)),
-                    pw.Text('${fmt(data.debtPayments)} ${data.currency}',
-                        style: ts(12, isBold: true, color: _blue)),
+                    pw.Text(
+                      '${fmt(data.debtPayments)} ${data.currency}',
+                      style: ts(12, isBold: true, color: _blue),
+                    ),
                   ],
                 ),
               ),
@@ -206,30 +248,36 @@ class PdfReportService {
                           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                           children: [
                             pw.Text(e.key, style: ts(10)),
-                            pw.Text('${fmt(e.value)} ${data.currency}',
-                                style: ts(10, isBold: true)),
+                            pw.Text(
+                              '${fmt(e.value)} ${data.currency}',
+                              style: ts(10, isBold: true),
+                            ),
                           ],
                         ),
                         pw.SizedBox(height: 4),
                         pw.LayoutBuilder(
                           builder: (ctx, constraints) {
                             final w = constraints?.maxWidth ?? 400.0;
-                            return pw.Stack(children: [
-                              pw.Container(
-                                height: 8, width: w,
-                                decoration: pw.BoxDecoration(
-                                  color: _border,
-                                  borderRadius: pw.BorderRadius.circular(4),
+                            return pw.Stack(
+                              children: [
+                                pw.Container(
+                                  height: 8,
+                                  width: w,
+                                  decoration: pw.BoxDecoration(
+                                    color: _border,
+                                    borderRadius: pw.BorderRadius.circular(4),
+                                  ),
                                 ),
-                              ),
-                              pw.Container(
-                                height: 8, width: w * pct,
-                                decoration: pw.BoxDecoration(
-                                  color: _red,
-                                  borderRadius: pw.BorderRadius.circular(4),
+                                pw.Container(
+                                  height: 8,
+                                  width: w * pct,
+                                  decoration: pw.BoxDecoration(
+                                    color: _red,
+                                    borderRadius: pw.BorderRadius.circular(4),
+                                  ),
                                 ),
-                              ),
-                            ]);
+                              ],
+                            );
                           },
                         ),
                       ],
@@ -254,34 +302,44 @@ class PdfReportService {
               columnWidths: {
                 0: const pw.FlexColumnWidth(2.5), // التاريخ
                 1: const pw.FlexColumnWidth(3.5), // الوصف
-                2: const pw.FlexColumnWidth(2),   // الفئة
-                3: const pw.FlexColumnWidth(2),   // المبلغ
+                2: const pw.FlexColumnWidth(2), // الفئة
+                3: const pw.FlexColumnWidth(2), // المبلغ
               },
               children: [
                 // Header row
                 pw.TableRow(
                   decoration: const pw.BoxDecoration(color: _bg),
-                  children: ['التاريخ', 'الوصف', 'الفئة', 'المبلغ']
-                      .map((h) => _tableCell(h, bold, isHeader: true))
-                      .toList(),
+                  children: [
+                    'التاريخ',
+                    'الوصف',
+                    'الفئة',
+                    'المبلغ',
+                  ].map((h) => _tableCell(h, bold, isHeader: true)).toList(),
                 ),
                 // Data rows
                 ...data.transactions.map((tx) {
                   final isIncome = tx['type'] == 'income';
-                  final amount   = (tx['amount'] as num).toDouble();
-                  final amtStr   = '${isIncome ? '+' : '-'}${fmt(amount)} ${data.currency}';
-                  final date     = (tx['transaction_date'] as String? ?? '').replaceAll('-', '/');
-                  final desc     = (tx['description'] as String? ?? '—');
-                  final cat      = (tx['category']    as String? ?? '—');
+                  final amount = (tx['amount'] as num).toDouble();
+                  final amtStr =
+                      '${isIncome ? '+' : '-'}${fmt(amount)} ${data.currency}';
+                  final date = (tx['transaction_date'] as String? ?? '')
+                      .replaceAll('-', '/');
+                  final desc = (tx['description'] as String? ?? '—');
+                  final cat = (tx['category'] as String? ?? '—');
 
-                  return pw.TableRow(children: [
-                    _tableCell(date, regular, color: _muted),
-                    _tableCell(desc, regular),
-                    _tableCell(cat,  regular, color: _muted),
-                    _tableCell(amtStr, bold,
+                  return pw.TableRow(
+                    children: [
+                      _tableCell(date, regular, color: _muted),
+                      _tableCell(desc, regular),
+                      _tableCell(cat, regular, color: _muted),
+                      _tableCell(
+                        amtStr,
+                        bold,
                         color: isIncome ? _green : _red,
-                        align: pw.TextAlign.left),
-                  ]);
+                        align: pw.TextAlign.left,
+                      ),
+                    ],
+                  );
                 }),
               ],
             ),
@@ -308,20 +366,40 @@ class PdfReportService {
                 children: [
                   pw.TableRow(
                     decoration: const pw.BoxDecoration(color: _bg),
-                    children: ['اسم الدين', 'المتبقي', 'القسط/شهر', 'تلقائي']
-                        .map((h) => _tableCell(h, bold, isHeader: true))
-                        .toList(),
+                    children: [
+                      'اسم الدين',
+                      'المتبقي',
+                      'القسط/شهر',
+                      'تلقائي',
+                    ].map((h) => _tableCell(h, bold, isHeader: true)).toList(),
                   ),
                   ...data.debts.map((d) {
-                    final remaining = (d['remaining_amount'] as num? ?? 0).toDouble();
-                    final monthly   = (d['monthly_payment']  as num? ?? 0).toDouble();
-                    final auto      = d['auto_deduct'] == true ? '✓' : '—';
-                    return pw.TableRow(children: [
-                      _tableCell(d['name'] as String? ?? '—', regular),
-                      _tableCell('${fmt(remaining)} ${data.currency}', regular, color: _red),
-                      _tableCell(monthly > 0 ? '${fmt(monthly)} ${data.currency}' : '—', regular),
-                      _tableCell(auto, bold, color: auto == '✓' ? _green : _muted),
-                    ]);
+                    final remaining = (d['remaining_amount'] as num? ?? 0)
+                        .toDouble();
+                    final monthly = (d['monthly_payment'] as num? ?? 0)
+                        .toDouble();
+                    final auto = d['auto_deduct'] == true ? '✓' : '—';
+                    return pw.TableRow(
+                      children: [
+                        _tableCell(d['name'] as String? ?? '—', regular),
+                        _tableCell(
+                          '${fmt(remaining)} ${data.currency}',
+                          regular,
+                          color: _red,
+                        ),
+                        _tableCell(
+                          monthly > 0
+                              ? '${fmt(monthly)} ${data.currency}'
+                              : '—',
+                          regular,
+                        ),
+                        _tableCell(
+                          auto,
+                          bold,
+                          color: auto == '✓' ? _green : _muted,
+                        ),
+                      ],
+                    );
                   }),
                 ],
               ),
@@ -337,10 +415,15 @@ class PdfReportService {
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text('تم إنشاء هذا التقرير بواسطة فجرك 🌅',
-                    style: ts(9, color: _muted)),
                 pw.Text(
-                  DateTime.now().toIso8601String().split('T')[0].replaceAll('-', '/'),
+                  'تم إنشاء هذا التقرير بواسطة فجرك 🌅',
+                  style: ts(9, color: _muted),
+                ),
+                pw.Text(
+                  DateTime.now()
+                      .toIso8601String()
+                      .split('T')[0]
+                      .replaceAll('-', '/'),
                   style: ts(9, color: _muted),
                 ),
               ],
@@ -351,15 +434,20 @@ class PdfReportService {
     );
 
     final bytes = await doc.save();
-    final filename = 'fajrak_${data.year}_${data.month.toString().padLeft(2, '0')}.pdf';
+    final filename =
+        'fajrak_${data.year}_${data.month.toString().padLeft(2, '0')}.pdf';
     await Printing.sharePdf(bytes: bytes, filename: filename);
   }
 
   // ── Helper widgets ──────────────────────────────────────────────────────────
 
   static pw.Widget _summaryCard(
-    String label, String value, PdfColor color,
-    String sub, pw.Font bold, pw.Font regular,
+    String label,
+    String value,
+    PdfColor color,
+    String sub,
+    pw.Font bold,
+    pw.Font regular,
   ) {
     return pw.Expanded(
       child: pw.Container(
@@ -374,17 +462,23 @@ class PdfReportService {
           child: pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
-              pw.Text(label,
-                  style: pw.TextStyle(font: regular, fontSize: 9, color: _muted),
-                  textAlign: pw.TextAlign.center),
+              pw.Text(
+                label,
+                style: pw.TextStyle(font: regular, fontSize: 9, color: _muted),
+                textAlign: pw.TextAlign.center,
+              ),
               pw.SizedBox(height: 4),
-              pw.Text(value,
-                  style: pw.TextStyle(font: bold, fontSize: 13, color: color),
-                  textAlign: pw.TextAlign.center),
+              pw.Text(
+                value,
+                style: pw.TextStyle(font: bold, fontSize: 13, color: color),
+                textAlign: pw.TextAlign.center,
+              ),
               pw.SizedBox(height: 2),
-              pw.Text(sub,
-                  style: pw.TextStyle(font: regular, fontSize: 8, color: _muted),
-                  textAlign: pw.TextAlign.center),
+              pw.Text(
+                sub,
+                style: pw.TextStyle(font: regular, fontSize: 8, color: _muted),
+                textAlign: pw.TextAlign.center,
+              ),
             ],
           ),
         ),
@@ -395,19 +489,29 @@ class PdfReportService {
   static pw.Widget _sectionTitle(String title, pw.Font bold) {
     return pw.Directionality(
       textDirection: pw.TextDirection.rtl,
-      child: pw.Row(children: [
-        pw.Container(width: 4, height: 18,
+      child: pw.Row(
+        children: [
+          pw.Container(
+            width: 4,
+            height: 18,
             decoration: pw.BoxDecoration(
-                color: _blue, borderRadius: pw.BorderRadius.circular(2))),
-        pw.SizedBox(width: 8),
-        pw.Text(title,
-            style: pw.TextStyle(font: bold, fontSize: 13, color: _text)),
-      ]),
+              color: _blue,
+              borderRadius: pw.BorderRadius.circular(2),
+            ),
+          ),
+          pw.SizedBox(width: 8),
+          pw.Text(
+            title,
+            style: pw.TextStyle(font: bold, fontSize: 13, color: _text),
+          ),
+        ],
+      ),
     );
   }
 
   static pw.Widget _tableCell(
-    String text, pw.Font font, {
+    String text,
+    pw.Font font, {
     bool isHeader = false,
     PdfColor? color,
     pw.TextAlign align = pw.TextAlign.right,

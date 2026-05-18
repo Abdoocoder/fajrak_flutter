@@ -34,9 +34,10 @@ class AlertListItem extends StatelessWidget {
           color: isRead ? colorScheme.surface : color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-              color: isRead
-                  ? colorScheme.outlineVariant
-                  : color.withValues(alpha: 0.3)),
+            color: isRead
+                ? colorScheme.outlineVariant
+                : color.withValues(alpha: 0.3),
+          ),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,8 +46,9 @@ class AlertListItem extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10)),
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
               child: Icon(icon, color: color, size: 20),
             ),
             const SizedBox(width: 12),
@@ -54,40 +56,58 @@ class AlertListItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(children: [
-                    Expanded(
-                        child: Text(alert['title'] as String? ?? '',
-                            style: TextStyle(
-                                color: isRead
-                                    ? colorScheme.onSurfaceVariant
-                                    : colorScheme.onSurface,
-                                fontWeight: isRead ? FontWeight.w700 : FontWeight.w900,
-                                fontSize: 14))),
-                    if (!isRead)
-                      Container(
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          alert['title'] as String? ?? '',
+                          style: TextStyle(
+                            color: isRead
+                                ? colorScheme.onSurfaceVariant
+                                : colorScheme.onSurface,
+                            fontWeight: isRead
+                                ? FontWeight.w700
+                                : FontWeight.w900,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      if (!isRead)
+                        Container(
                           width: 8,
                           height: 8,
                           decoration: BoxDecoration(
-                              color: color,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                    color: color.withValues(alpha: 0.5), blurRadius: 8)
-                              ])),
-                  ]),
+                            color: color,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: color.withValues(alpha: 0.5),
+                                blurRadius: 8,
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
                   const SizedBox(height: 4),
-                  Text(alert['message'] as String? ?? '',
-                      style: TextStyle(
-                          color: isRead
-                              ? colorScheme.onSurfaceVariant.withValues(alpha: 0.7)
-                              : colorScheme.onSurfaceVariant,
-                          fontSize: 12,
-                          height: 1.6)),
+                  Text(
+                    alert['message'] as String? ?? '',
+                    style: TextStyle(
+                      color: isRead
+                          ? colorScheme.onSurfaceVariant.withValues(alpha: 0.7)
+                          : colorScheme.onSurfaceVariant,
+                      fontSize: 12,
+                      height: 1.6,
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                  Text(date,
-                      style: TextStyle(
-                          color: colorScheme.onSurfaceVariant,
-                          fontSize: 10)),
+                  Text(
+                    date,
+                    style: TextStyle(
+                      color: colorScheme.onSurfaceVariant,
+                      fontSize: 10,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -96,7 +116,7 @@ class AlertListItem extends StatelessWidget {
               color: AppColors.error.withValues(alpha: 0.7),
               tooltip: 'tooltip_dismiss_alert'.tr(),
               onPressed: onDelete,
-            )
+            ),
           ],
         ),
       ),

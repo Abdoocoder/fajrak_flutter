@@ -30,9 +30,7 @@ void main() {
       final remoteRecord = {
         'id': 'tx-123',
         'operation': 'delete',
-        'data': {
-          'deleted_at': '2024-01-15T10:00:00Z',
-        },
+        'data': {'deleted_at': '2024-01-15T10:00:00Z'},
       };
 
       final isDelete = remoteRecord['operation'] == 'delete';
@@ -43,19 +41,13 @@ void main() {
       final createRecord = {
         'id': 'tx-456',
         'operation': 'create',
-        'data': {
-          'amount': 100,
-          'created_at': '2024-01-15T10:00:00Z',
-        },
+        'data': {'amount': 100, 'created_at': '2024-01-15T10:00:00Z'},
       };
 
       final updateRecord = {
         'id': 'tx-789',
         'operation': 'update',
-        'data': {
-          'amount': 150,
-          'updated_at': '2024-01-15T11:00:00Z',
-        },
+        'data': {'amount': 150, 'updated_at': '2024-01-15T11:00:00Z'},
       };
 
       expect(createRecord['operation'], 'create');
@@ -101,7 +93,8 @@ void main() {
       final localRecord = {'localVersion': 1, 'id': 'tx-123'};
       final remoteRecord = {'localVersion': 2, 'id': 'tx-123'};
 
-      final shouldUpdate = (remoteRecord['localVersion'] as int) >
+      final shouldUpdate =
+          (remoteRecord['localVersion'] as int) >
           (localRecord['localVersion'] as int);
 
       expect(shouldUpdate, isTrue);
@@ -111,7 +104,8 @@ void main() {
       final localRecord = {'localVersion': 3, 'id': 'tx-123'};
       final remoteRecord = {'localVersion': 2, 'id': 'tx-123'};
 
-      final hasConflict = (localRecord['localVersion'] as int) >
+      final hasConflict =
+          (localRecord['localVersion'] as int) >
           (remoteRecord['localVersion'] as int);
 
       expect(hasConflict, isTrue);
@@ -131,8 +125,12 @@ void main() {
     });
 
     test('nested object merge', () {
-      final existing = {'user': {'name': 'Ahmed', 'age': 25}};
-      final update = {'user': {'age': 26, 'city': 'Kuwait'}};
+      final existing = {
+        'user': {'name': 'Ahmed', 'age': 25},
+      };
+      final update = {
+        'user': {'age': 26, 'city': 'Kuwait'},
+      };
 
       final mergedUser = {
         ...existing['user'] as Map<String, dynamic>,
@@ -169,21 +167,30 @@ void main() {
   });
 
   group('SyncService - Deleted Records Detection', () {
-    test('deleted records from different tables should be tracked separately', () {
-      final deletedRecords = [
-        {'table': 'transactions', 'id': 'tx-1'},
-        {'table': 'transactions', 'id': 'tx-2'},
-        {'table': 'debts', 'id': 'debt-1'},
-        {'table': 'savings_goals', 'id': 'goal-1'},
-      ];
+    test(
+      'deleted records from different tables should be tracked separately',
+      () {
+        final deletedRecords = [
+          {'table': 'transactions', 'id': 'tx-1'},
+          {'table': 'transactions', 'id': 'tx-2'},
+          {'table': 'debts', 'id': 'debt-1'},
+          {'table': 'savings_goals', 'id': 'goal-1'},
+        ];
 
-      final txDeleted = deletedRecords.where((r) => r['table'] == 'transactions').length;
-      final debtDeleted = deletedRecords.where((r) => r['table'] == 'debts').length;
-      final goalDeleted = deletedRecords.where((r) => r['table'] == 'savings_goals').length;
+        final txDeleted = deletedRecords
+            .where((r) => r['table'] == 'transactions')
+            .length;
+        final debtDeleted = deletedRecords
+            .where((r) => r['table'] == 'debts')
+            .length;
+        final goalDeleted = deletedRecords
+            .where((r) => r['table'] == 'savings_goals')
+            .length;
 
-      expect(txDeleted, 2);
-      expect(debtDeleted, 1);
-      expect(goalDeleted, 1);
-    });
+        expect(txDeleted, 2);
+        expect(debtDeleted, 1);
+        expect(goalDeleted, 1);
+      },
+    );
   });
 }

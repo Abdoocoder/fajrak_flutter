@@ -44,17 +44,36 @@ class _DashboardHealthScoreState extends State<DashboardHealthScore> {
     if (list.isEmpty) return;
     if (mounted) {
       setState(() {
-        _spots = list.asMap().entries.map((e) =>
-          FlSpot(e.key.toDouble(), (e.value['score'] as num).toDouble())
-        ).toList();
+        _spots = list
+            .asMap()
+            .entries
+            .map(
+              (e) => FlSpot(
+                e.key.toDouble(),
+                (e.value['score'] as num).toDouble(),
+              ),
+            )
+            .toList();
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.score >= 80 ? AppColors.success : widget.score >= 60 ? widget.colorScheme.primary : widget.score >= 40 ? AppColors.warning : AppColors.error;
-    final label = widget.score >= 80 ? 'health_excellent'.tr() : widget.score >= 60 ? 'health_good'.tr() : widget.score >= 40 ? 'health_fair'.tr() : 'health_poor'.tr();
+    final color = widget.score >= 80
+        ? AppColors.success
+        : widget.score >= 60
+        ? widget.colorScheme.primary
+        : widget.score >= 40
+        ? AppColors.warning
+        : AppColors.error;
+    final label = widget.score >= 80
+        ? 'health_excellent'.tr()
+        : widget.score >= 60
+        ? 'health_good'.tr()
+        : widget.score >= 40
+        ? 'health_fair'.tr()
+        : 'health_poor'.tr();
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -63,48 +82,110 @@ class _DashboardHealthScoreState extends State<DashboardHealthScore> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
-      child: Column(children: [
-        Row(children: [
-          SizedBox(width: 64, height: 64, child: Stack(alignment: Alignment.center, children: [
-            CircularProgressIndicator(value: widget.score / 100, color: color, backgroundColor: widget.colorScheme.outlineVariant, strokeWidth: 6),
-            Text('${widget.score}', style: TextStyle(color: color, fontWeight: FontWeight.w900, fontSize: 18)),
-          ])),
-          const SizedBox(width: 16),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('health_score'.tr(), style: TextStyle(color: widget.colorScheme.onSurfaceVariant, fontSize: 11)),
-            const SizedBox(height: 4),
-            Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w900, fontSize: 16)),
-            Text('dash_points_per_100'.tr(), style: TextStyle(color: widget.colorScheme.onSurfaceVariant, fontSize: 11)),
-          ])),
-        ]),
-        // Mini sparkline chart if history is available
-        if (_spots.length >= 3) ...[
-          const SizedBox(height: 12),
-          SizedBox(height: 48, child: LineChart(
-            LineChartData(
-              gridData: const FlGridData(show: false),
-              titlesData: const FlTitlesData(show: false),
-              borderData: FlBorderData(show: false),
-              lineTouchData: const LineTouchData(enabled: false),
-              minY: 0, maxY: 100,
-              lineBarsData: [LineChartBarData(
-                spots: _spots,
-                isCurved: true,
-                color: color,
-                barWidth: 2,
-                dotData: const FlDotData(show: false),
-                belowBarData: BarAreaData(
-                  show: true,
-                  color: color.withValues(alpha: 0.1),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              SizedBox(
+                width: 64,
+                height: 64,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    CircularProgressIndicator(
+                      value: widget.score / 100,
+                      color: color,
+                      backgroundColor: widget.colorScheme.outlineVariant,
+                      strokeWidth: 6,
+                    ),
+                    Text(
+                      '${widget.score}',
+                      style: TextStyle(
+                        color: color,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
                 ),
-              )],
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'health_score'.tr(),
+                      style: TextStyle(
+                        color: widget.colorScheme.onSurfaceVariant,
+                        fontSize: 11,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        color: color,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      'dash_points_per_100'.tr(),
+                      style: TextStyle(
+                        color: widget.colorScheme.onSurfaceVariant,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          // Mini sparkline chart if history is available
+          if (_spots.length >= 3) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 48,
+              child: LineChart(
+                LineChartData(
+                  gridData: const FlGridData(show: false),
+                  titlesData: const FlTitlesData(show: false),
+                  borderData: FlBorderData(show: false),
+                  lineTouchData: const LineTouchData(enabled: false),
+                  minY: 0,
+                  maxY: 100,
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: _spots,
+                      isCurved: true,
+                      color: color,
+                      barWidth: 2,
+                      dotData: const FlDotData(show: false),
+                      belowBarData: BarAreaData(
+                        show: true,
+                        color: color.withValues(alpha: 0.1),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          )),
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Text('health_history_trend'.tr(), style: TextStyle(fontSize: 10, color: widget.colorScheme.onSurfaceVariant)),
-          ]),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'health_history_trend'.tr(),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: widget.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
-      ]),
+      ),
     );
   }
 }
