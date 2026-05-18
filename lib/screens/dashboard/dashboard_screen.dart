@@ -16,6 +16,7 @@ import '../../widgets/common/shimmer_loader.dart';
 import '../../widgets/dashboard/balance_card.dart';
 import '../../widgets/dashboard/budget_progress_card.dart';
 import '../../widgets/transactions/transaction_list_item.dart';
+import '../alerts/alerts_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key, required this.onSwitchTab});
@@ -225,7 +226,10 @@ class _DashboardAppBar extends StatelessWidget {
               size: 22,
               color: AppColors.textInverse,
             ),
-            onPressed: () => Navigator.pushNamed(context, '/alerts'),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AlertsScreen()),
+            ),
           ),
         ],
       ),
