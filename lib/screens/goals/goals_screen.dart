@@ -9,8 +9,12 @@ import '../../widgets/goals/goal_summary_cards.dart';
 import '../../widgets/goals/overall_progress_card.dart';
 import '../../widgets/goals/add_goal_dialog.dart';
 import '../../widgets/goals/add_amount_dialog.dart';
-import '../../widgets/common/skeleton_loader.dart';
 import '../../widgets/common/confirm_dialog.dart';
+import '../../widgets/common/empty_state.dart';
+import '../../widgets/common/shimmer_loader.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
 
 class GoalsScreen extends StatefulWidget {
   const GoalsScreen({super.key});
@@ -105,7 +109,9 @@ class _GoalsScreenState extends State<GoalsScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? AppColors.surfaceDark
+          : AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -122,7 +128,9 @@ class _GoalsScreenState extends State<GoalsScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? AppColors.surfaceDark
+          : AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -158,8 +166,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final totalTarget = _goals.fold(
       0.0,
       (a, g) => a + (g['target_amount'] as num).toDouble(),
@@ -175,32 +182,37 @@ class _GoalsScreenState extends State<GoalsScreen> {
         .length;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor:
+          isDark ? AppColors.backgroundDark : AppColors.background,
       appBar: AppBar(
+        backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surface,
+        elevation: 0,
         title: Text(
           'goals_title'.tr(),
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            color: colorScheme.onSurface,
+          style: AppTypography.headingMd.copyWith(
+            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
           ),
         ),
-        iconTheme: IconThemeData(color: colorScheme.onSurface),
+        iconTheme: const IconThemeData(color: AppColors.textSecondary),
         actions: [
           IconButton(
-            icon: Icon(Icons.add, color: colorScheme.primary),
+            icon: const Icon(Icons.add, color: AppColors.primary),
             tooltip: 'goals_add'.tr(),
             onPressed: () => _showAddDialog(),
           ),
         ],
       ),
       body: _loading
-          ? const PageSkeleton()
+          ? Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: const DashboardShimmer(),
+            )
           : RefreshIndicator(
               onRefresh: _load,
-              color: colorScheme.primary,
+              color: AppColors.primary,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(AppSpacing.md),
                 child: Column(
                   children: [
                     GoalSummaryCards(
@@ -208,53 +220,25 @@ class _GoalsScreenState extends State<GoalsScreen> {
                       completedGoals: completed,
                       totalSaved: totalSaved,
                       currency: _currency,
-                      colorScheme: colorScheme,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
 
                     if (_goals.isNotEmpty) ...[
                       OverallProgressCard(
                         totalSaved: totalSaved,
                         totalTarget: totalTarget,
                         currency: _currency,
-                        colorScheme: colorScheme,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.md),
                     ],
 
                     if (_goals.isEmpty)
-                      Container(
-                        padding: const EdgeInsets.all(40),
-                        decoration: BoxDecoration(
-                          color: colorScheme.surface,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: colorScheme.outlineVariant),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.track_changes,
-                              size: 48,
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'goals_empty'.tr(),
-                              style: TextStyle(
-                                color: colorScheme.onSurfaceVariant,
-                                fontSize: 15,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            ElevatedButton(
-                              onPressed: () => _showAddDialog(),
-                              child: Text(
-                                'goals_add_first'.tr(),
-                                style: const TextStyle(),
-                              ),
-                            ),
-                          ],
-                        ),
+                      EmptyState(
+                        icon: Icons.track_changes,
+                        title: 'goals_empty'.tr(),
+                        subtitle: '',
+                        ctaLabel: 'goals_add_first'.tr(),
+                        onCta: () => _showAddDialog(),
                       )
                     else
                       ..._goals.map(
@@ -262,7 +246,6 @@ class _GoalsScreenState extends State<GoalsScreen> {
                           key: ValueKey(goal['id']),
                           goal: goal,
                           currency: _currency,
-                          colorScheme: colorScheme,
                           onAddAmount: _showAddAmountDialog,
                           onEdit: (g) => _showAddDialog(existing: g),
                           onDelete: _deleteGoal,

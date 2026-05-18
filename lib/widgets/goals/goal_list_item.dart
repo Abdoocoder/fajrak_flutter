@@ -1,166 +1,108 @@
 import 'package:flutter/material.dart';
-import '../../utils/app_colors.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
+import '../common/app_button.dart';
+import '../common/progress_bar.dart';
 
 class GoalListItem extends StatelessWidget {
-  final Map<String, dynamic> goal;
-  final String currency;
-  final ColorScheme colorScheme;
-  final Function(Map<String, dynamic>) onAddAmount;
-  final Function(Map<String, dynamic>) onEdit;
-  final Function(String) onDelete;
-
   const GoalListItem({
     super.key,
     required this.goal,
     required this.currency,
-    required this.colorScheme,
     required this.onAddAmount,
     required this.onEdit,
     required this.onDelete,
   });
 
+  final Map<String, dynamic> goal;
+  final String currency;
+  final Function(Map<String, dynamic>) onAddAmount;
+  final Function(Map<String, dynamic>) onEdit;
+  final Function(String) onDelete;
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final target = (goal['target_amount'] as num).toDouble();
     final current = (goal['current_amount'] as num).toDouble();
     final progress = target > 0 ? (current / target).clamp(0.0, 1.0) : 0.0;
     final remaining = target - current;
     final isDone = current >= target;
 
-    final color = isDone
-        ? AppColors.success
-        : progress >= 0.7
-        ? colorScheme.primary
-        : colorScheme.secondary;
+    // income (green) for done or early stages; primary (blue) when nearing target
+    final accentColor =
+        (!isDone && progress >= 0.7) ? AppColors.primary : AppColors.income;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
+        color: isDark ? AppColors.surfaceDark : AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: accentColor.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              if ((goal['icon'] as String?) != null)
+              if ((goal['icon'] as String?) != null) ...[
                 Icon(
                   _getIconData(goal['icon'] as String),
                   size: 22,
-                  color: color,
+                  color: accentColor,
                 ),
-              if ((goal['icon'] as String?) != null) const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
+              ],
               Expanded(
                 child: Text(
                   goal['name'] ?? '',
-                  style: TextStyle(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 15,
+                  style: AppTypography.headingSm.copyWith(
+                    color: isDark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimary,
                   ),
                 ),
               ),
-              if (isDone)
-                Icon(Icons.check_circle_outline, size: 18, color: color),
-              const SizedBox(width: 8),
-              GestureDetector(
+              if (isDone) ...[
+                Icon(Icons.check_circle_outline, size: 18, color: accentColor),
+                const SizedBox(width: AppSpacing.sm),
+              ],
+              _ActionButton(
+                icon: Icons.edit,
+                color: AppColors.primary,
                 onTap: () => onEdit(goal),
-                child: Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(7),
-                    border: Border.all(
-                      color: colorScheme.primary.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  child: Icon(Icons.edit, color: colorScheme.primary, size: 14),
-                ),
               ),
-              const SizedBox(width: 6),
-              GestureDetector(
+              const SizedBox(width: AppSpacing.xs),
+              _ActionButton(
+                icon: Icons.close,
+                color: AppColors.expense,
                 onTap: () => onDelete(goal['id'].toString()),
-                child: Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: AppColors.error.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(7),
-                    border: Border.all(
-                      color: AppColors.error.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.close,
-                    color: AppColors.error,
-                    size: 14,
-                  ),
-                ),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          Semantics(
-            value: '${(progress * 100).toStringAsFixed(0)}%',
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: LinearProgressIndicator(
-                value: progress,
-                backgroundColor: colorScheme.outlineVariant,
-                valueColor: AlwaysStoppedAnimation(color),
-                minHeight: 10,
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'goals_progress_percent'.tr(
-                  args: [(progress * 100).toStringAsFixed(0)],
-                ),
-                style: TextStyle(
-                  color: color,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              Text(
-                'goals_remaining_value'.tr(
-                  args: [remaining.toStringAsFixed(0), currency],
-                ),
-                style: TextStyle(
-                  color: colorScheme.onSurfaceVariant,
-                  fontSize: 12,
-                ),
-              ),
-            ],
+          AppProgressBar(
+            value: progress,
+            title: '',
+            percentageLabel: '${(progress * 100).toStringAsFixed(0)}%',
+            variant: ProgressBarVariant.goal,
+            fillColor: accentColor,
+            infoEnd: isDone
+                ? null
+                : 'goals_remaining_value'.tr(
+                    args: [remaining.toStringAsFixed(0), currency],
+                  ),
           ),
           if (!isDone) ...[
             const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () => onAddAmount(goal),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: color,
-                  side: BorderSide(color: color.withValues(alpha: 0.4)),
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: Text(
-                  'goals_add_saving'.tr(),
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-              ),
+            AppButton(
+              label: 'goals_add_saving'.tr(),
+              onPressed: () => onAddAmount(goal),
+              variant: AppButtonVariant.secondary,
             ),
           ],
         ],
@@ -207,5 +149,34 @@ class GoalListItem extends StatelessWidget {
       if (icon.codePoint == codePoint) return icon;
     }
     return Icons.track_changes;
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 28,
+        height: 28,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(7),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
+        ),
+        child: Icon(icon, color: color, size: 14),
+      ),
+    );
   }
 }
