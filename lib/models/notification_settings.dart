@@ -3,7 +3,7 @@ enum NotificationCategory {
   debtReminder,
   savingGoal,
   systemUpdate,
-  securityAlert
+  securityAlert,
 }
 
 class NotificationPreference {
@@ -39,17 +39,23 @@ class NotificationPreference {
 
   static String _categoryToString(NotificationCategory cat) {
     switch (cat) {
-      case NotificationCategory.budgetAlert:   return 'BudgetAlert';
-      case NotificationCategory.debtReminder:  return 'DebtReminder';
-      case NotificationCategory.savingGoal:    return 'SavingGoal';
-      case NotificationCategory.systemUpdate:  return 'SystemUpdate';
-      case NotificationCategory.securityAlert: return 'SecurityAlert';
+      case NotificationCategory.budgetAlert:
+        return 'BudgetAlert';
+      case NotificationCategory.debtReminder:
+        return 'DebtReminder';
+      case NotificationCategory.savingGoal:
+        return 'SavingGoal';
+      case NotificationCategory.systemUpdate:
+        return 'SystemUpdate';
+      case NotificationCategory.securityAlert:
+        return 'SecurityAlert';
     }
   }
 
   static NotificationCategory _parseCategory(String category) {
     return NotificationCategory.values.firstWhere(
-      (e) => e.toString().split('.').last.toLowerCase() == category.toLowerCase(),
+      (e) =>
+          e.toString().split('.').last.toLowerCase() == category.toLowerCase(),
       orElse: () => NotificationCategory.systemUpdate,
     );
   }

@@ -38,8 +38,8 @@ class TransactionsTable extends Table {
 
   // ── Sync bookkeeping (local-only, never sent to Supabase) ──
   TextColumn get syncStatus => text().withDefault(
-        const Constant('synced'),
-      )(); // 'synced' | 'pending_create' | 'pending_update' | 'pending_delete'
+    const Constant('synced'),
+  )(); // 'synced' | 'pending_create' | 'pending_update' | 'pending_delete'
   IntColumn get localVersion => integer().withDefault(const Constant(1))();
 
   @override
@@ -68,8 +68,7 @@ class DebtsTable extends Table {
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 
-  TextColumn get syncStatus =>
-      text().withDefault(const Constant('synced'))();
+  TextColumn get syncStatus => text().withDefault(const Constant('synced'))();
   IntColumn get localVersion => integer().withDefault(const Constant(1))();
 
   @override
@@ -88,13 +87,11 @@ class SavingsGoalsTable extends Table {
   RealColumn get currentAmount => real().withDefault(const Constant(0))();
   DateTimeColumn get targetDate => dateTime().nullable()();
   TextColumn get icon => text().withDefault(const Constant('🎯'))();
-  TextColumn get color =>
-      text().withDefault(const Constant('#2E75B6'))();
+  TextColumn get color => text().withDefault(const Constant('#2E75B6'))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 
-  TextColumn get syncStatus =>
-      text().withDefault(const Constant('synced'))();
+  TextColumn get syncStatus => text().withDefault(const Constant('synced'))();
   IntColumn get localVersion => integer().withDefault(const Constant(1))();
 
   @override
@@ -109,21 +106,18 @@ class AccountsTable extends Table {
   TextColumn get id => text()();
   TextColumn get userId => text()();
   TextColumn get name => text()();
-  TextColumn get type => text()(); // 'cash' | 'bank' | 'savings' | 'credit_card'
+  TextColumn get type =>
+      text()(); // 'cash' | 'bank' | 'savings' | 'credit_card'
   RealColumn get openingBalance => real().withDefault(const Constant(0))();
   TextColumn get currency => text().withDefault(const Constant('KWD'))();
-  TextColumn get color =>
-      text().withDefault(const Constant('#3B7EF6'))();
+  TextColumn get color => text().withDefault(const Constant('#3B7EF6'))();
   TextColumn get icon => text().withDefault(const Constant('🏦'))();
-  BoolColumn get isDefault =>
-      boolean().withDefault(const Constant(false))();
-  BoolColumn get isArchived =>
-      boolean().withDefault(const Constant(false))();
+  BoolColumn get isDefault => boolean().withDefault(const Constant(false))();
+  BoolColumn get isArchived => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 
-  TextColumn get syncStatus =>
-      text().withDefault(const Constant('synced'))();
+  TextColumn get syncStatus => text().withDefault(const Constant('synced'))();
   IntColumn get localVersion => integer().withDefault(const Constant(1))();
 
   @override
@@ -143,8 +137,7 @@ class BudgetsTable extends Table {
   IntColumn get year => integer()();
   DateTimeColumn get createdAt => dateTime()();
 
-  TextColumn get syncStatus =>
-      text().withDefault(const Constant('synced'))();
+  TextColumn get syncStatus => text().withDefault(const Constant('synced'))();
   IntColumn get localVersion => integer().withDefault(const Constant(1))();
 
   @override
@@ -162,17 +155,16 @@ class RecurringTransactionsTable extends Table {
   RealColumn get amount => real()();
   TextColumn get category => text()();
   TextColumn get type => text()(); // 'income' | 'expense'
-  TextColumn get frequency => text()(); // 'daily' | 'weekly' | 'monthly' | 'yearly'
+  TextColumn get frequency =>
+      text()(); // 'daily' | 'weekly' | 'monthly' | 'yearly'
   DateTimeColumn get nextDate => dateTime()();
   TextColumn get currency => text().withDefault(const Constant('KWD'))();
   TextColumn get notes => text().nullable()();
-  BoolColumn get isActive =>
-      boolean().withDefault(const Constant(true))();
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 
-  TextColumn get syncStatus =>
-      text().withDefault(const Constant('synced'))();
+  TextColumn get syncStatus => text().withDefault(const Constant('synced'))();
   IntColumn get localVersion => integer().withDefault(const Constant(1))();
 
   @override
@@ -189,31 +181,32 @@ class SyncQueueTable extends Table {
 
   IntColumn get id => integer().autoIncrement()();
   TextColumn get operationType => text()(); // 'create' | 'update' | 'delete'
-  TextColumn get entityType => text()(); // 'transaction' | 'debt' | 'goal' | 'account' | 'budget' | 'recurring'
+  TextColumn get entityType =>
+      text()(); // 'transaction' | 'debt' | 'goal' | 'account' | 'budget' | 'recurring'
   TextColumn get entityId => text()();
   TextColumn get payload => text()(); // JSON snapshot
   DateTimeColumn get createdAt => dateTime()();
-  IntColumn get attemptCount =>
-      integer().withDefault(const Constant(0))();
+  IntColumn get attemptCount => integer().withDefault(const Constant(0))();
   DateTimeColumn get lastAttemptAt => dateTime().nullable()();
   TextColumn get lastError => text().nullable()();
-  BoolColumn get isProcessing =>
-      boolean().withDefault(const Constant(false))();
+  BoolColumn get isProcessing => boolean().withDefault(const Constant(false))();
 }
 
 // ─────────────────────────────────────────────────────────────
 // DATABASE
 // ─────────────────────────────────────────────────────────────
 
-@DriftDatabase(tables: [
-  TransactionsTable,
-  DebtsTable,
-  SavingsGoalsTable,
-  AccountsTable,
-  BudgetsTable,
-  RecurringTransactionsTable,
-  SyncQueueTable,
-])
+@DriftDatabase(
+  tables: [
+    TransactionsTable,
+    DebtsTable,
+    SavingsGoalsTable,
+    AccountsTable,
+    BudgetsTable,
+    RecurringTransactionsTable,
+    SyncQueueTable,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase._(super.e);
 
@@ -230,8 +223,10 @@ class AppDatabase extends _$AppDatabase {
 
   /// Returns the existing instance. Throws if [initialize] was not called.
   static AppDatabase get instance {
-    assert(_instance != null,
-        'AppDatabase.initialize() must be called before accessing instance.');
+    assert(
+      _instance != null,
+      'AppDatabase.initialize() must be called before accessing instance.',
+    );
     return _instance!;
   }
 
@@ -246,16 +241,16 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (m) => m.createAll(),
-        onUpgrade: (m, from, to) async {
-          // Add schema upgrades here as new migrations are needed.
-          // Example: if (from < 2) await m.addColumn(transactionsTable, transactionsTable.newColumn);
-        },
-        beforeOpen: (details) async {
-          // Enable foreign keys.
-          await customStatement('PRAGMA foreign_keys = ON');
-        },
-      );
+    onCreate: (m) => m.createAll(),
+    onUpgrade: (m, from, to) async {
+      // Add schema upgrades here as new migrations are needed.
+      // Example: if (from < 2) await m.addColumn(transactionsTable, transactionsTable.newColumn);
+    },
+    beforeOpen: (details) async {
+      // Enable foreign keys.
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
+  );
 }
 
 // Connection is provided by the platform-specific file imported above.

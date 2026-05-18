@@ -25,18 +25,9 @@ class _HelpScreenState extends State<HelpScreen> {
     {
       'section': 'help_faq_dashboard_title'.tr(),
       'items': [
-        {
-          'q': 'help_faq_dashboard_q1'.tr(),
-          'a': 'help_faq_dashboard_a1'.tr()
-        },
-        {
-          'q': 'help_faq_dashboard_q2'.tr(),
-          'a': 'help_faq_dashboard_a2'.tr()
-        },
-        {
-          'q': 'help_faq_dashboard_q3'.tr(),
-          'a': 'help_faq_dashboard_a3'.tr()
-        },
+        {'q': 'help_faq_dashboard_q1'.tr(), 'a': 'help_faq_dashboard_a1'.tr()},
+        {'q': 'help_faq_dashboard_q2'.tr(), 'a': 'help_faq_dashboard_a2'.tr()},
+        {'q': 'help_faq_dashboard_q3'.tr(), 'a': 'help_faq_dashboard_a3'.tr()},
       ],
     },
     {
@@ -44,19 +35,19 @@ class _HelpScreenState extends State<HelpScreen> {
       'items': [
         {
           'q': 'help_faq_transactions_q1'.tr(),
-          'a': 'help_faq_transactions_a1'.tr()
+          'a': 'help_faq_transactions_a1'.tr(),
         },
         {
           'q': 'help_faq_transactions_q2'.tr(),
-          'a': 'help_faq_transactions_a2'.tr()
+          'a': 'help_faq_transactions_a2'.tr(),
         },
         {
           'q': 'help_faq_transactions_q3'.tr(),
-          'a': 'help_faq_transactions_a3'.tr()
+          'a': 'help_faq_transactions_a3'.tr(),
         },
         {
           'q': 'help_faq_transactions_q4'.tr(),
-          'a': 'help_faq_transactions_a4'.tr()
+          'a': 'help_faq_transactions_a4'.tr(),
         },
       ],
     },
@@ -82,27 +73,15 @@ class _HelpScreenState extends State<HelpScreen> {
     {
       'section': 'help_faq_budget_title'.tr(),
       'items': [
-        {
-          'q': 'help_faq_budget_q1'.tr(),
-          'a': 'help_faq_budget_a1'.tr()
-        },
-        {
-          'q': 'help_faq_budget_q2'.tr(),
-          'a': 'help_faq_budget_a2'.tr()
-        },
+        {'q': 'help_faq_budget_q1'.tr(), 'a': 'help_faq_budget_a1'.tr()},
+        {'q': 'help_faq_budget_q2'.tr(), 'a': 'help_faq_budget_a2'.tr()},
       ],
     },
     {
       'section': 'help_faq_goals_title'.tr(),
       'items': [
-        {
-          'q': 'help_faq_goals_q1'.tr(),
-          'a': 'help_faq_goals_a1'.tr()
-        },
-        {
-          'q': 'help_faq_goals_q2'.tr(),
-          'a': 'help_faq_goals_a2'.tr()
-        },
+        {'q': 'help_faq_goals_q1'.tr(), 'a': 'help_faq_goals_a1'.tr()},
+        {'q': 'help_faq_goals_q2'.tr(), 'a': 'help_faq_goals_a2'.tr()},
       ],
     },
     {
@@ -110,33 +89,24 @@ class _HelpScreenState extends State<HelpScreen> {
       'items': [
         {
           'q': 'help_faq_investments_q1'.tr(),
-          'a': 'help_faq_investments_a1'.tr()
+          'a': 'help_faq_investments_a1'.tr(),
         },
         {
           'q': 'help_faq_investments_q2'.tr(),
-          'a': 'help_faq_investments_a2'.tr()
+          'a': 'help_faq_investments_a2'.tr(),
         },
         {
           'q': 'help_faq_investments_q3'.tr(),
-          'a': 'help_faq_investments_a3'.tr()
+          'a': 'help_faq_investments_a3'.tr(),
         },
       ],
     },
     {
       'section': 'help_faq_zakat_title'.tr(),
       'items': [
-        {
-          'q': 'help_faq_zakat_q1'.tr(),
-          'a': 'help_faq_zakat_a1'.tr()
-        },
-        {
-          'q': 'help_faq_zakat_q2'.tr(),
-          'a': 'help_faq_zakat_a2'.tr()
-        },
-        {
-          'q': 'help_faq_zakat_q3'.tr(),
-          'a': 'help_faq_zakat_a3'.tr()
-        },
+        {'q': 'help_faq_zakat_q1'.tr(), 'a': 'help_faq_zakat_a1'.tr()},
+        {'q': 'help_faq_zakat_q2'.tr(), 'a': 'help_faq_zakat_a2'.tr()},
+        {'q': 'help_faq_zakat_q3'.tr(), 'a': 'help_faq_zakat_a3'.tr()},
       ],
     },
     {
@@ -172,8 +142,12 @@ class _HelpScreenState extends State<HelpScreen> {
           return {
             'section': section['section'],
             'items': (section['items'] as List).where((item) {
-              return item['q'].toString().toLowerCase().contains(_search.toLowerCase()) ||
-                  item['a'].toString().toLowerCase().contains(_search.toLowerCase());
+              return item['q'].toString().toLowerCase().contains(
+                    _search.toLowerCase(),
+                  ) ||
+                  item['a'].toString().toLowerCase().contains(
+                    _search.toLowerCase(),
+                  );
             }).toList(),
           };
         })
@@ -189,10 +163,10 @@ class _HelpScreenState extends State<HelpScreen> {
       appBar: AppBar(
         backgroundColor: bgColor,
         elevation: 0,
-        title: Text('help_title'.tr(),
-            style: TextStyle(
-                fontWeight: FontWeight.w900,
-                color: cs.onSurface)),
+        title: Text(
+          'help_title'.tr(),
+          style: TextStyle(fontWeight: FontWeight.w900, color: cs.onSurface),
+        ),
         iconTheme: IconThemeData(color: cs.onSurface),
       ),
       body: SingleChildScrollView(
@@ -203,18 +177,23 @@ class _HelpScreenState extends State<HelpScreen> {
             // Search Bar
             Container(
               decoration: BoxDecoration(
-                  color: cs.surface,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: cs.outlineVariant)),
+                color: cs.surface,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: cs.outlineVariant),
+              ),
               child: TextField(
                 onChanged: (v) => setState(() => _search = v),
                 style: TextStyle(color: cs.onSurface),
                 decoration: InputDecoration(
                   hintText: 'help_search_hint'.tr(),
                   prefixIcon: Icon(Icons.search, color: cs.onSurfaceVariant),
-                  hintStyle: TextStyle(color: cs.onSurfaceVariant.withValues(alpha: 0.6)),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  hintStyle: TextStyle(
+                    color: cs.onSurfaceVariant.withValues(alpha: 0.6),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   border: InputBorder.none,
                 ),
               ),
@@ -226,10 +205,8 @@ class _HelpScreenState extends State<HelpScreen> {
               onTap: () async {
                 final Uri emailUri = Uri(
                   scheme: 'mailto',
-                  path: 'support@fajrak.com', 
-                  queryParameters: {
-                    'subject': 'طلب مساعدة - تطبيق فجرك',
-                  },
+                  path: 'support@fajrak.com',
+                  queryParameters: {'subject': 'طلب مساعدة - تطبيق فجرك'},
                 );
                 try {
                   await launchUrl(emailUri);
@@ -243,40 +220,56 @@ class _HelpScreenState extends State<HelpScreen> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.05),
-                    border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.2)),
-                    borderRadius: BorderRadius.circular(16)),
+                  color: AppColors.primary.withValues(alpha: 0.05),
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.2),
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 child: Row(
                   children: [
                     Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12)),
-                        child: const Center(
-                            child: Icon(Icons.support_agent,
-                                color: AppColors.primary))),
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.support_agent,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('help_contact_title'.tr(),
-                              style: TextStyle(
-                                  color: cs.onSurface,
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 13)),
-                          Text('help_contact_subtitle'.tr(),
-                              style: TextStyle(
-                                  color: cs.onSurfaceVariant,
-                                  fontSize: 11)),
+                          Text(
+                            'help_contact_title'.tr(),
+                            style: TextStyle(
+                              color: cs.onSurface,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 13,
+                            ),
+                          ),
+                          Text(
+                            'help_contact_subtitle'.tr(),
+                            style: TextStyle(
+                              color: cs.onSurfaceVariant,
+                              fontSize: 11,
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                    const Icon(Icons.arrow_forward_ios,
-                        color: AppColors.textSecondary, size: 14),
+                    const Icon(
+                      Icons.arrow_forward_ios,
+                      color: AppColors.textSecondary,
+                      size: 14,
+                    ),
                   ],
                 ),
               ),
@@ -284,23 +277,29 @@ class _HelpScreenState extends State<HelpScreen> {
             const SizedBox(height: 24),
 
             // FAQs
-            ...filtered.map((section) => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12, top: 8),
-                      child: Text(section['section'],
-                          style: const TextStyle(
-                              color: AppColors.textMuted,
-                              fontWeight: FontWeight.w900,
-                              fontSize: 13,
-                              letterSpacing: 1.1)),
+            ...filtered.map(
+              (section) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12, top: 8),
+                    child: Text(
+                      section['section'],
+                      style: const TextStyle(
+                        color: AppColors.textMuted,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 13,
+                        letterSpacing: 1.1,
+                      ),
                     ),
-                    ...(section['items'] as List)
-                        .map((item) => _FAQItem(q: item['q'], a: item['a'])),
-                    const SizedBox(height: 12),
-                  ],
-                )),
+                  ),
+                  ...(section['items'] as List).map(
+                    (item) => _FAQItem(q: item['q'], a: item['a']),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -326,39 +325,44 @@ class _FAQItemState extends State<_FAQItem> {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: _open
-            ? cs.surface
-            : cs.surface.withValues(alpha: 0.5),
+        color: _open ? cs.surface : cs.surface.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-            color: _open
-                ? cs.primary.withValues(alpha: 0.3)
-                : cs.outlineVariant),
+          color: _open ? cs.primary.withValues(alpha: 0.3) : cs.outlineVariant,
+        ),
       ),
       child: Column(
         children: [
-            ListTile(
+          ListTile(
             onTap: () => setState(() => _open = !_open),
-            title: Text(widget.q,
-                style: TextStyle(
-                    color: _open ? cs.onSurface : cs.onSurfaceVariant,
-                    fontWeight: _open ? FontWeight.w900 : FontWeight.w700,
-                    fontSize: 13)),
+            title: Text(
+              widget.q,
+              style: TextStyle(
+                color: _open ? cs.onSurface : cs.onSurfaceVariant,
+                fontWeight: _open ? FontWeight.w900 : FontWeight.w700,
+                fontSize: 13,
+              ),
+            ),
             trailing: AnimatedRotation(
               duration: const Duration(milliseconds: 200),
               turns: _open ? 0.5 : 0,
-              child: Icon(Icons.keyboard_arrow_down,
-                  color: cs.onSurfaceVariant),
+              child: Icon(
+                Icons.keyboard_arrow_down,
+                color: cs.onSurfaceVariant,
+              ),
             ),
           ),
           if (_open)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Text(widget.a,
-                  style: TextStyle(
-                      color: cs.onSurfaceVariant,
-                      fontSize: 12,
-                      height: 1.6)),
+              child: Text(
+                widget.a,
+                style: TextStyle(
+                  color: cs.onSurfaceVariant,
+                  fontSize: 12,
+                  height: 1.6,
+                ),
+              ),
             ),
         ],
       ),

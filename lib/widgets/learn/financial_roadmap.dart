@@ -5,10 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 class FinancialRoadmap extends StatelessWidget {
   final String currentStage;
 
-  const FinancialRoadmap({
-    super.key,
-    required this.currentStage,
-  });
+  const FinancialRoadmap({super.key, required this.currentStage});
 
   @override
   Widget build(BuildContext context) {
@@ -16,9 +13,21 @@ class FinancialRoadmap extends StatelessWidget {
     final stages = [
       {'id': 'awareness', 'icon': Icons.spa, 'title': 'roadmap_awareness'.tr()},
       {'id': 'debt', 'icon': Icons.credit_card, 'title': 'roadmap_debt'.tr()},
-      {'id': 'emergency', 'icon': Icons.shield, 'title': 'roadmap_emergency'.tr()},
-      {'id': 'investing', 'icon': Icons.show_chart, 'title': 'roadmap_investing'.tr()},
-      {'id': 'wealth', 'icon': Icons.workspace_premium, 'title': 'roadmap_wealth'.tr()},
+      {
+        'id': 'emergency',
+        'icon': Icons.shield,
+        'title': 'roadmap_emergency'.tr(),
+      },
+      {
+        'id': 'investing',
+        'icon': Icons.show_chart,
+        'title': 'roadmap_investing'.tr(),
+      },
+      {
+        'id': 'wealth',
+        'icon': Icons.workspace_premium,
+        'title': 'roadmap_wealth'.tr(),
+      },
     ];
 
     int currentIndex = stages.indexWhere((s) => s['id'] == currentStage);
@@ -35,10 +44,7 @@ class FinancialRoadmap extends StatelessWidget {
             left: 40,
             right: 40,
             top: 25,
-            child: Container(
-              height: 2,
-              color: colorScheme.outlineVariant,
-            ),
+            child: Container(height: 2, color: colorScheme.outlineVariant),
           ),
           // Stages
           Row(
@@ -50,8 +56,10 @@ class FinancialRoadmap extends StatelessWidget {
               final Color color = isCurrent
                   ? colorScheme.primary
                   : (isPast
-                      ? (Theme.of(context).brightness == Brightness.dark ? AppColors.success : AppColors.successDark)
-                      : colorScheme.onSurfaceVariant);
+                        ? (Theme.of(context).brightness == Brightness.dark
+                              ? AppColors.success
+                              : AppColors.successDark)
+                        : colorScheme.onSurfaceVariant);
 
               return Column(
                 children: [
@@ -63,26 +71,36 @@ class FinancialRoadmap extends StatelessWidget {
                           ? color.withValues(alpha: 0.1)
                           : colorScheme.surface,
                       shape: BoxShape.circle,
-                      border:
-                          Border.all(color: color, width: isCurrent ? 2 : 1),
+                      border: Border.all(
+                        color: color,
+                        width: isCurrent ? 2 : 1,
+                      ),
                       boxShadow: isCurrent
                           ? [
                               BoxShadow(
-                                  color: color.withValues(alpha: 0.3),
-                                  blurRadius: 10)
+                                color: color.withValues(alpha: 0.3),
+                                blurRadius: 10,
+                              ),
                             ]
                           : null,
                     ),
                     child: Center(
-                        child: Icon(s['icon'] as IconData, size: 20, color: color)),
+                      child: Icon(
+                        s['icon'] as IconData,
+                        size: 20,
+                        color: color,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 6),
-                  Text(s['title'] as String,
-                      style: TextStyle(
-                          color: color,
-                          fontSize: 10,
-                          fontWeight:
-                              isCurrent ? FontWeight.w900 : FontWeight.w500)),
+                  Text(
+                    s['title'] as String,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 10,
+                      fontWeight: isCurrent ? FontWeight.w900 : FontWeight.w500,
+                    ),
+                  ),
                 ],
               );
             }),

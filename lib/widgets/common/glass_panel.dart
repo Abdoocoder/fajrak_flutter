@@ -36,12 +36,16 @@ class GlassPanel extends StatelessWidget {
         border: topBorderOnly
             ? Border(
                 top: BorderSide(
-                  color: borderColor ?? colorScheme.outlineVariant.withValues(alpha: 0.3),
+                  color:
+                      borderColor ??
+                      colorScheme.outlineVariant.withValues(alpha: 0.3),
                   width: 1,
                 ),
               )
             : Border.all(
-                color: borderColor ?? colorScheme.outlineVariant.withValues(alpha: 0.3),
+                color:
+                    borderColor ??
+                    colorScheme.outlineVariant.withValues(alpha: 0.3),
                 width: 1,
               ),
       ),

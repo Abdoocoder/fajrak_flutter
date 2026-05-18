@@ -22,33 +22,43 @@ class CategorySpendingItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: colorScheme.outlineVariant)),
-      child: Column(children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text(category,
-              style: TextStyle(
-                  color: colorScheme.onSurface,
-                  fontSize: 13)),
-          Text(
-              '${amount.toStringAsFixed(0)} $currency (${percentage.toStringAsFixed(0)}%)',
-              style: TextStyle(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: colorScheme.outlineVariant),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                category,
+                style: TextStyle(color: colorScheme.onSurface, fontSize: 13),
+              ),
+              Text(
+                '${amount.toStringAsFixed(0)} $currency (${percentage.toStringAsFixed(0)}%)',
+                style: TextStyle(
                   color: colorScheme.onSurfaceVariant,
-                  fontSize: 12)),
-        ]),
-        const SizedBox(height: 6),
-        Semantics(
-          value: '${percentage.toStringAsFixed(0)}%',
-          child: ClipRRect(
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Semantics(
+            value: '${percentage.toStringAsFixed(0)}%',
+            child: ClipRRect(
               borderRadius: BorderRadius.circular(3),
               child: LinearProgressIndicator(
-                  value: percentage / 100,
-                  backgroundColor: colorScheme.outlineVariant,
-                  color: colorScheme.primary,
-                  minHeight: 5)),
-        ),
-      ]),
+                value: percentage / 100,
+                backgroundColor: colorScheme.outlineVariant,
+                color: colorScheme.primary,
+                minHeight: 5,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

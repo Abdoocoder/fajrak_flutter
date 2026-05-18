@@ -40,8 +40,11 @@ class MoreMenuItem extends StatelessWidget {
                 ),
               ),
             ),
-            Icon(Icons.arrow_back_ios_new,
-                color: colorScheme.outlineVariant, size: 14),
+            Icon(
+              Icons.arrow_back_ios_new,
+              color: colorScheme.outlineVariant,
+              size: 14,
+            ),
           ],
         ),
       ),

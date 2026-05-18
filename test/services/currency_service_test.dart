@@ -28,7 +28,10 @@ void main() {
 
     test('currencies list should have expected items', () {
       expect(CurrencyService.currencies.length, greaterThan(30));
-      expect(CurrencyService.currencies.any((c) => c['value'] == 'SAR'), isTrue);
+      expect(
+        CurrencyService.currencies.any((c) => c['value'] == 'SAR'),
+        isTrue,
+      );
     });
   });
 }

@@ -5,7 +5,7 @@ enum DashCardId {
   monthSummary,
   heroBalance,
   monthlyStats,
-  quickAdd,    // required — cannot be hidden
+  quickAdd, // required — cannot be hidden
   recentTx,
   netWorth,
   healthScore,
@@ -33,20 +33,77 @@ class DashCardConfig {
 }
 
 const List<DashCardConfig> kDashCards = [
-  DashCardConfig(id: DashCardId.monthSummary,  labelKey: 'dash_card_month_summary',  defaultVisible: true),
-  DashCardConfig(id: DashCardId.heroBalance,   labelKey: 'dash_card_hero_balance',   defaultVisible: true),
-  DashCardConfig(id: DashCardId.monthlyStats,  labelKey: 'dash_card_monthly_stats',  defaultVisible: true),
-  DashCardConfig(id: DashCardId.quickAdd,      labelKey: 'dash_card_quick_add',      defaultVisible: true,  required: true),
-  DashCardConfig(id: DashCardId.recentTx,      labelKey: 'dash_card_recent_tx',      defaultVisible: true),
-  DashCardConfig(id: DashCardId.netWorth,      labelKey: 'dash_card_net_worth',      defaultVisible: true),
-  DashCardConfig(id: DashCardId.healthScore,   labelKey: 'dash_card_health_score',   defaultVisible: true),
-  DashCardConfig(id: DashCardId.stage,         labelKey: 'dash_card_stage',          defaultVisible: true),
-  DashCardConfig(id: DashCardId.budgets,       labelKey: 'dash_card_budgets',        defaultVisible: false),
-  DashCardConfig(id: DashCardId.quickLinks,    labelKey: 'dash_card_quick_links',    defaultVisible: false),
-  DashCardConfig(id: DashCardId.charts,        labelKey: 'dash_card_charts',         defaultVisible: false),
-  DashCardConfig(id: DashCardId.gamification,  labelKey: 'dash_card_gamification',   defaultVisible: false),
-  DashCardConfig(id: DashCardId.simulator,     labelKey: 'dash_card_simulator',      defaultVisible: false),
-  DashCardConfig(id: DashCardId.challenges,    labelKey: 'dash_card_challenges',     defaultVisible: false),
+  DashCardConfig(
+    id: DashCardId.monthSummary,
+    labelKey: 'dash_card_month_summary',
+    defaultVisible: true,
+  ),
+  DashCardConfig(
+    id: DashCardId.heroBalance,
+    labelKey: 'dash_card_hero_balance',
+    defaultVisible: true,
+  ),
+  DashCardConfig(
+    id: DashCardId.monthlyStats,
+    labelKey: 'dash_card_monthly_stats',
+    defaultVisible: true,
+  ),
+  DashCardConfig(
+    id: DashCardId.quickAdd,
+    labelKey: 'dash_card_quick_add',
+    defaultVisible: true,
+    required: true,
+  ),
+  DashCardConfig(
+    id: DashCardId.recentTx,
+    labelKey: 'dash_card_recent_tx',
+    defaultVisible: true,
+  ),
+  DashCardConfig(
+    id: DashCardId.netWorth,
+    labelKey: 'dash_card_net_worth',
+    defaultVisible: true,
+  ),
+  DashCardConfig(
+    id: DashCardId.healthScore,
+    labelKey: 'dash_card_health_score',
+    defaultVisible: true,
+  ),
+  DashCardConfig(
+    id: DashCardId.stage,
+    labelKey: 'dash_card_stage',
+    defaultVisible: true,
+  ),
+  DashCardConfig(
+    id: DashCardId.budgets,
+    labelKey: 'dash_card_budgets',
+    defaultVisible: false,
+  ),
+  DashCardConfig(
+    id: DashCardId.quickLinks,
+    labelKey: 'dash_card_quick_links',
+    defaultVisible: false,
+  ),
+  DashCardConfig(
+    id: DashCardId.charts,
+    labelKey: 'dash_card_charts',
+    defaultVisible: false,
+  ),
+  DashCardConfig(
+    id: DashCardId.gamification,
+    labelKey: 'dash_card_gamification',
+    defaultVisible: false,
+  ),
+  DashCardConfig(
+    id: DashCardId.simulator,
+    labelKey: 'dash_card_simulator',
+    defaultVisible: false,
+  ),
+  DashCardConfig(
+    id: DashCardId.challenges,
+    labelKey: 'dash_card_challenges',
+    defaultVisible: false,
+  ),
 ];
 
 const _kPrefsKey = 'dashboard_layout_v1';
@@ -94,8 +151,9 @@ class DashboardLayoutProvider extends ChangeNotifier {
     return _visibility[id] ?? true;
   }
 
-  int get visibleOptionalCount =>
-      kDashCards.where((c) => !c.required && (_visibility[c.id] ?? c.defaultVisible)).length;
+  int get visibleOptionalCount => kDashCards
+      .where((c) => !c.required && (_visibility[c.id] ?? c.defaultVisible))
+      .length;
 
   int get totalOptionalCount => kDashCards.where((c) => !c.required).length;
 

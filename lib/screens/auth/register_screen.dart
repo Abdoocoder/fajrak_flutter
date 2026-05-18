@@ -22,15 +22,16 @@ class _PasswordChecks {
     required this.length,
   });
 
-  bool get allMet => upper && lower && number && symbol && length >= _kMinLength;
+  bool get allMet =>
+      upper && lower && number && symbol && length >= _kMinLength;
 
   factory _PasswordChecks.of(String pw) => _PasswordChecks(
-        upper: pw.contains(RegExp(r'[A-Z]')),
-        lower: pw.contains(RegExp(r'[a-z]')),
-        number: pw.contains(RegExp(r'[0-9]')),
-        symbol: pw.contains(RegExp(r'[^A-Za-z0-9]')),
-        length: pw.length,
-      );
+    upper: pw.contains(RegExp(r'[A-Z]')),
+    lower: pw.contains(RegExp(r'[a-z]')),
+    number: pw.contains(RegExp(r'[0-9]')),
+    symbol: pw.contains(RegExp(r'[^A-Za-z0-9]')),
+    length: pw.length,
+  );
 }
 
 class RegisterScreen extends StatefulWidget {
@@ -89,7 +90,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ErrorHandler.handle(e, context: context, developerMessage: 'Register Action');
+        ErrorHandler.handle(
+          e,
+          context: context,
+          developerMessage: 'Register Action',
+        );
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -115,27 +120,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 height: 72,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                      colors: [colorScheme.primary, colorScheme.secondary]),
+                    colors: [colorScheme.primary, colorScheme.secondary],
+                  ),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Center(
-                    child: Text('ف',
-                        style: TextStyle(
-                            fontSize: 36,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white))),
+                  child: Text(
+                    'ف',
+                    style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(height: 24),
-              Text('auth_register_title'.tr(),
-                  style: TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w900,
-                      color: colorScheme.onSurface)),
+              Text(
+                'auth_register_title'.tr(),
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w900,
+                  color: colorScheme.onSurface,
+                ),
+              ),
               const SizedBox(height: 8),
-              Text('auth_register_subtitle'.tr(),
-                  style: TextStyle(
-                      fontSize: 14,
-                      color: colorScheme.onSurfaceVariant)),
+              Text(
+                'auth_register_subtitle'.tr(),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
               const SizedBox(height: 32),
               if (_error != null) ...[
                 AuthErrorBanner(message: _error!),
@@ -146,9 +162,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 autofocus: true,
                 style: TextStyle(color: colorScheme.onSurface),
                 decoration: InputDecoration(
-                    labelText: 'auth_full_name'.tr(),
-                    prefixIcon:
-                        Icon(Icons.person_outlined, color: colorScheme.onSurfaceVariant)),
+                  labelText: 'auth_full_name'.tr(),
+                  prefixIcon: Icon(
+                    Icons.person_outlined,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -156,9 +175,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 keyboardType: TextInputType.emailAddress,
                 style: TextStyle(color: colorScheme.onSurface),
                 decoration: InputDecoration(
-                    labelText: 'auth_email'.tr(),
-                    prefixIcon:
-                        Icon(Icons.email_outlined, color: colorScheme.onSurfaceVariant)),
+                  labelText: 'auth_email'.tr(),
+                  prefixIcon: Icon(
+                    Icons.email_outlined,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -167,15 +189,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 style: TextStyle(color: colorScheme.onSurface),
                 decoration: InputDecoration(
                   labelText: 'auth_password'.tr(),
-                  prefixIcon:
-                      Icon(Icons.lock_outlined, color: colorScheme.onSurfaceVariant),
+                  prefixIcon: Icon(
+                    Icons.lock_outlined,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                   suffixIcon: IconButton(
                     icon: Icon(
-                        _obscure
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                        color: colorScheme.onSurfaceVariant),
-                    tooltip: _obscure ? 'tooltip_show_password'.tr() : 'tooltip_hide_password'.tr(),
+                      _obscure
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    tooltip: _obscure
+                        ? 'tooltip_show_password'.tr()
+                        : 'tooltip_hide_password'.tr(),
                     onPressed: () => setState(() => _obscure = !_obscure),
                   ),
                 ),
@@ -192,23 +219,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
-                            strokeWidth: 2, color: colorScheme.onPrimary))
+                          strokeWidth: 2,
+                          color: colorScheme.onPrimary,
+                        ),
+                      )
                     : Text('auth_register_button'.tr()),
               ),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('auth_have_account'.tr(),
-                      style: TextStyle(
-                          color: colorScheme.onSurfaceVariant)),
+                  Text(
+                    'auth_have_account'.tr(),
+                    style: TextStyle(color: colorScheme.onSurfaceVariant),
+                  ),
                   TextButton(
                     onPressed: () =>
                         Navigator.pushReplacementNamed(context, '/login'),
-                    child: Text('auth_login_now'.tr(),
-                        style: TextStyle(
-                            color: colorScheme.primary,
-                            fontWeight: FontWeight.w700)),
+                    child: Text(
+                      'auth_login_now'.tr(),
+                      style: TextStyle(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -236,7 +270,9 @@ class _PasswordChecklist extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
       ),
       child: Column(
         children: [
@@ -284,7 +320,8 @@ class _PasswordChecklist extends StatelessWidget {
           const SizedBox(height: 6),
           _Req(
             met: checks.length >= _kMinLength,
-            label: '${'auth_pass_req_length'.tr()}: ${checks.length}/$_kMinLength',
+            label:
+                '${'auth_pass_req_length'.tr()}: ${checks.length}/$_kMinLength',
             metColor: metColor,
             unmetColor: unmetColor,
           ),

@@ -303,6 +303,8 @@
   "goals_add_amount_to": "إضافة مدخرات لـ {}",
   "goals_amount_to_add": "المبلغ المراد إضافته",
   "goals_delete_title": "حذف الهدف",
+  "trans_delete_title": "حذف المعاملة",
+  "budget_delete_title": "حذف الميزانية",
   "goals_count_label": "الأهداف",
   "goals_completed_label": "تم تحقيقها",
   "goals_saved_label": "تم ادخار",

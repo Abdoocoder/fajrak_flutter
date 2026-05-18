@@ -1,5 +1,3 @@
-
-
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -57,10 +55,10 @@ void main() {
 
     test('دمج كائنات متداخلة (nested objects)', () {
       final existing = {
-        'user': {'name': 'Ahmed', 'age': 25}
+        'user': {'name': 'Ahmed', 'age': 25},
       };
       final update = {
-        'user': {'age': 26, 'city': 'Kuwait'}
+        'user': {'age': 26, 'city': 'Kuwait'},
       };
 
       final merged = mergePayload(existing, update);
@@ -70,51 +68,61 @@ void main() {
       expect(merged['user']['city'], 'Kuwait');
     });
 
-    test('Queue Collapse concept: كل عملية create/update/delete من نفس entityId تندمج', () {
-      final queueOps = <Map<String, dynamic>>[];
+    test(
+      'Queue Collapse concept: كل عملية create/update/delete من نفس entityId تندمج',
+      () {
+        final queueOps = <Map<String, dynamic>>[];
 
-      void addOperation(String entityId, String opType, Map<String, dynamic> payload) {
-        final existingIdx = queueOps.indexWhere(
-          (op) => op['entityId'] == entityId && op['operationType'] == opType,
-        );
+        void addOperation(
+          String entityId,
+          String opType,
+          Map<String, dynamic> payload,
+        ) {
+          final existingIdx = queueOps.indexWhere(
+            (op) => op['entityId'] == entityId && op['operationType'] == opType,
+          );
 
-        if (existingIdx >= 0) {
-          queueOps[existingIdx] = {
-            ...queueOps[existingIdx],
-            'payload': mergePayload(
-              queueOps[existingIdx]['payload'] as Map<String, dynamic>,
-              payload,
-            ),
-          };
-        } else {
-          queueOps.add({
-            'entityId': entityId,
-            'operationType': opType,
-            'payload': payload,
-          });
+          if (existingIdx >= 0) {
+            queueOps[existingIdx] = {
+              ...queueOps[existingIdx],
+              'payload': mergePayload(
+                queueOps[existingIdx]['payload'] as Map<String, dynamic>,
+                payload,
+              ),
+            };
+          } else {
+            queueOps.add({
+              'entityId': entityId,
+              'operationType': opType,
+              'payload': payload,
+            });
+          }
         }
-      }
 
-      addOperation('tx-1', 'create', {'amount': 100});
-      addOperation('tx-1', 'update', {'amount': 110});
-      addOperation('tx-1', 'update', {'amount': 120});
-      addOperation('tx-2', 'update', {'amount': 200});
-      addOperation('tx-1', 'delete', {'reason': 'cancelled'});
-      addOperation('tx-3', 'create', {'amount': 300});
+        addOperation('tx-1', 'create', {'amount': 100});
+        addOperation('tx-1', 'update', {'amount': 110});
+        addOperation('tx-1', 'update', {'amount': 120});
+        addOperation('tx-2', 'update', {'amount': 200});
+        addOperation('tx-1', 'delete', {'reason': 'cancelled'});
+        addOperation('tx-3', 'create', {'amount': 300});
 
-      expect(queueOps.length, 5);
-      
-      final tx1Create = queueOps.firstWhere((op) =>
-        op['entityId'] == 'tx-1' && op['operationType'] == 'create');
-      expect(tx1Create['payload']['amount'], 100);
+        expect(queueOps.length, 5);
 
-      final tx1Update = queueOps.firstWhere((op) => 
-        op['entityId'] == 'tx-1' && op['operationType'] == 'update');
-      expect(tx1Update['payload']['amount'], 120);
+        final tx1Create = queueOps.firstWhere(
+          (op) => op['entityId'] == 'tx-1' && op['operationType'] == 'create',
+        );
+        expect(tx1Create['payload']['amount'], 100);
 
-      final tx1Delete = queueOps.firstWhere((op) => 
-        op['entityId'] == 'tx-1' && op['operationType'] == 'delete');
-      expect(tx1Delete['payload']['reason'], 'cancelled');
-    });
+        final tx1Update = queueOps.firstWhere(
+          (op) => op['entityId'] == 'tx-1' && op['operationType'] == 'update',
+        );
+        expect(tx1Update['payload']['amount'], 120);
+
+        final tx1Delete = queueOps.firstWhere(
+          (op) => op['entityId'] == 'tx-1' && op['operationType'] == 'delete',
+        );
+        expect(tx1Delete['payload']['reason'], 'cancelled');
+      },
+    );
   });
 }

@@ -32,9 +32,15 @@ class _AddGoalDialogState extends State<AddGoalDialog> {
   void initState() {
     super.initState();
     _nameCtrl = TextEditingController(text: widget.existing?['name'] ?? '');
-    _targetCtrl = TextEditingController(text: widget.existing?['target_amount']?.toString() ?? '');
-    _currentCtrl = TextEditingController(text: widget.existing?['current_amount']?.toString() ?? '0');
-    _selectedIcon = int.tryParse(widget.existing?['icon']?.toString() ?? '') ?? Icons.track_changes.codePoint;
+    _targetCtrl = TextEditingController(
+      text: widget.existing?['target_amount']?.toString() ?? '',
+    );
+    _currentCtrl = TextEditingController(
+      text: widget.existing?['current_amount']?.toString() ?? '0',
+    );
+    _selectedIcon =
+        int.tryParse(widget.existing?['icon']?.toString() ?? '') ??
+        Icons.track_changes.codePoint;
     _deadlineDate = widget.existing?['deadline'] as String? ?? '';
   }
 
@@ -53,7 +59,8 @@ class _AddGoalDialogState extends State<AddGoalDialog> {
     if (target == null || target <= 0) {
       return 'goals_target_invalid'.tr();
     }
-    final current = double.tryParse(_currentCtrl.text.replaceAll(',', '.')) ?? 0;
+    final current =
+        double.tryParse(_currentCtrl.text.replaceAll(',', '.')) ?? 0;
     if (current < 0) return 'goals_current_invalid'.tr();
     if (current > target) return 'goals_current_exceeds_target'.tr();
     return null;
@@ -62,11 +69,13 @@ class _AddGoalDialogState extends State<AddGoalDialog> {
   void _showValidationError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Row(children: [
-          const Icon(Icons.warning_amber_rounded, color: Colors.white),
-          const SizedBox(width: 10),
-          Expanded(child: Text(message, style: const TextStyle())),
-        ]),
+        content: Row(
+          children: [
+            const Icon(Icons.warning_amber_rounded, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(child: Text(message, style: const TextStyle())),
+          ],
+        ),
         backgroundColor: const Color(0xFFF59E0B),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -87,7 +96,8 @@ class _AddGoalDialogState extends State<AddGoalDialog> {
     final user = Supabase.instance.client.auth.currentUser!;
     HapticFeedback.mediumImpact();
     final target = double.parse(_targetCtrl.text.replaceAll(',', '.'));
-    final current = double.tryParse(_currentCtrl.text.replaceAll(',', '.')) ?? 0;
+    final current =
+        double.tryParse(_currentCtrl.text.replaceAll(',', '.')) ?? 0;
     final data = {
       'user_id': user.id,
       'name': _nameCtrl.text.trim(),
@@ -108,7 +118,12 @@ class _AddGoalDialogState extends State<AddGoalDialog> {
       widget.onSaved();
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      if (mounted) ErrorHandler.handle(e, context: context, developerMessage: 'Goals Save');
+      if (mounted)
+        ErrorHandler.handle(
+          e,
+          context: context,
+          developerMessage: 'Goals Save',
+        );
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -120,126 +135,176 @@ class _AddGoalDialogState extends State<AddGoalDialog> {
 
     return Padding(
       padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 20,
-          right: 20,
-          top: 20),
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        left: 20,
+        right: 20,
+        top: 20,
+      ),
       child: SingleChildScrollView(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
                 color: colorScheme.outlineVariant,
-                borderRadius: BorderRadius.circular(2))),
-        const SizedBox(height: 16),
-        Text(widget.existing != null ? 'goals_edit'.tr() : 'goals_new'.tr(),
-            style: TextStyle(
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              widget.existing != null ? 'goals_edit'.tr() : 'goals_new'.tr(),
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w900,
-                color: colorScheme.onSurface)),
-        const SizedBox(height: 20),
-        Align(
-            alignment: Alignment.centerRight,
-            child: Text('goals_choose_icon'.tr(),
-                style: TextStyle(
-                    color: colorScheme.onSurfaceVariant,
-                    fontSize: 12))),
-        const SizedBox(height: 8),
-        SizedBox(
-          height: 120,
-          child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 10, mainAxisSpacing: 4, crossAxisSpacing: 4),
-            itemCount: widget.goalIcons.length,
-            itemBuilder: (_, i) {
-              final icon = widget.goalIcons[i];
-              final selected = icon.codePoint == _selectedIcon;
-              return GestureDetector(
-                onTap: () => setState(() => _selectedIcon = icon.codePoint),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: selected
-                        ? colorScheme.primary.withValues(alpha: 0.25)
-                        : colorScheme.outlineVariant,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                        color: selected ? colorScheme.primary : Colors.transparent),
-                  ),
-                  child: Center(
-                      child: Icon(icon, size: 18, color: selected ? colorScheme.primary : colorScheme.onSurfaceVariant)),
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 12),
-        _field('goals_name_hint'.tr(), _nameCtrl, TextInputType.text),
-        const SizedBox(height: 10),
-        _field('goals_target_amount'.tr(), _targetCtrl,
-            const TextInputType.numberWithOptions(decimal: true)),
-        const SizedBox(height: 10),
-        _field('goals_current_amount'.tr(), _currentCtrl,
-            const TextInputType.numberWithOptions(decimal: true)),
-        const SizedBox(height: 10),
-        GestureDetector(
-          onTap: () async {
-            final picked = await showDatePicker(
-              context: context,
-              initialDate: _deadlineDate.isNotEmpty
-                  ? DateTime.tryParse(_deadlineDate) ??
-                      DateTime.now().add(const Duration(days: 180))
-                  : DateTime.now().add(const Duration(days: 180)),
-              firstDate: DateTime.now(),
-              lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
-            );
-            if (picked != null) {
-              setState(() {
-                _deadlineDate = picked.toIso8601String().split('T')[0];
-              });
-            }
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-                color: colorScheme.outlineVariant,
-                borderRadius: BorderRadius.circular(10)),
-            child: Row(children: [
-              Icon(Icons.calendar_today_outlined,
-                  color: colorScheme.onSurfaceVariant, size: 18),
-              const SizedBox(width: 10),
-              Text(
-                _deadlineDate.isNotEmpty
-                    ? 'goals_deadline_value'.tr(args: [_deadlineDate])
-                    : 'goals_deadline_hint'.tr(),
-                style: TextStyle(
-                    color: _deadlineDate.isNotEmpty
-                        ? colorScheme.onSurface
-                        : colorScheme.onSurfaceVariant,
-                    fontSize: 13),
+                color: colorScheme.onSurface,
               ),
-            ]),
-          ),
-        ),
-        const SizedBox(height: 20),
-        SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _saving ? null : _save,
-              style: ElevatedButton.styleFrom(
+            ),
+            const SizedBox(height: 20),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                'goals_choose_icon'.tr(),
+                style: TextStyle(
+                  color: colorScheme.onSurfaceVariant,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 120,
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 10,
+                  mainAxisSpacing: 4,
+                  crossAxisSpacing: 4,
+                ),
+                itemCount: widget.goalIcons.length,
+                itemBuilder: (_, i) {
+                  final icon = widget.goalIcons[i];
+                  final selected = icon.codePoint == _selectedIcon;
+                  return GestureDetector(
+                    onTap: () => setState(() => _selectedIcon = icon.codePoint),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: selected
+                            ? colorScheme.primary.withValues(alpha: 0.25)
+                            : colorScheme.outlineVariant,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: selected
+                              ? colorScheme.primary
+                              : Colors.transparent,
+                        ),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          icon,
+                          size: 18,
+                          color: selected
+                              ? colorScheme.primary
+                              : colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+            _field('goals_name_hint'.tr(), _nameCtrl, TextInputType.text),
+            const SizedBox(height: 10),
+            _field(
+              'goals_target_amount'.tr(),
+              _targetCtrl,
+              const TextInputType.numberWithOptions(decimal: true),
+            ),
+            const SizedBox(height: 10),
+            _field(
+              'goals_current_amount'.tr(),
+              _currentCtrl,
+              const TextInputType.numberWithOptions(decimal: true),
+            ),
+            const SizedBox(height: 10),
+            GestureDetector(
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _deadlineDate.isNotEmpty
+                      ? DateTime.tryParse(_deadlineDate) ??
+                            DateTime.now().add(const Duration(days: 180))
+                      : DateTime.now().add(const Duration(days: 180)),
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
+                );
+                if (picked != null) {
+                  setState(() {
+                    _deadlineDate = picked.toIso8601String().split('T')[0];
+                  });
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: colorScheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today_outlined,
+                      color: colorScheme.onSurfaceVariant,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      _deadlineDate.isNotEmpty
+                          ? 'goals_deadline_value'.tr(args: [_deadlineDate])
+                          : 'goals_deadline_hint'.tr(),
+                      style: TextStyle(
+                        color: _deadlineDate.isNotEmpty
+                            ? colorScheme.onSurface
+                            : colorScheme.onSurfaceVariant,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _saving ? null : _save,
+                style: ElevatedButton.styleFrom(
                   backgroundColor: colorScheme.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12))),
-              child: Text(
-                  widget.existing != null ? 'goals_save_edit'.tr() : 'goals_save'.tr(),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  widget.existing != null
+                      ? 'goals_save_edit'.tr()
+                      : 'goals_save'.tr(),
                   style: const TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 15)),
-            )),
-        const SizedBox(height: 16),
-      ])),
+                    fontWeight: FontWeight.w900,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
     );
   }
 
@@ -255,8 +320,14 @@ class _AddGoalDialogState extends State<AddGoalDialog> {
         hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
         filled: true,
         fillColor: colorScheme.outlineVariant,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
       ),
     );
   }

@@ -17,40 +17,54 @@ class OverallProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progress = totalTarget > 0 ? (totalSaved / totalTarget).clamp(0.0, 1.0) : 0.0;
-    
+    final progress = totalTarget > 0
+        ? (totalSaved / totalTarget).clamp(0.0, 1.0)
+        : 0.0;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: colorScheme.outlineVariant)),
-      child: Column(children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text('goals_overall_progress'.tr(),
-              style: TextStyle(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: colorScheme.outlineVariant),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'goals_overall_progress'.tr(),
+                style: TextStyle(
                   color: colorScheme.onSurfaceVariant,
-                  fontSize: 12)),
-          Text(
-              '${totalSaved.toStringAsFixed(0)} / ${totalTarget.toStringAsFixed(0)} $currency',
-              style: TextStyle(
+                  fontSize: 12,
+                ),
+              ),
+              Text(
+                '${totalSaved.toStringAsFixed(0)} / ${totalTarget.toStringAsFixed(0)} $currency',
+                style: TextStyle(
                   color: colorScheme.onSurface,
                   fontWeight: FontWeight.w700,
-                  fontSize: 12)),
-        ]),
-        const SizedBox(height: 8),
-        Semantics(
-          value: '${(progress * 100).toStringAsFixed(0)}%',
-          child: ClipRRect(
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Semantics(
+            value: '${(progress * 100).toStringAsFixed(0)}%',
+            child: ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
                 value: progress,
                 backgroundColor: colorScheme.outlineVariant,
                 valueColor: AlwaysStoppedAnimation(colorScheme.secondary),
                 minHeight: 10,
-              )),
-        ),
-      ]),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -5,7 +5,10 @@ class AnalyticsService {
   static final SupabaseClient _client = Supabase.instance.client;
 
   /// Logs a custom event to the `app_events` table in Supabase.
-  static Future<void> logEvent(String name, [Map<String, dynamic>? properties]) async {
+  static Future<void> logEvent(
+    String name, [
+    Map<String, dynamic>? properties,
+  ]) async {
     final user = _client.auth.currentUser;
     if (user == null) return;
 
@@ -28,7 +31,11 @@ class AnalyticsService {
   }
 
   /// Specialized method for tracking errors.
-  static Future<void> logError(String errorType, String message, [Map<String, dynamic>? extra]) async {
+  static Future<void> logError(
+    String errorType,
+    String message, [
+    Map<String, dynamic>? extra,
+  ]) async {
     await logEvent('app_error', {
       'type': errorType,
       'message': message,

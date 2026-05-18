@@ -27,12 +27,14 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
-    _fadeAnim = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
-    );
-    _scaleAnim = Tween<double>(begin: 0.8, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
-    );
+    _fadeAnim = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
+    _scaleAnim = Tween<double>(
+      begin: 0.8,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
     _controller.forward();
     AnalyticsService.logScreenView('Splash');
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -64,7 +66,8 @@ class _SplashScreenState extends State<SplashScreen>
       }
     } catch (e) {
       // Network error while user is already logged in → go to main (offline mode)
-      final isNetwork = e is SocketException ||
+      final isNetwork =
+          e is SocketException ||
           e.toString().toLowerCase().contains('socketexception') ||
           e.toString().toLowerCase().contains('failed host lookup') ||
           e.toString().toLowerCase().contains('authretryablefetchexception');
@@ -74,7 +77,11 @@ class _SplashScreenState extends State<SplashScreen>
         if (isNetwork && user != null) {
           Navigator.pushReplacementNamed(context, '/main');
         } else {
-          ErrorHandler.handle(e, context: context, developerMessage: 'Splash CheckUser');
+          ErrorHandler.handle(
+            e,
+            context: context,
+            developerMessage: 'Splash CheckUser',
+          );
           if (user == null) {
             await Future.delayed(const Duration(seconds: 2));
             if (mounted) Navigator.pushReplacementNamed(context, '/login');
@@ -134,7 +141,8 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
                 const SizedBox(height: 24),
-                Text('فجرك',
+                Text(
+                  'فجرك',
                   style: TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.w900,

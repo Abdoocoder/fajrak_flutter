@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../utils/app_colors.dart';
+import '../common/confirm_dialog.dart';
 
 class TransactionListItem extends StatelessWidget {
   final Map<String, dynamic> transaction;
@@ -25,7 +27,11 @@ class TransactionListItem extends StatelessWidget {
       case 'pending_update':
         return Tooltip(
           message: 'قيد المزامنة',
-          child: Icon(Icons.cloud_upload_outlined, size: 14, color: Colors.orange[600]),
+          child: Icon(
+            Icons.cloud_upload_outlined,
+            size: 14,
+            color: Colors.orange[600],
+          ),
         );
       case 'pending_delete':
         return Tooltip(
@@ -52,6 +58,17 @@ class TransactionListItem extends StatelessWidget {
     return Dismissible(
       key: Key(transaction['id'].toString()),
       direction: DismissDirection.endToStart,
+      confirmDismiss: (direction) async {
+        bool confirm = false;
+        await ConfirmDialog.show(
+          context: context,
+          title: 'trans_delete_title'.tr(),
+          message: 'confirm_delete'.tr(),
+          danger: true,
+          onConfirm: () => confirm = true,
+        );
+        return confirm;
+      },
       background: Container(
         alignment: Alignment.centerLeft,
         padding: const EdgeInsets.only(left: 20),
@@ -85,23 +102,35 @@ class TransactionListItem extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
-                      child: Icon(isIncome ? Icons.arrow_downward : Icons.arrow_upward,
-                          size: 18, color: color)),
+                    child: Icon(
+                      isIncome ? Icons.arrow_downward : Icons.arrow_upward,
+                      size: 18,
+                      color: color,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(transaction['description'] ?? transaction['category'] ?? '',
-                          style: TextStyle(
-                              color: colorScheme.onSurface,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14)),
-                      Text(transaction['category'] ?? '',
-                          style: TextStyle(
-                              color: colorScheme.onSurfaceVariant,
-                              fontSize: 11)),
+                      Text(
+                        transaction['description'] ??
+                            transaction['category'] ??
+                            '',
+                        style: TextStyle(
+                          color: colorScheme.onSurface,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        transaction['category'] ?? '',
+                        style: TextStyle(
+                          color: colorScheme.onSurfaceVariant,
+                          fontSize: 11,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -118,15 +147,23 @@ class TransactionListItem extends StatelessWidget {
                         Text(
                           '${isIncome ? '+' : '-'}${amount.toStringAsFixed(0)} $currency',
                           style: TextStyle(
-                              color: color,
-                              fontWeight: FontWeight.w900,
-                              fontSize: 15),
+                            color: color,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 15,
+                          ),
                         ),
                         const SizedBox(width: 6),
-                        Icon(Icons.edit_outlined, size: 14, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                        Icon(
+                          Icons.edit_outlined,
+                          size: 14,
+                          color: colorScheme.onSurfaceVariant.withValues(
+                            alpha: 0.5,
+                          ),
+                        ),
                       ],
                     ),
-                    if (transaction['original_currency'] != null && transaction['original_currency'] != currency)
+                    if (transaction['original_currency'] != null &&
+                        transaction['original_currency'] != currency)
                       Text(
                         '${(transaction['original_amount'] as num).toDouble().toStringAsFixed(0)} ${transaction['original_currency']}',
                         style: TextStyle(
@@ -138,8 +175,9 @@ class TransactionListItem extends StatelessWidget {
                     Text(
                       transaction['transaction_date'] ?? '',
                       style: TextStyle(
-                          color: colorScheme.onSurfaceVariant,
-                          fontSize: 10),
+                        color: colorScheme.onSurfaceVariant,
+                        fontSize: 10,
+                      ),
                     ),
                   ],
                 ),

@@ -73,7 +73,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
       if (mounted) Navigator.pushReplacementNamed(context, '/main');
     } catch (e) {
-      if (mounted) ErrorHandler.handle(e, context: context, developerMessage: 'Onboarding Save');
+      if (mounted)
+        ErrorHandler.handle(
+          e,
+          context: context,
+          developerMessage: 'Onboarding Save',
+        );
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -105,10 +110,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               padding: const EdgeInsets.symmetric(vertical: 24),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(4, (index) => _buildDot(index, colorScheme)),
+                children: List.generate(
+                  4,
+                  (index) => _buildDot(index, colorScheme),
+                ),
               ),
             ),
-            
+
             Expanded(
               child: PageView(
                 controller: _pageController,
@@ -136,17 +144,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         backgroundColor: colorScheme.primary,
                         foregroundColor: colorScheme.onPrimary,
                         padding: const EdgeInsets.symmetric(vertical: 18),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                         elevation: 8,
                         shadowColor: colorScheme.primary.withValues(alpha: 0.4),
                       ),
                       child: _loading
-                          ? SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: colorScheme.onPrimary, strokeWidth: 2))
+                          ? SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                color: colorScheme.onPrimary,
+                                strokeWidth: 2,
+                              ),
+                            )
                           : Text(
-                              _currentStep == 3 
-                                ? 'onboarding_start'.tr()
-                                : 'continue'.tr(),
-                              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
+                              _currentStep == 3
+                                  ? 'onboarding_start'.tr()
+                                  : 'continue'.tr(),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w900,
+                                fontSize: 16,
+                              ),
                             ),
                     ),
                   ),
@@ -156,7 +176,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         duration: const Duration(milliseconds: 400),
                         curve: Curves.easeInOut,
                       ),
-                      child: Text('back'.tr(), style: TextStyle(color: colorScheme.onSurfaceVariant)),
+                      child: Text(
+                        'back'.tr(),
+                        style: TextStyle(color: colorScheme.onSurfaceVariant),
+                      ),
                     ),
                 ],
               ),
@@ -174,7 +197,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       height: 8,
       width: _currentStep == index ? 24 : 8,
       decoration: BoxDecoration(
-        color: _currentStep == index ? colorScheme.primary : colorScheme.outlineVariant,
+        color: _currentStep == index
+            ? colorScheme.primary
+            : colorScheme.outlineVariant,
         borderRadius: BorderRadius.circular(4),
       ),
     );
@@ -192,19 +217,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               color: colorScheme.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.auto_awesome, size: 80, color: colorScheme.primary),
+            child: Icon(
+              Icons.auto_awesome,
+              size: 80,
+              color: colorScheme.primary,
+            ),
           ),
           const SizedBox(height: 40),
           Text(
             'onboarding_welcome_title'.tr(),
             textAlign: TextAlign.center,
-            style: TextStyle(color: colorScheme.onSurface, fontSize: 32, fontWeight: FontWeight.w900),
+            style: TextStyle(
+              color: colorScheme.onSurface,
+              fontSize: 32,
+              fontWeight: FontWeight.w900,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
             'onboarding_welcome_subtitle'.tr(),
             textAlign: TextAlign.center,
-            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 16, height: 1.6),
+            style: TextStyle(
+              color: colorScheme.onSurfaceVariant,
+              fontSize: 16,
+              height: 1.6,
+            ),
           ),
         ],
       ),
@@ -221,12 +258,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         controller: _incomeController,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         textAlign: TextAlign.center,
-        style: TextStyle(color: colorScheme.onSurface, fontSize: 32, fontWeight: FontWeight.w900),
+        style: TextStyle(
+          color: colorScheme.onSurface,
+          fontSize: 32,
+          fontWeight: FontWeight.w900,
+        ),
         decoration: InputDecoration(
           hintText: '0',
           hintStyle: TextStyle(color: colorScheme.outlineVariant),
           suffixText: _currency,
-          suffixStyle: TextStyle(color: colorScheme.primary, fontSize: 16, fontWeight: FontWeight.bold),
+          suffixStyle: TextStyle(
+            color: colorScheme.primary,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 20),
         ),
@@ -244,7 +289,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         children: [
           Text(
             'onboarding_day_value'.tr(args: [_salaryDay.toString()]),
-            style: TextStyle(color: colorScheme.primary, fontSize: 40, fontWeight: FontWeight.w900),
+            style: TextStyle(
+              color: colorScheme.primary,
+              fontSize: 40,
+              fontWeight: FontWeight.w900,
+            ),
           ),
           const SizedBox(height: 20),
           SliderTheme(
@@ -276,53 +325,90 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       icon: Icons.public,
       title: 'settings_currency'.tr(),
       subtitle: 'onboarding_currency_subtitle'.tr(),
-      child: Column(children: [
-        // عرض العملة المكتشفة
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3)),
-          ),
-          child: Row(children: [
-            Text(info?['flag'] as String? ?? '🌐', style: const TextStyle(fontSize: 28)),
-            const SizedBox(width: 12),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(
-                info?['labelAr'] as String? ?? _currency,
-                style: TextStyle(color: colorScheme.onSurface, fontSize: 15, fontWeight: FontWeight.w700),
+      child: Column(
+        children: [
+          // عرض العملة المكتشفة
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: colorScheme.primary.withValues(alpha: 0.3),
               ),
-              Text(
-                _currency,
-                style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12),
-              ),
-            ])),
-            TextButton(
-              onPressed: () async {
-                await showCurrencyPickerSheet(
-                  context: context,
-                  selectedCode: _currency,
-                  onSelected: (code) => setState(() => _currency = code),
-                );
-              },
-              child: Text('تغيير', style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.w700)),
             ),
-          ]),
-        ),
-        if (_detected?.confidence == 'high' && _detected!.countryName.isNotEmpty) ...[
-          const SizedBox(height: 10),
-          Text(
-            '📍 اكتشفنا أنك في ${_detected!.countryName}',
-            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12),
-            textAlign: TextAlign.center,
+            child: Row(
+              children: [
+                Text(
+                  info?['flag'] as String? ?? '🌐',
+                  style: const TextStyle(fontSize: 28),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        info?['labelAr'] as String? ?? _currency,
+                        style: TextStyle(
+                          color: colorScheme.onSurface,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      Text(
+                        _currency,
+                        style: TextStyle(
+                          color: colorScheme.onSurfaceVariant,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    await showCurrencyPickerSheet(
+                      context: context,
+                      selectedCode: _currency,
+                      onSelected: (code) => setState(() => _currency = code),
+                    );
+                  },
+                  child: Text(
+                    'تغيير',
+                    style: TextStyle(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
+          if (_detected?.confidence == 'high' &&
+              _detected!.countryName.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              '📍 اكتشفنا أنك في ${_detected!.countryName}',
+              style: TextStyle(
+                color: colorScheme.onSurfaceVariant,
+                fontSize: 12,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ],
-      ]),
+      ),
     );
   }
 
-  Widget _slideBase({required ColorScheme colorScheme, required IconData icon, required String title, required String subtitle, required Widget child}) {
+  Widget _slideBase({
+    required ColorScheme colorScheme,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Widget child,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30),
       child: Column(
@@ -330,9 +416,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         children: [
           Icon(icon, size: 50, color: colorScheme.primary),
           const SizedBox(height: 20),
-          Text(title, style: TextStyle(color: colorScheme.onSurface, fontSize: 24, fontWeight: FontWeight.w900)),
+          Text(
+            title,
+            style: TextStyle(
+              color: colorScheme.onSurface,
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
           const SizedBox(height: 8),
-          Text(subtitle, textAlign: TextAlign.center, style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14)),
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
+          ),
           const SizedBox(height: 40),
           Container(
             padding: const EdgeInsets.all(24),

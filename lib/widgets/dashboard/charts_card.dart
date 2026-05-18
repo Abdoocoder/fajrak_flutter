@@ -47,73 +47,80 @@ class ChartsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('dash_overview_6m'.tr(),
-              style: TextStyle(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 14)),
-          const SizedBox(height: 24),
-          RepaintBoundary(
-          child: SizedBox(
-            height: 200,
-            child: BarChart(
-               BarChartData(
-                alignment: BarChartAlignment.spaceAround,
-                maxY: _getMaxY(),
-                barTouchData: BarTouchData(enabled: false),
-                titlesData: FlTitlesData(
-                  show: true,
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) {
-                        if (value.toInt() >= 0 &&
-                            value.toInt() < months6Data.length) {
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(
-                              months6Data[value.toInt()]['month'],
-                              style: TextStyle(
-                                  color: colorScheme.onSurfaceVariant,
-                                  fontSize: 10),
-                            ),
-                          );
-                        }
-                        return const Text('');
-                      },
-                    ),
-                  ),
-                  leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                ),
-                gridData: const FlGridData(show: false),
-                borderData: FlBorderData(show: false),
-                barGroups: months6Data.asMap().entries.map((e) {
-                  return BarChartGroupData(
-                    x: e.key,
-                    barRods: [
-                      BarChartRodData(
-                        toY: (e.value['income'] as num?)?.toDouble() ?? 0.0,
-                        color: incomeColor,
-                        width: 10,
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                      BarChartRodData(
-                        toY: (e.value['expenses'] as num?)?.toDouble() ?? 0.0,
-                        color: expenseColor,
-                        width: 10,
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                    ],
-                  );
-                }).toList(),
-              ),
+          Text(
+            'dash_overview_6m'.tr(),
+            style: TextStyle(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w900,
+              fontSize: 14,
             ),
           ),
+          const SizedBox(height: 24),
+          RepaintBoundary(
+            child: SizedBox(
+              height: 200,
+              child: BarChart(
+                BarChartData(
+                  alignment: BarChartAlignment.spaceAround,
+                  maxY: _getMaxY(),
+                  barTouchData: BarTouchData(enabled: false),
+                  titlesData: FlTitlesData(
+                    show: true,
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) {
+                          if (value.toInt() >= 0 &&
+                              value.toInt() < months6Data.length) {
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(
+                                months6Data[value.toInt()]['month'],
+                                style: TextStyle(
+                                  color: colorScheme.onSurfaceVariant,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            );
+                          }
+                          return const Text('');
+                        },
+                      ),
+                    ),
+                    leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                  ),
+                  gridData: const FlGridData(show: false),
+                  borderData: FlBorderData(show: false),
+                  barGroups: months6Data.asMap().entries.map((e) {
+                    return BarChartGroupData(
+                      x: e.key,
+                      barRods: [
+                        BarChartRodData(
+                          toY: (e.value['income'] as num?)?.toDouble() ?? 0.0,
+                          color: incomeColor,
+                          width: 10,
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                        BarChartRodData(
+                          toY: (e.value['expenses'] as num?)?.toDouble() ?? 0.0,
+                          color: expenseColor,
+                          width: 10,
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
           ), // RepaintBoundary
           const SizedBox(height: 16),
           Row(
@@ -123,7 +130,7 @@ class ChartsCard extends StatelessWidget {
               const SizedBox(width: 16),
               _buildLegend(expenseColor, 'dash_expenses'.tr(), colorScheme),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -144,13 +151,15 @@ class ChartsCard extends StatelessWidget {
     return Row(
       children: [
         Container(
-            width: 10,
-            height: 10,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
         const SizedBox(width: 6),
-        Text(label,
-            style: TextStyle(
-                color: colorScheme.onSurfaceVariant, fontSize: 12)),
+        Text(
+          label,
+          style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12),
+        ),
       ],
     );
   }
@@ -166,11 +175,14 @@ class ChartsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('dash_spent_from_categories'.tr(),
-              style: TextStyle(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 14)),
+          Text(
+            'dash_spent_from_categories'.tr(),
+            style: TextStyle(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w900,
+              fontSize: 14,
+            ),
+          ),
           const SizedBox(height: 16),
           ...categoryData.map((cat) {
             return Padding(
@@ -179,15 +191,19 @@ class ChartsCard extends StatelessWidget {
                 children: [
                   Expanded(
                     flex: 2,
-                    child: Text(cat['category'],
-                        style: TextStyle(
-                            color: colorScheme.onSurface,
-                            fontSize: 13)),
+                    child: Text(
+                      cat['category'],
+                      style: TextStyle(
+                        color: colorScheme.onSurface,
+                        fontSize: 13,
+                      ),
+                    ),
                   ),
                   Expanded(
                     flex: 5,
                     child: Semantics(
-                      value: '${((cat['percentage'] as double) * 100).toStringAsFixed(0)}%',
+                      value:
+                          '${((cat['percentage'] as double) * 100).toStringAsFixed(0)}%',
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
@@ -205,9 +221,10 @@ class ChartsCard extends StatelessWidget {
                     child: Text(
                       '${cat['amount'].toStringAsFixed(0)} $currency',
                       style: TextStyle(
-                          color: colorScheme.onSurface,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700),
+                        color: colorScheme.onSurface,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
                       textAlign: TextAlign.left,
                     ),
                   ),

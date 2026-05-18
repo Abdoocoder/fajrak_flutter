@@ -19,25 +19,35 @@ class AlertHeader extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(children: [
-          Text('alerts_count'.tr(args: [totalCount.toString()]),
+        Row(
+          children: [
+            Text(
+              'alerts_count'.tr(args: [totalCount.toString()]),
               style: TextStyle(
-                  color: colorScheme.onSurfaceVariant,
-                  fontSize: 13)),
-          if (unreadCount > 0) ...[
-            const SizedBox(width: 8),
-            Container(
+                color: colorScheme.onSurfaceVariant,
+                fontSize: 13,
+              ),
+            ),
+            if (unreadCount > 0) ...[
+              const SizedBox(width: 8),
+              Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                    color: AppColors.error.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12)),
-                child: Text('alerts_unread_count'.tr(args: [unreadCount.toString()]),
-                    style: const TextStyle(
-                        color: AppColors.error,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w900))),
-          ]
-        ]),
+                  color: AppColors.error.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'alerts_unread_count'.tr(args: [unreadCount.toString()]),
+                  style: const TextStyle(
+                    color: AppColors.error,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
       ],
     );
   }

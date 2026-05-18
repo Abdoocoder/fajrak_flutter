@@ -11,30 +11,30 @@ class NotificationService {
   // 1. القنوات المتعددة (Notification Channels)
   static const AndroidNotificationChannel _budgetChannel =
       AndroidNotificationChannel(
-    'budget_alerts', // ID
-    'Budget Alerts', // Name
-    description: 'تنبيهات تجاوز الميزانية',
-    importance: Importance.high,
-    playSound: true,
-  );
+        'budget_alerts', // ID
+        'Budget Alerts', // Name
+        description: 'تنبيهات تجاوز الميزانية',
+        importance: Importance.high,
+        playSound: true,
+      );
 
   static const AndroidNotificationChannel _debtChannel =
       AndroidNotificationChannel(
-    'debt_reminders', // ID
-    'Debt Reminders', // Name
-    description: 'تذكير بمواعيد الأقساط والديون',
-    importance: Importance.max,
-    playSound: true,
-  );
+        'debt_reminders', // ID
+        'Debt Reminders', // Name
+        description: 'تذكير بمواعيد الأقساط والديون',
+        importance: Importance.max,
+        playSound: true,
+      );
 
   static const AndroidNotificationChannel _goalChannel =
       AndroidNotificationChannel(
-    'saving_goals', // ID
-    'Saving Goals', // Name
-    description: 'إنجازات أهداف الادخار',
-    importance: Importance.defaultImportance,
-    playSound: true,
-  );
+        'saving_goals', // ID
+        'Saving Goals', // Name
+        description: 'إنجازات أهداف الادخار',
+        importance: Importance.defaultImportance,
+        playSound: true,
+      );
 
   static Future<void> initialize() async {
     final messaging = FirebaseMessaging.instance;
@@ -53,8 +53,10 @@ class NotificationService {
     // تهيئة الإشعارات المحلية
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosInit = DarwinInitializationSettings();
-    const initSettings =
-        InitializationSettings(android: androidInit, iOS: iosInit);
+    const initSettings = InitializationSettings(
+      android: androidInit,
+      iOS: iosInit,
+    );
 
     await _localNotifications.initialize(
       settings: initSettings,
@@ -67,9 +69,10 @@ class NotificationService {
     );
 
     // تسجيل القنوات على أندرويد
-    final androidPlugin =
-        _localNotifications.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+    final androidPlugin = _localNotifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     if (androidPlugin != null) {
       await androidPlugin.createNotificationChannel(_budgetChannel);
       await androidPlugin.createNotificationChannel(_debtChannel);
@@ -113,8 +116,10 @@ class NotificationService {
         selectedChannel = _goalChannel;
         break;
       default:
-        selectedChannel =
-            const AndroidNotificationChannel('default', 'Default');
+        selectedChannel = const AndroidNotificationChannel(
+          'default',
+          'Default',
+        );
     }
 
     await _localNotifications.show(
@@ -174,7 +179,8 @@ class NotificationService {
 
       if (kDebugMode) {
         debugPrint(
-            '[NotificationService] Saving FCM token: ${token.substring(0, 20)}...');
+          '[NotificationService] Saving FCM token: ${token.substring(0, 20)}...',
+        );
       }
 
       final error = await Supabase.instance.client

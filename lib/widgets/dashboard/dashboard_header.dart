@@ -32,7 +32,9 @@ class _DashboardHeaderState extends State<DashboardHeader> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.name.isNotEmpty ? 'dash_welcome'.tr(args: [widget.name]) : 'dash_title'.tr(),
+                widget.name.isNotEmpty
+                    ? 'dash_welcome'.tr(args: [widget.name])
+                    : 'dash_title'.tr(),
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -64,7 +66,9 @@ class _DashboardHeaderState extends State<DashboardHeader> {
           onTapCancel: () => setState(() => _bellPressed = false),
           child: AnimatedScale(
             scale: _bellPressed && !reduceMotion ? 0.93 : 1.0,
-            duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 120),
+            duration: reduceMotion
+                ? Duration.zero
+                : const Duration(milliseconds: 120),
             curve: Curves.easeOut,
             child: Stack(
               clipBehavior: Clip.none,
@@ -74,12 +78,16 @@ class _DashboardHeaderState extends State<DashboardHeader> {
                   blur: 8,
                   opacity: 0.1,
                   color: colorScheme.surface,
-                  borderColor: colorScheme.outlineVariant.withValues(alpha: 0.3),
+                  borderColor: colorScheme.outlineVariant.withValues(
+                    alpha: 0.3,
+                  ),
                   child: SizedBox(
                     width: 44,
                     height: 44,
                     child: Icon(
-                      unreadCount > 0 ? Icons.notifications_rounded : Icons.notifications_none_rounded,
+                      unreadCount > 0
+                          ? Icons.notifications_rounded
+                          : Icons.notifications_none_rounded,
                       color: colorScheme.onSurface,
                     ),
                   ),

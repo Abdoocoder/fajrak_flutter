@@ -30,28 +30,36 @@ class DebtSummarySection extends StatelessWidget {
     return Column(
       children: [
         // Summary stats cards
-        Row(children: [
-          Expanded(
+        Row(
+          children: [
+            Expanded(
               child: _statCard(
-                  'debts_total_remaining'.tr(),
-                  '${totalRemaining.toStringAsFixed(0)} $currency',
-                  AppColors.error,
-                  cs)),
-          const SizedBox(width: 8),
-          Expanded(
+                'debts_total_remaining'.tr(),
+                '${totalRemaining.toStringAsFixed(0)} $currency',
+                AppColors.error,
+                cs,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
               child: _statCard(
-                  'debts_paid'.tr(),
-                  '${paidPct.toStringAsFixed(0)}%',
-                  AppColors.success,
-                  cs)),
-          const SizedBox(width: 8),
-          Expanded(
+                'debts_paid'.tr(),
+                '${paidPct.toStringAsFixed(0)}%',
+                AppColors.success,
+                cs,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
               child: _statCard(
-                  'debts_monthly_total'.tr(),
-                  '${totalMonthly.toStringAsFixed(0)} $currency',
-                  AppColors.warning,
-                  cs)),
-        ]),
+                'debts_monthly_total'.tr(),
+                '${totalMonthly.toStringAsFixed(0)} $currency',
+                AppColors.warning,
+                cs,
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 12),
 
         // Life-time paid badge
@@ -60,40 +68,73 @@ class DebtSummarySection extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
-                color: AppColors.success.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                    color: AppColors.success.withValues(alpha: 0.2))),
-            child: Row(children: [
-              const Icon(Icons.emoji_events, size: 28, color: AppColors.success),
-              const SizedBox(width: 12),
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('debts_total_paid_life'.tr(),
-                    style: TextStyle(
+              color: AppColors.success.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: AppColors.success.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.emoji_events,
+                  size: 28,
+                  color: AppColors.success,
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'debts_total_paid_life'.tr(),
+                      style: TextStyle(
                         color: cs.onSurfaceVariant,
-                        fontSize: 12)),
-                Text('${lifeTimePaid.toStringAsFixed(0)} $currency',
-                    style: const TextStyle(
+                        fontSize: 12,
+                      ),
+                    ),
+                    Text(
+                      '${lifeTimePaid.toStringAsFixed(0)} $currency',
+                      style: const TextStyle(
                         color: AppColors.successLight,
                         fontSize: 18,
-                        fontWeight: FontWeight.w900)),
-              ]),
-              const Spacer(),
-              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                Text('debts_paid_count'.tr(),
-                    style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'debts_paid_count'.tr(),
+                      style: TextStyle(
                         color: cs.onSurfaceVariant,
-                        fontSize: 11)),
-                Row(mainAxisSize: MainAxisSize.min, children: [
-                  Text('$paidCount ',
-                      style: const TextStyle(
+                        fontSize: 11,
+                      ),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '$paidCount ',
+                          style: const TextStyle(
+                            color: AppColors.successLight,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const Icon(
+                          Icons.check_circle_outline,
+                          size: 16,
                           color: AppColors.successLight,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w900)),
-                  const Icon(Icons.check_circle_outline, size: 16, color: AppColors.successLight),
-                ]),
-              ]),
-            ]),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
 
         // Overall progress
@@ -101,51 +142,69 @@ class DebtSummarySection extends StatelessWidget {
           padding: const EdgeInsets.all(14),
           margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
-              color: cs.surface,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: cs.outlineVariant)),
-          child: Column(children: [
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text('debts_overall_progress'.tr(),
-                  style: TextStyle(
+            color: cs.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: cs.outlineVariant),
+          ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'debts_overall_progress'.tr(),
+                    style: TextStyle(
                       color: cs.onSurfaceVariant,
                       fontSize: 12,
-                      fontWeight: FontWeight.w700)),
-              Text('${paidPct.toStringAsFixed(1)}%',
-                  style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    '${paidPct.toStringAsFixed(1)}%',
+                    style: const TextStyle(
                       color: AppColors.successLight,
                       fontSize: 12,
-                      fontWeight: FontWeight.w900)),
-            ]),
-            const SizedBox(height: 8),
-            Semantics(
-              value: '${paidPct.toStringAsFixed(0)}%',
-              child: ClipRRect(
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Semantics(
+                value: '${paidPct.toStringAsFixed(0)}%',
+                child: ClipRRect(
                   borderRadius: BorderRadius.circular(5),
                   child: LinearProgressIndicator(
-                      value: (paidPct / 100).clamp(0.0, 1.0),
-                      backgroundColor: cs.outlineVariant,
-                      color: AppColors.success,
-                      minHeight: 10)),
-            ),
-            const SizedBox(height: 6),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text(
-                  'debts_paid_amount'.tr(args: [
-                    (totalOriginal - totalRemaining).toStringAsFixed(0),
-                    currency
-                  ]),
-                  style: TextStyle(
-                      color: cs.onSurfaceVariant,
-                      fontSize: 10)),
-              Text(
-                  'debts_original_amount_label'
-                      .tr(args: [totalOriginal.toStringAsFixed(0), currency]),
-                  style: TextStyle(
-                      color: cs.onSurfaceVariant,
-                      fontSize: 10)),
-            ]),
-          ]),
+                    value: (paidPct / 100).clamp(0.0, 1.0),
+                    backgroundColor: cs.outlineVariant,
+                    color: AppColors.success,
+                    minHeight: 10,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'debts_paid_amount'.tr(
+                      args: [
+                        (totalOriginal - totalRemaining).toStringAsFixed(0),
+                        currency,
+                      ],
+                    ),
+                    style: TextStyle(color: cs.onSurfaceVariant, fontSize: 10),
+                  ),
+                  Text(
+                    'debts_original_amount_label'.tr(
+                      args: [totalOriginal.toStringAsFixed(0), currency],
+                    ),
+                    style: TextStyle(color: cs.onSurfaceVariant, fontSize: 10),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -155,21 +214,28 @@ class DebtSummarySection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
       decoration: BoxDecoration(
-          color: cs.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: cs.outlineVariant)),
-      child: Column(children: [
-        Text(value,
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.outlineVariant),
+      ),
+      child: Column(
+        children: [
+          Text(
+            value,
             style: TextStyle(
-                color: color,
-                fontSize: 14,
-                fontWeight: FontWeight.w900)),
-        const SizedBox(height: 4),
-        Text(label,
-            style: TextStyle(
-                color: cs.onSurfaceVariant, fontSize: 10),
-            textAlign: TextAlign.center),
-      ]),
+              color: color,
+              fontSize: 14,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(color: cs.onSurfaceVariant, fontSize: 10),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }

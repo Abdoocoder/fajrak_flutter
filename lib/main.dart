@@ -41,7 +41,10 @@ void main() async {
   // Global Error Handling — set up before anything async
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
-    ErrorHandler.handle(details.exception, developerMessage: 'FlutterError: ${details.library}');
+    ErrorHandler.handle(
+      details.exception,
+      developerMessage: 'FlutterError: ${details.library}',
+    );
   };
   PlatformDispatcher.instance.onError = (error, stack) {
     ErrorHandler.handle(error, developerMessage: 'PlatformError');
@@ -63,9 +66,12 @@ void main() async {
             apiKey: dotenv.env['FLUTTER_FIREBASE_API_KEY'] ?? '',
             appId: dotenv.env['FLUTTER_FIREBASE_APP_ID'] ?? '',
             messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID'] ?? '',
-            projectId: dotenv.env['FLUTTER_FIREBASE_PROJECT_ID'] ?? 'fajrak-f7df1',
-            authDomain: '${dotenv.env['FLUTTER_FIREBASE_PROJECT_ID'] ?? 'fajrak-f7df1'}.firebaseapp.com',
-            storageBucket: '${dotenv.env['FLUTTER_FIREBASE_PROJECT_ID'] ?? 'fajrak-f7df1'}.appspot.com',
+            projectId:
+                dotenv.env['FLUTTER_FIREBASE_PROJECT_ID'] ?? 'fajrak-f7df1',
+            authDomain:
+                '${dotenv.env['FLUTTER_FIREBASE_PROJECT_ID'] ?? 'fajrak-f7df1'}.firebaseapp.com',
+            storageBucket:
+                '${dotenv.env['FLUTTER_FIREBASE_PROJECT_ID'] ?? 'fajrak-f7df1'}.appspot.com',
           ),
         )
       : Firebase.initializeApp();
@@ -87,6 +93,10 @@ void main() async {
   // The DB is re-opened with the correct key after the user signs in
   // (handled in AuthService / SplashScreen).
   if (!kIsWeb) {
+    final initialKey =
+        Supabase.instance.client.auth.currentSession?.accessToken ??
+        dotenv.env['SUPABASE_ANON_KEY'] ??
+        'fajrak_default_key';
     final initialKey = await _getLocalDbKey();
     await AppDatabase.initialize(encryptionKey: initialKey);
   }
@@ -155,11 +165,12 @@ Future<String> _getLocalDbKey() async {
 }
 
 class FajrakApp extends StatelessWidget {
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
   const FajrakApp({super.key});
 
   static final ThemeData _lightTheme = AppTheme.light;
-  static final ThemeData _darkTheme  = AppTheme.dark;
+  static final ThemeData _darkTheme = AppTheme.dark;
 
   @override
   Widget build(BuildContext context) {
@@ -183,7 +194,8 @@ class FajrakApp extends StatelessWidget {
         '/main': (context) => const MainScreen(),
         '/forgot-password': (context) => const ForgotPasswordScreen(),
         '/reset-password': (context) => const ResetPasswordScreen(),
-        '/settings/notifications': (context) => const NotificationSettingsScreen(),
+        '/settings/notifications': (context) =>
+            const NotificationSettingsScreen(),
       },
     );
   }

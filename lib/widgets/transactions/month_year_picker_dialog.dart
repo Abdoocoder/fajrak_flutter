@@ -35,11 +35,14 @@ class _MonthYearPickerDialogState extends State<MonthYearPickerDialog> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('filter_date'.tr(),
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900)),
+          Text(
+            'filter_date'.tr(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
           const SizedBox(height: 20),
           Row(
             children: [
@@ -49,13 +52,15 @@ class _MonthYearPickerDialogState extends State<MonthYearPickerDialog> {
                   initialValue: _selectedMonth,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                      labelText: 'month'.tr(),
-                      filled: true,
-                      fillColor: const Color(0xFF1E293B)),
+                    labelText: 'month'.tr(),
+                    filled: true,
+                    fillColor: const Color(0xFF1E293B),
+                  ),
                   items: List.generate(
-                      12,
-                      (i) => DropdownMenuItem(
-                          value: i + 1, child: Text('${i + 1}'))),
+                    12,
+                    (i) =>
+                        DropdownMenuItem(value: i + 1, child: Text('${i + 1}')),
+                  ),
                   onChanged: (v) => setState(() => _selectedMonth = v),
                 ),
               ),
@@ -66,9 +71,10 @@ class _MonthYearPickerDialogState extends State<MonthYearPickerDialog> {
                   initialValue: _selectedYear,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                      labelText: 'year'.tr(),
-                      filled: true,
-                      fillColor: const Color(0xFF1E293B)),
+                    labelText: 'year'.tr(),
+                    filled: true,
+                    fillColor: const Color(0xFF1E293B),
+                  ),
                   items: List.generate(5, (i) {
                     final year = DateTime.now().year - i;
                     return DropdownMenuItem(value: year, child: Text('$year'));
@@ -87,9 +93,10 @@ class _MonthYearPickerDialogState extends State<MonthYearPickerDialog> {
                     widget.onApplied(null, null);
                     Navigator.pop(context);
                   },
-                  child: Text('cancel_filter'.tr(),
-                      style: const TextStyle(
-                          color: Color(0xFFEF4444))),
+                  child: Text(
+                    'cancel_filter'.tr(),
+                    style: const TextStyle(color: Color(0xFFEF4444)),
+                  ),
                 ),
               ),
               Expanded(
@@ -99,10 +106,12 @@ class _MonthYearPickerDialogState extends State<MonthYearPickerDialog> {
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF3B7EF6)),
-                  child: Text('apply'.tr(),
-                      style: const TextStyle(
-                          color: Colors.white)),
+                    backgroundColor: const Color(0xFF3B7EF6),
+                  ),
+                  child: Text(
+                    'apply'.tr(),
+                    style: const TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
             ],

@@ -39,9 +39,15 @@ class _ProfileFormState extends State<ProfileForm> {
     super.initState();
     final p = widget.initialProfile ?? {};
     _nameCtrl = TextEditingController(text: p['full_name']?.toString() ?? '');
-    _incomeCtrl = TextEditingController(text: p['monthly_income']?.toString() ?? '');
-    _openingBalanceCtrl = TextEditingController(text: p['opening_balance']?.toString() ?? '');
-    _jobTitleCtrl = TextEditingController(text: p['job_title']?.toString() ?? '');
+    _incomeCtrl = TextEditingController(
+      text: p['monthly_income']?.toString() ?? '',
+    );
+    _openingBalanceCtrl = TextEditingController(
+      text: p['opening_balance']?.toString() ?? '',
+    );
+    _jobTitleCtrl = TextEditingController(
+      text: p['job_title']?.toString() ?? '',
+    );
     _phoneCtrl = TextEditingController(text: p['phone']?.toString() ?? '');
     // تنظيف legacy data: 'دولار' كانت bug قديم، نحوّلها إلى 'USD'
     final raw = p['currency']?.toString() ?? 'JOD';
@@ -83,9 +89,11 @@ class _ProfileFormState extends State<ProfileForm> {
 
       // Sync the salary transaction for the current month with the new income
       final now = DateTime.now();
-      final monthStart = '${now.year}-${now.month.toString().padLeft(2, '0')}-01';
+      final monthStart =
+          '${now.year}-${now.month.toString().padLeft(2, '0')}-01';
       final nextMonth = DateTime(now.year, now.month + 1, 1);
-      final nextMonthStart = '${nextMonth.year}-${nextMonth.month.toString().padLeft(2, '0')}-01';
+      final nextMonthStart =
+          '${nextMonth.year}-${nextMonth.month.toString().padLeft(2, '0')}-01';
 
       final existing = await Supabase.instance.client
           .from('transactions')
@@ -110,15 +118,18 @@ class _ProfileFormState extends State<ProfileForm> {
           'amount': newIncome,
           'category': 'cat_salary'.tr(),
           'description': 'onboarding_income_desc'.tr(),
-          'transaction_date': '${now.year}-${now.month.toString().padLeft(2, '0')}-01',
+          'transaction_date':
+              '${now.year}-${now.month.toString().padLeft(2, '0')}-01',
         });
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('toast_saved'.tr(), style: const TextStyle()),
-          backgroundColor: AppColors.success,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('toast_saved'.tr(), style: const TextStyle()),
+            backgroundColor: AppColors.success,
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _savingProfile = false);
@@ -158,10 +169,12 @@ class _ProfileFormState extends State<ProfileForm> {
                   child: Center(
                     child: Text(
                       _nameCtrl.text.isNotEmpty
-                          ? _nameCtrl.text.substring(0, _nameCtrl.text.length.clamp(0, 2)).toUpperCase()
+                          ? _nameCtrl.text
+                                .substring(0, _nameCtrl.text.length.clamp(0, 2))
+                                .toUpperCase()
                           : widget.userEmail.length >= 2
-                              ? widget.userEmail.substring(0, 2).toUpperCase()
-                              : 'U',
+                          ? widget.userEmail.substring(0, 2).toUpperCase()
+                          : 'U',
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w900,
@@ -176,7 +189,9 @@ class _ProfileFormState extends State<ProfileForm> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _nameCtrl.text.isNotEmpty ? _nameCtrl.text : 'settings_your_name'.tr(),
+                        _nameCtrl.text.isNotEmpty
+                            ? _nameCtrl.text
+                            : 'settings_your_name'.tr(),
                         style: TextStyle(
                           color: colorScheme.onSurface,
                           fontWeight: FontWeight.w900,
@@ -217,23 +232,44 @@ class _ProfileFormState extends State<ProfileForm> {
             ),
           ),
           const SizedBox(height: 20),
-          _inputField(_nameCtrl, 'settings_name'.tr(), Icons.person_outline, colorScheme),
+          _inputField(
+            _nameCtrl,
+            'settings_name'.tr(),
+            Icons.person_outline,
+            colorScheme,
+          ),
           const SizedBox(height: 10),
-          _inputField(_jobTitleCtrl, 'settings_job_title'.tr(), Icons.work_outline, colorScheme),
+          _inputField(
+            _jobTitleCtrl,
+            'settings_job_title'.tr(),
+            Icons.work_outline,
+            colorScheme,
+          ),
           const SizedBox(height: 10),
-          _inputField(_phoneCtrl, 'settings_phone'.tr(), Icons.phone_outlined, colorScheme, type: TextInputType.phone),
+          _inputField(
+            _phoneCtrl,
+            'settings_phone'.tr(),
+            Icons.phone_outlined,
+            colorScheme,
+            type: TextInputType.phone,
+          ),
           const SizedBox(height: 10),
           GestureDetector(
             onTap: () async {
               final date = await showDatePicker(
                 context: context,
-                initialDate: _birthDate.isNotEmpty ? DateTime.tryParse(_birthDate) ?? DateTime(1990) : DateTime(1990),
+                initialDate: _birthDate.isNotEmpty
+                    ? DateTime.tryParse(_birthDate) ?? DateTime(1990)
+                    : DateTime(1990),
                 firstDate: DateTime(1940),
                 lastDate: DateTime.now(),
-                builder: (ctx, child) => Theme(data: ThemeData.dark(), child: child!),
+                builder: (ctx, child) =>
+                    Theme(data: ThemeData.dark(), child: child!),
               );
               if (date != null) {
-                setState(() => _birthDate = date.toIso8601String().split('T')[0]);
+                setState(
+                  () => _birthDate = date.toIso8601String().split('T')[0],
+                );
               }
             },
             child: Container(
@@ -245,32 +281,53 @@ class _ProfileFormState extends State<ProfileForm> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.cake_outlined, color: colorScheme.onSurfaceVariant, size: 20),
+                  Icon(
+                    Icons.cake_outlined,
+                    color: colorScheme.onSurfaceVariant,
+                    size: 20,
+                  ),
                   const SizedBox(width: 12),
                   Text(
-                    _birthDate.isNotEmpty ? _birthDate : 'settings_birth_date'.tr(),
+                    _birthDate.isNotEmpty
+                        ? _birthDate
+                        : 'settings_birth_date'.tr(),
                     style: TextStyle(
-                      color: _birthDate.isNotEmpty ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
+                      color: _birthDate.isNotEmpty
+                          ? colorScheme.onSurface
+                          : colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const Spacer(),
-                  Icon(Icons.calendar_today_outlined, color: colorScheme.onSurfaceVariant, size: 16),
+                  Icon(
+                    Icons.calendar_today_outlined,
+                    color: colorScheme.onSurfaceVariant,
+                    size: 16,
+                  ),
                 ],
               ),
             ),
           ),
           const SizedBox(height: 20),
           _sectionTitle('settings_financial'.tr(), colorScheme),
-          _inputField(_incomeCtrl, 'settings_income'.tr(), Icons.account_balance_wallet_outlined, colorScheme, type: const TextInputType.numberWithOptions(decimal: true)),
+          _inputField(
+            _incomeCtrl,
+            'settings_income'.tr(),
+            Icons.account_balance_wallet_outlined,
+            colorScheme,
+            type: const TextInputType.numberWithOptions(decimal: true),
+          ),
           const SizedBox(height: 10),
-          _inputField(_openingBalanceCtrl, 'الرصيد الابتدائي (النقد قبل التطبيق)', Icons.account_balance_wallet_outlined, colorScheme, type: const TextInputType.numberWithOptions(decimal: true)),
+          _inputField(
+            _openingBalanceCtrl,
+            'الرصيد الابتدائي (النقد قبل التطبيق)',
+            Icons.account_balance_wallet_outlined,
+            colorScheme,
+            type: const TextInputType.numberWithOptions(decimal: true),
+          ),
           const SizedBox(height: 12),
           Text(
             'settings_currency'.tr(),
-            style: TextStyle(
-              color: colorScheme.onSurfaceVariant,
-              fontSize: 13,
-            ),
+            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
           ),
           const SizedBox(height: 8),
           GestureDetector(
@@ -288,24 +345,44 @@ class _ProfileFormState extends State<ProfileForm> {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: colorScheme.outlineVariant),
               ),
-              child: Row(children: [
-                Text(
-                  CurrencyService.findByCode(_currency)?['flag'] as String? ?? '🌐',
-                  style: const TextStyle(fontSize: 22),
-                ),
-                const SizedBox(width: 10),
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              child: Row(
+                children: [
                   Text(
-                    CurrencyService.findByCode(_currency)?['labelAr'] as String? ?? _currency,
-                    style: TextStyle(color: colorScheme.onSurface, fontSize: 14, fontWeight: FontWeight.w700),
+                    CurrencyService.findByCode(_currency)?['flag'] as String? ??
+                        '🌐',
+                    style: const TextStyle(fontSize: 22),
                   ),
-                  Text(
-                    _currency,
-                    style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 11),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          CurrencyService.findByCode(_currency)?['labelAr']
+                                  as String? ??
+                              _currency,
+                          style: TextStyle(
+                            color: colorScheme.onSurface,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        Text(
+                          _currency,
+                          style: TextStyle(
+                            color: colorScheme.onSurfaceVariant,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ])),
-                Icon(Icons.arrow_drop_down, color: colorScheme.onSurfaceVariant),
-              ]),
+                  Icon(
+                    Icons.arrow_drop_down,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 24),
@@ -317,17 +394,25 @@ class _ProfileFormState extends State<ProfileForm> {
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               child: _savingProfile
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
                     )
                   : Text(
                       'save'.tr(),
-                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 15,
+                      ),
                     ),
             ),
           ),
@@ -376,7 +461,10 @@ class _ProfileFormState extends State<ProfileForm> {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: colorScheme.primary),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
       ),
     );
   }

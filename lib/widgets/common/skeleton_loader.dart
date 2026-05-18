@@ -19,13 +19,9 @@ class SkeletonLoader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    final baseColor = isDark 
-        ? AppColors.surface2 
-        : Colors.grey[300]!;
-    final highlightColor = isDark 
-        ? const Color(0xFF334155) 
-        : Colors.grey[100]!;
+
+    final baseColor = isDark ? AppColors.surface2 : Colors.grey[300]!;
+    final highlightColor = isDark ? const Color(0xFF334155) : Colors.grey[100]!;
 
     return Container(
       margin: margin,
@@ -67,10 +63,7 @@ class ListSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: List.generate(
-        count,
-        (index) => const CardSkeleton(height: 80),
-      ),
+      children: List.generate(count, (index) => const CardSkeleton(height: 80)),
     );
   }
 }
@@ -100,15 +93,37 @@ class PageSkeleton extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
-          const SkeletonLoader(width: double.infinity, height: 160, borderRadius: 24),
+          const SkeletonLoader(
+            width: double.infinity,
+            height: 160,
+            borderRadius: 24,
+          ),
           const SizedBox(height: 24),
           Row(
             children: const [
-              Expanded(child: SkeletonLoader(width: double.infinity, height: 80, borderRadius: 16)),
+              Expanded(
+                child: SkeletonLoader(
+                  width: double.infinity,
+                  height: 80,
+                  borderRadius: 16,
+                ),
+              ),
               SizedBox(width: 12),
-              Expanded(child: SkeletonLoader(width: double.infinity, height: 80, borderRadius: 16)),
+              Expanded(
+                child: SkeletonLoader(
+                  width: double.infinity,
+                  height: 80,
+                  borderRadius: 16,
+                ),
+              ),
               SizedBox(width: 12),
-              Expanded(child: SkeletonLoader(width: double.infinity, height: 80, borderRadius: 16)),
+              Expanded(
+                child: SkeletonLoader(
+                  width: double.infinity,
+                  height: 80,
+                  borderRadius: 16,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 24),

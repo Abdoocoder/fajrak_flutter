@@ -66,16 +66,17 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
   void _watchSyncQueue() {
     final db = AppDatabase.instance;
-    _syncSubscription = (db.select(db.transactionsTable)
-          ..where((t) => t.syncStatus.isNotValue('synced')))
-        .watch()
-        .listen((rows) {
-      if (!mounted) return;
-      setState(() {
-        _syncStatuses = {for (final r in rows) r.id: r.syncStatus};
-        _pendingCount = rows.length;
-      });
-    });
+    _syncSubscription =
+        (db.select(db.transactionsTable)
+              ..where((t) => t.syncStatus.isNotValue('synced')))
+            .watch()
+            .listen((rows) {
+              if (!mounted) return;
+              setState(() {
+                _syncStatuses = {for (final r in rows) r.id: r.syncStatus};
+                _pendingCount = rows.length;
+              });
+            });
   }
 
   Future<void> _triggerSync() async {
@@ -91,7 +92,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
       if (!_loading && !_loadingMore && _hasMore) {
         _load(reset: false);
       }
@@ -121,10 +123,18 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     try {
       // Build date range strings once (used by both paged + totals queries)
       final String? start = (_filterMonth != null && _filterYear != null)
-          ? DateTime(_filterYear!, _filterMonth!, 1).toIso8601String().split('T')[0]
+          ? DateTime(
+              _filterYear!,
+              _filterMonth!,
+              1,
+            ).toIso8601String().split('T')[0]
           : null;
       final String? end = (_filterMonth != null && _filterYear != null)
-          ? DateTime(_filterYear!, _filterMonth! + 1, 0).toIso8601String().split('T')[0]
+          ? DateTime(
+              _filterYear!,
+              _filterMonth! + 1,
+              0,
+            ).toIso8601String().split('T')[0]
           : null;
 
       // Build paged transactions query
@@ -138,8 +148,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           : baseQ;
       final pagedFuture = rangedQ
           .order('transaction_date', ascending: false)
-          .range(reset ? 0 : _transactions.length,
-              (reset ? 0 : _transactions.length) + _limit - 1);
+          .range(
+            reset ? 0 : _transactions.length,
+            (reset ? 0 : _transactions.length) + _limit - 1,
+          );
 
       // Parallel: profile (only on reset — we already have it on load-more)
       // + paged transactions + totals (only on reset)
@@ -149,18 +161,25 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             .select('type, amount') // minimal fields for summary calculation
             .eq('user_id', user.id);
         final totalsFuture = (start != null && end != null)
-            ? totalsQ.gte('transaction_date', start).lte('transaction_date', end)
+            ? totalsQ
+                  .gte('transaction_date', start)
+                  .lte('transaction_date', end)
             : totalsQ;
 
         final results = await Future.wait<dynamic>([
-          Supabase.instance.client.from('profiles').select('currency, full_name').eq('id', user.id).single(),
+          Supabase.instance.client
+              .from('profiles')
+              .select('currency, full_name')
+              .eq('id', user.id)
+              .single(),
           pagedFuture,
           totalsFuture,
         ]);
 
         final profile = results[0] as Map<String, dynamic>;
         final data = results[1] as List;
-        final allDataForSummary = (results[2] as List).cast<Map<String, dynamic>>();
+        final allDataForSummary = (results[2] as List)
+            .cast<Map<String, dynamic>>();
 
         if (mounted) {
           _currency = profile['currency'] as String? ?? 'JOD';
@@ -183,7 +202,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       }
     } catch (e) {
       if (mounted) setState(() => _hasError = true);
-      if (mounted) ErrorHandler.handle(e, context: context, developerMessage: 'Transactions Load');
+      if (mounted)
+        ErrorHandler.handle(
+          e,
+          context: context,
+          developerMessage: 'Transactions Load',
+        );
     } finally {
       if (mounted) {
         setState(() {
@@ -200,9 +224,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-          content: Text('settings_exporting'.tr(),
-              style: const TextStyle()),
-          duration: const Duration(seconds: 2)),
+        content: Text('settings_exporting'.tr(), style: const TextStyle()),
+        duration: const Duration(seconds: 2),
+      ),
     );
 
     try {
@@ -217,8 +241,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text('settings_no_export'.tr(),
-                    style: const TextStyle())),
+              content: Text(
+                'settings_no_export'.tr(),
+                style: const TextStyle(),
+              ),
+            ),
           );
         }
         return;
@@ -231,23 +258,29 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       }
 
       final buffer = StringBuffer();
-      buffer.writeln([
-        csvField('trans_date'.tr()),
-        csvField('inv_type'.tr()),
-        csvField('${'trans_amount'.tr()} ($_currency)'),
-        csvField('trans_category'.tr()),
-        csvField('trans_description'.tr()),
-      ].join(','));
+      buffer.writeln(
+        [
+          csvField('trans_date'.tr()),
+          csvField('inv_type'.tr()),
+          csvField('${'trans_amount'.tr()} ($_currency)'),
+          csvField('trans_category'.tr()),
+          csvField('trans_description'.tr()),
+        ].join(','),
+      );
       for (final tx in list) {
-        final type = tx['type'] == 'income' ? 'trans_income'.tr() : 'trans_expense'.tr();
+        final type = tx['type'] == 'income'
+            ? 'trans_income'.tr()
+            : 'trans_expense'.tr();
         final amount = (tx['amount'] as num? ?? 0).toStringAsFixed(2);
-        buffer.writeln([
-          csvField(tx['transaction_date']),
-          csvField(type),
-          csvField(amount),
-          csvField(tx['category']),
-          csvField(tx['description']),
-        ].join(','));
+        buffer.writeln(
+          [
+            csvField(tx['transaction_date']),
+            csvField(type),
+            csvField(amount),
+            csvField(tx['category']),
+            csvField(tx['description']),
+          ].join(','),
+        );
       }
 
       final dir = await getTemporaryDirectory();
@@ -255,10 +288,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       final file = File('${dir.path}/fajrak_transactions_$ts.csv');
       await file.writeAsString('\u{feff}${buffer.toString()}', encoding: utf8);
 
-      await SharePlus.instance.share(ShareParams(
-        files: [XFile(file.path, mimeType: 'text/csv')],
-        subject: 'trans_title'.tr(),
-      ));
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path, mimeType: 'text/csv')],
+          subject: 'trans_title'.tr(),
+        ),
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -277,7 +312,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
       final now = DateTime.now();
       final month = _filterMonth ?? now.month;
-      final year  = _filterYear  ?? now.year;
+      final year = _filterYear ?? now.year;
 
       // Fetch active debts for the report
       final debtsRes = await Supabase.instance.client
@@ -294,7 +329,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           .where((t) => t['type'] == 'expense')
           .fold(0.0, (a, t) => a + (t['amount'] as num).toDouble());
       final debtPayments = _allTransactions
-          .where((t) => t['type'] == 'expense' && debtCats.contains(t['category'] as String?))
+          .where(
+            (t) =>
+                t['type'] == 'expense' &&
+                debtCats.contains(t['category'] as String?),
+          )
           .fold(0.0, (a, t) => a + (t['amount'] as num).toDouble());
 
       await PdfReportService.shareMonthlyReport(
@@ -312,11 +351,15 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('حدث خطأ أثناء إنشاء التقرير',
-              style: const TextStyle()),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'حدث خطأ أثناء إنشاء التقرير',
+              style: const TextStyle(),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _generatingPdf = false);
@@ -354,7 +397,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       useSafeArea: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (ctx) => AddTransactionDialog(
         existing: existing,
         onSaved: () => _load(reset: true),
@@ -369,7 +413,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       useSafeArea: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (ctx) => MonthYearPickerDialog(
         initialMonth: _filterMonth,
         initialYear: _filterYear,
@@ -398,7 +443,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         .where((t) => t['type'] == 'expense')
         .fold(0.0, (a, t) => a + (t['amount'] as num).toDouble());
     final debtPayments = _allTransactions
-        .where((t) => t['type'] == 'expense' && debtCategories.contains(t['category'] as String?))
+        .where(
+          (t) =>
+              t['type'] == 'expense' &&
+              debtCategories.contains(t['category'] as String?),
+        )
         .fold(0.0, (a, t) => a + (t['amount'] as num).toDouble());
 
     return Scaffold(
@@ -407,15 +456,21 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('trans_title'.tr(),
-                style: TextStyle(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 18)),
-            Text('trans_count'.tr(args: [filtered.length.toString()]),
-                style: TextStyle(
-                    color: colorScheme.onSurfaceVariant,
-                    fontSize: 12)),
+            Text(
+              'trans_title'.tr(),
+              style: TextStyle(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w900,
+                fontSize: 18,
+              ),
+            ),
+            Text(
+              'trans_count'.tr(args: [filtered.length.toString()]),
+              style: TextStyle(
+                color: colorScheme.onSurfaceVariant,
+                fontSize: 12,
+              ),
+            ),
           ],
         ),
         actions: [
@@ -425,8 +480,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Badge(
-                  label: Text(_pendingCount.toString(),
-                      style: const TextStyle(fontSize: 10)),
+                  label: Text(
+                    _pendingCount.toString(),
+                    style: const TextStyle(fontSize: 10),
+                  ),
                   backgroundColor: Colors.orange[600],
                   child: IconButton(
                     onPressed: _triggerSync,
@@ -438,7 +495,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               ),
             ),
           IconButton(
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RecurringScreen())),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const RecurringScreen()),
+            ),
             icon: Icon(Icons.repeat, color: colorScheme.onSurfaceVariant),
             tooltip: 'recurring_title'.tr(),
           ),
@@ -451,9 +511,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               ? Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: SizedBox(
-                    width: 20, height: 20,
+                    width: 20,
+                    height: 20,
                     child: CircularProgressIndicator(
-                        strokeWidth: 2, color: colorScheme.primary),
+                      strokeWidth: 2,
+                      color: colorScheme.primary,
+                    ),
                   ),
                 )
               : IconButton(
@@ -504,19 +567,46 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 ? Center(
                     child: Padding(
                       padding: const EdgeInsets.all(32),
-                      child: Column(mainAxisSize: MainAxisSize.min, children: [
-                        Icon(Icons.wifi_off_rounded, size: 56, color: colorScheme.onSurface.withValues(alpha: 0.3)),
-                        const SizedBox(height: 16),
-                        Text('error_load_failed'.tr(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: colorScheme.onSurface), textAlign: TextAlign.center),
-                        const SizedBox(height: 8),
-                        Text('error_check_connection'.tr(), style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant), textAlign: TextAlign.center),
-                        const SizedBox(height: 24),
-                        FilledButton.icon(
-                          onPressed: () => _load(reset: true),
-                          icon: const Icon(Icons.refresh_rounded),
-                          label: Text('btn_retry'.tr(), style: const TextStyle(fontWeight: FontWeight.w700)),
-                        ),
-                      ]),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.wifi_off_rounded,
+                            size: 56,
+                            color: colorScheme.onSurface.withValues(alpha: 0.3),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'error_load_failed'.tr(),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: colorScheme.onSurface,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'error_check_connection'.tr(),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 24),
+                          FilledButton.icon(
+                            onPressed: () => _load(reset: true),
+                            icon: const Icon(Icons.refresh_rounded),
+                            label: Text(
+                              'btn_retry'.tr(),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   )
                 : _loading && _transactions.isEmpty
@@ -525,47 +615,58 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     child: ListSkeleton(count: 8),
                   )
                 : filtered.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.payments_outlined, size: 48, color: colorScheme.onSurfaceVariant),
-                            const SizedBox(height: 16),
-                            Text('trans_empty'.tr(),
-                                style: TextStyle(
-                                    color: colorScheme.onSurface,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w900)),
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.payments_outlined,
+                          size: 48,
+                          color: colorScheme.onSurfaceVariant,
                         ),
-                      )
-                    : RefreshIndicator(
-                        onRefresh: _triggerSync,
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                          itemCount: filtered.length + (_hasMore && _loadingMore ? 1 : 0),
-                          itemBuilder: (context, index) {
-                            if (index == filtered.length) {
-                              return Center(
-                                  child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: CircularProgressIndicator(
-                                          color: colorScheme.primary)));
-                            }
-                            final tx = filtered[index];
-                            return TransactionListItem(
-                              key: ValueKey(tx['id']),
-                              transaction: tx,
-                              currency: _currency,
-                              colorScheme: colorScheme,
-                              onDelete: _delete,
-                              onTap: (t) => _showAddDialog(existing: t),
-                              syncStatus: _syncStatuses[tx['id']],
-                            );
-                          },
+                        const SizedBox(height: 16),
+                        Text(
+                          'trans_empty'.tr(),
+                          style: TextStyle(
+                            color: colorScheme.onSurface,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
-                      ),
+                      ],
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: _triggerSync,
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                      itemCount:
+                          filtered.length + (_hasMore && _loadingMore ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index == filtered.length) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(
+                                color: colorScheme.primary,
+                              ),
+                            ),
+                          );
+                        }
+                        final tx = filtered[index];
+                        return TransactionListItem(
+                          key: ValueKey(tx['id']),
+                          transaction: tx,
+                          currency: _currency,
+                          colorScheme: colorScheme,
+                          onDelete: _delete,
+                          onTap: (t) => _showAddDialog(existing: t),
+                          syncStatus: _syncStatuses[tx['id']],
+                        );
+                      },
+                    ),
+                  ),
           ),
         ],
       ),

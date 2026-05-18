@@ -31,9 +31,7 @@ class _DashboardCustomizerSheet extends StatelessWidget {
           decoration: BoxDecoration(
             color: colorScheme.surface,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            border: Border(
-              top: BorderSide(color: colorScheme.outlineVariant),
-            ),
+            border: Border(top: BorderSide(color: colorScheme.outlineVariant)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -56,7 +54,9 @@ class _DashboardCustomizerSheet extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Column(
-                        crossAxisAlignment: isAr ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                        crossAxisAlignment: isAr
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
                         children: [
                           Text(
                             'dash_customize_title'.tr(),
@@ -69,7 +69,10 @@ class _DashboardCustomizerSheet extends StatelessWidget {
                           const SizedBox(height: 2),
                           Text(
                             'dash_customize_subtitle'.tr(
-                              namedArgs: {'visible': visible.toString(), 'total': total.toString()},
+                              namedArgs: {
+                                'visible': visible.toString(),
+                                'total': total.toString(),
+                              },
                             ),
                             style: TextStyle(
                               fontSize: 12,
@@ -200,7 +203,9 @@ class _CardToggleTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: isOn ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
+                      color: isOn
+                          ? colorScheme.onSurface
+                          : colorScheme.onSurfaceVariant,
                     ),
                   ),
                   if (isRequired) ...[
@@ -226,8 +231,11 @@ class _CardToggleTile extends StatelessWidget {
                 activeTrackColor: colorScheme.primary,
               ),
             if (isRequired)
-              Icon(Icons.lock_outline_rounded,
-                  size: 18, color: colorScheme.outlineVariant),
+              Icon(
+                Icons.lock_outline_rounded,
+                size: 18,
+                color: colorScheme.outlineVariant,
+              ),
           ],
         ),
       ),

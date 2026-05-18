@@ -30,8 +30,12 @@ class _NavItemWidgetState extends State<NavItemWidget> {
     final isSelected = widget.currentIndex == widget.index;
     final colorScheme = Theme.of(context).colorScheme;
     final reduceMotion = MediaQuery.of(context).disableAnimations;
-    final animDuration = reduceMotion ? Duration.zero : const Duration(milliseconds: 180);
-    final pressDuration = reduceMotion ? Duration.zero : const Duration(milliseconds: 120);
+    final animDuration = reduceMotion
+        ? Duration.zero
+        : const Duration(milliseconds: 180);
+    final pressDuration = reduceMotion
+        ? Duration.zero
+        : const Duration(milliseconds: 120);
 
     return Semantics(
       label: widget.label,
@@ -62,7 +66,9 @@ class _NavItemWidgetState extends State<NavItemWidget> {
                 ),
                 child: Icon(
                   isSelected ? widget.selectedIcon : widget.icon,
-                  color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                  color: isSelected
+                      ? colorScheme.primary
+                      : colorScheme.onSurfaceVariant,
                   size: 24,
                 ),
               ),
@@ -73,12 +79,16 @@ class _NavItemWidgetState extends State<NavItemWidget> {
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                  color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                  color: isSelected
+                      ? colorScheme.primary
+                      : colorScheme.onSurfaceVariant,
                 ),
                 child: Text(widget.label),
               ),
               AnimatedContainer(
-                duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 200),
+                duration: reduceMotion
+                    ? Duration.zero
+                    : const Duration(milliseconds: 200),
                 curve: Curves.easeOut,
                 margin: const EdgeInsets.only(top: 3),
                 width: isSelected ? 16 : 0,
