@@ -91,12 +91,15 @@ class BudgetProgressCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
 
           // ProgressRing — centered hero
+          // Expense arc: orange/red based on threshold
+          // Remaining arc: income green — shows leftover at a glance
           Center(
             child: ProgressRing(
               value: fraction,
               label: '$pct%',
               subLabel: 'budget_used'.tr(),
               fillColor: ringFillColor,
+              remainingColor: AppColors.income.withValues(alpha: 0.55),
             ),
           ),
           const SizedBox(height: AppSpacing.md),

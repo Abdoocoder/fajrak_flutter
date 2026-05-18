@@ -10,6 +10,7 @@ class ProgressRing extends StatelessWidget {
     required this.label,
     this.subLabel,
     this.fillColor,
+    this.remainingColor,
     this.size = 120,
     this.strokeWidth = 10,
   });
@@ -25,6 +26,10 @@ class ProgressRing extends StatelessWidget {
 
   /// Override fill color. null → primary→accent gradient.
   final Color? fillColor;
+
+  /// If set, draws the remaining (unfilled) arc in this color
+  /// instead of the default track color.
+  final Color? remainingColor;
 
   final double size;
   final double strokeWidth;
@@ -51,6 +56,7 @@ class ProgressRing extends StatelessWidget {
               value: value.clamp(0.0, 1.0),
               trackColor: trackColor,
               fillColor: fillColor,
+              remainingColor: remainingColor,
               strokeWidth: strokeWidth,
             ),
           ),
@@ -85,12 +91,14 @@ class _RingPainter extends CustomPainter {
     required this.value,
     required this.trackColor,
     this.fillColor,
+    this.remainingColor,
     required this.strokeWidth,
   });
 
   final double value;
   final Color trackColor;
   final Color? fillColor;
+  final Color? remainingColor;
   final double strokeWidth;
 
   static const _startAngle = -math.pi / 2; // 12 o'clock
@@ -101,20 +109,38 @@ class _RingPainter extends CustomPainter {
     final radius = (size.width - strokeWidth) / 2;
     final rect = Rect.fromCircle(center: center, radius: radius);
 
-    // Track — full circle
-    canvas.drawCircle(
-      center,
-      radius,
-      Paint()
-        ..color = trackColor
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = strokeWidth
-        ..strokeCap = StrokeCap.round,
-    );
+    final sweepAngle = value * 2 * math.pi;
+
+    // Track — draw as full circle only when no remainingColor, otherwise
+    // draw only the gap between fill end and track start (handles edge cases)
+    if (remainingColor == null) {
+      canvas.drawCircle(
+        center,
+        radius,
+        Paint()
+          ..color = trackColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round,
+      );
+    } else if (value < 1.0) {
+      // Draw remaining arc in the semantic color (e.g. income green)
+      final remainingStart = _startAngle + sweepAngle;
+      final remainingSweep = (1.0 - value) * 2 * math.pi;
+      canvas.drawArc(
+        rect,
+        remainingStart,
+        remainingSweep,
+        false,
+        Paint()
+          ..color = remainingColor!
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round,
+      );
+    }
 
     if (value <= 0) return;
-
-    final sweepAngle = value * 2 * math.pi;
 
     final fillPaint = Paint()
       ..style = PaintingStyle.stroke
@@ -139,5 +165,6 @@ class _RingPainter extends CustomPainter {
       old.value != value ||
       old.trackColor != trackColor ||
       old.fillColor != fillColor ||
+      old.remainingColor != remainingColor ||
       old.strokeWidth != strokeWidth;
 }
