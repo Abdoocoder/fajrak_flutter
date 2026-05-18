@@ -1,5 +1,8 @@
-import '../../utils/app_colors.dart';
 import 'package:flutter/material.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
+import '../../widgets/common/shimmer_loader.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -115,27 +118,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor:
+          isDark ? AppColors.backgroundDark : AppColors.background,
       appBar: AppBar(
+        backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surface,
+        elevation: 0,
         title: Text(
           'settings_title'.tr(),
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            color: colorScheme.onSurface,
+          style: AppTypography.headingMd.copyWith(
+            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimary,
           ),
         ),
-        iconTheme: IconThemeData(color: colorScheme.onSurface),
+        iconTheme: const IconThemeData(color: AppColors.textSecondary),
       ),
       body: _loading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+          ? Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: const DashboardShimmer(),
             )
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -162,12 +167,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Center(
                     child: Text(
                       '🌄 — $_appVersion',
-                      style: TextStyle(
-                        color: colorScheme.onSurfaceVariant.withValues(
-                          alpha: 0.5,
-                        ),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
+                      style: AppTypography.labelSm.copyWith(
+                        color: AppColors.textTertiary.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
