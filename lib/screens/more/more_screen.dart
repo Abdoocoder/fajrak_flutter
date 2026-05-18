@@ -2,6 +2,9 @@ import 'package:easy_localization/easy_localization.dart';
 import '../../utils/error_handler.dart';
 import '../../services/analytics_service.dart';
 import 'package:flutter/material.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
 
 import '../debts/debts_screen.dart';
 import '../budgets/budgets_screen.dart';
@@ -44,25 +47,24 @@ class _MoreScreenState extends State<MoreScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SafeArea(
       child: ListView(
-        padding: const EdgeInsets.only(
-          top: 16,
-          left: 16,
-          right: 16,
-          bottom: 24,
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          AppSpacing.screenPaddingHorizontal,
+          AppSpacing.md,
+          AppSpacing.screenPaddingHorizontal,
+          AppSpacing.xl,
         ),
         children: [
           Padding(
-            padding: const EdgeInsets.only(bottom: 16, right: 4, left: 4),
+            padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.md),
             child: Text(
               'nav_more'.tr(),
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                color: colorScheme.onSurface,
+              style: AppTypography.headingLg.copyWith(
+                color: isDark
+                    ? AppColors.textPrimaryDark
+                    : AppColors.textPrimary,
               ),
             ),
           ),
@@ -73,7 +75,6 @@ class _MoreScreenState extends State<MoreScreen> {
               context,
               MaterialPageRoute(builder: (_) => const DebtsScreen()),
             ),
-            colorScheme: colorScheme,
           ),
           MoreMenuItem(
             icon: Icons.pie_chart_outline,
@@ -82,7 +83,6 @@ class _MoreScreenState extends State<MoreScreen> {
               context,
               MaterialPageRoute(builder: (_) => const BudgetsScreen()),
             ),
-            colorScheme: colorScheme,
           ),
           MoreMenuItem(
             icon: Icons.track_changes,
@@ -91,7 +91,6 @@ class _MoreScreenState extends State<MoreScreen> {
               context,
               MaterialPageRoute(builder: (_) => const GoalsScreen()),
             ),
-            colorScheme: colorScheme,
           ),
           MoreMenuItem(
             icon: Icons.trending_up,
@@ -100,7 +99,6 @@ class _MoreScreenState extends State<MoreScreen> {
               context,
               MaterialPageRoute(builder: (_) => const InvestmentsScreen()),
             ),
-            colorScheme: colorScheme,
           ),
           MoreMenuItem(
             icon: Icons.local_fire_department_outlined,
@@ -109,7 +107,6 @@ class _MoreScreenState extends State<MoreScreen> {
               context,
               MaterialPageRoute(builder: (_) => const FIRECalculatorScreen()),
             ),
-            colorScheme: colorScheme,
           ),
           MoreMenuItem(
             icon: Icons.cruelty_free_outlined,
@@ -118,7 +115,6 @@ class _MoreScreenState extends State<MoreScreen> {
               context,
               MaterialPageRoute(builder: (_) => const ZakatCalculatorScreen()),
             ),
-            colorScheme: colorScheme,
           ),
           MoreMenuItem(
             icon: Icons.menu_book_outlined,
@@ -127,7 +123,6 @@ class _MoreScreenState extends State<MoreScreen> {
               context,
               MaterialPageRoute(builder: (_) => const LearnScreen()),
             ),
-            colorScheme: colorScheme,
           ),
           MoreMenuItem(
             icon: Icons.notifications_none,
@@ -136,7 +131,6 @@ class _MoreScreenState extends State<MoreScreen> {
               context,
               MaterialPageRoute(builder: (_) => const AlertsScreen()),
             ),
-            colorScheme: colorScheme,
           ),
           MoreMenuItem(
             icon: Icons.settings_outlined,
@@ -145,7 +139,6 @@ class _MoreScreenState extends State<MoreScreen> {
               context,
               MaterialPageRoute(builder: (_) => const SettingsScreen()),
             ),
-            colorScheme: colorScheme,
           ),
           MoreMenuItem(
             icon: Icons.help_outline,
@@ -154,7 +147,6 @@ class _MoreScreenState extends State<MoreScreen> {
               context,
               MaterialPageRoute(builder: (_) => const HelpScreen()),
             ),
-            colorScheme: colorScheme,
           ),
         ],
       ),
