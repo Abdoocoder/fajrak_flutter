@@ -54,11 +54,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       _invValue = 0,
       _goalsSaved = 0,
       _goalsTarget = 0;
+  double _invValue = 0, _goalsSaved = 0, _goalsTarget = 0, _totalDebt = 0, _totalReceivable = 0, _netWorth = 0;
   double _prevIncome = 0, _prevExpenses = 0;
-  DateTime? _lastUpdated;
-  final double _foodSpending = 0, _entertainmentSpending = 0;
+  final double _foodSpending = 0;
+  final double _entertainmentSpending = 0;
   String _stage = 'awareness';
-  int _loadedTransactionVersion = 0;
+  DateTime? _lastUpdated;
+  int _loadedTransactionVersion = -1;
 
   @override
   void initState() {
@@ -76,8 +78,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     await _loadPhase2();
   }
 
-  /// Phase 1 — accounts only (fast, shows hero card immediately)
-  Future<void> _loadPhase1() async {
+  Future<void> _load() async {
+    if (!_loading) setState(() => _loading = true);
+    _hasError = false;
     try {
       final user = Supabase.instance.client.auth.currentUser;
       if (user == null) {
@@ -101,10 +104,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
       }
     } catch (_) {
       if (mounted) setState(() => _accountsLoading = false);
+      // Phase 1: Accounts & Total Balance (Local-first)
+      _accounts = await AccountsService.fetchAccounts();
+      _totalAccountsBalance = _accounts.fold(0.0, (sum, acc) => sum + (acc['balance'] as double? ?? 0.0));
+      _accountsLoading = false;
+      if (mounted) setState(() {});
+
+      // Phase 2: Everything else (Remote)
+      await _loadPhase2();
+    } catch (e) {
+      debugPrint('Dashboard _load error: $e');
+      if (mounted) setState(() { _loading = false; _hasError = true; });
     }
   }
 
-  /// Phase 2 — all dashboard data
   Future<void> _loadPhase2() async {
     try {
       final user = Supabase.instance.client.auth.currentUser;
@@ -134,8 +147,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
         now.month - 5,
         1,
       ).toIso8601String().split('T')[0];
+      if (user == null) return;
 
-      // Parallel batch — base table queries only (RPC calls handled separately with fallbacks)
+      final now = DateTime.now();
+      final prevMonthStart = DateTime(now.year, now.month - 1, 1).toIso8601String().split('T')[0];
+      final prevMonthEnd = DateTime(now.year, now.month, 1).toIso8601String().split('T')[0];
+      final sixMonthsAgo = DateTime(now.year, now.month - 5, 1).toIso8601String().split('T')[0];
+
+      // ⚡ OPTIMIZATION: Parallel batch — consolidated redundant queries and included independent RPCs.
+      // Reduced sequential waits from 4 batches to 3.
       final results = await Future.wait<dynamic>([
         /* 0 */ Supabase.instance.client
             .from('profiles')
@@ -180,21 +200,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
               .eq('user_id', user.id)
               .gte('transaction_date', prevMonthStart)
               .lt('transaction_date', prevMonthEnd),
+        /* 0: Profile */ Supabase.instance.client.from('profiles').select('full_name, monthly_income, currency').eq('id', user.id).single(),
+        /* 1: Recent Txs */ Supabase.instance.client.from('transactions').select('id, type, amount, category, description, transaction_date, original_amount, original_currency').eq('user_id', user.id).order('transaction_date', ascending: false).limit(5),
+        /* 2: Debts */ Supabase.instance.client.from('debts').select('remaining_amount, monthly_payment, debt_type, auto_deduct').eq('user_id', user.id).eq('is_paid', false),
+        /* 3: Goals */ Supabase.instance.client.from('savings_goals').select('current_amount, target_amount').eq('user_id', user.id),
+        /* 4: 6-month Txs (covers charts, categories, and current month summary) */ Supabase.instance.client.from('transactions').select('type, amount, category, transaction_date').eq('user_id', user.id).gte('transaction_date', sixMonthsAgo).order('transaction_date', ascending: true),
+        /* 5: Monthly Summary RPC (Parallel) */ FinanceService.fetchMonthlyFinancialSummary(year: now.year, month: now.month).catchError((_) => <String, dynamic>{}),
+        // Prev month totals for MonthSummaryCard (only fetched in first 7 days)
+        if (now.day <= 7)
+          /* 6: Prev Month Txs */ Supabase.instance.client.from('transactions').select('type, amount')
+              .eq('user_id', user.id).gte('transaction_date', prevMonthStart).lt('transaction_date', prevMonthEnd)
+        else
+          Future.value([]),
       ]);
 
       final profile = results[0] as Map<String, dynamic>;
-      final currentMonthTxs = results[1] as List;
-      final recent = results[2] as List;
-      final debts = results[3] as List;
-      final goals = results[5] as List;
-      final chartsList = results[6] as List;
+      final recent = results[1] as List;
+      final debts = results[2] as List;
+      final goals = results[3] as List;
+      final chartsList = results[4] as List;
+      final monthly = results[5] as Map<String, dynamic>;
 
-      // ── Build 6-month aggregated data from already-fetched chartsList ──
+      // ── Build 6-month aggregated data and category breakdown in one pass ──
       final monthMap = <String, Map<String, double>>{};
+      final catMap = <String, double>{};
+      final currentMonthPrefix = '${now.year}-${now.month.toString().padLeft(2, '0')}';
+      double localIncome = 0, localExpenses = 0;
+
       for (final tx in chartsList) {
         final date = tx['transaction_date'] as String;
         final monthKey = date.substring(0, 7); // "YYYY-MM"
-        monthMap.putIfAbsent(monthKey, () => {'income': 0.0, 'expenses': 0.0});
         final amount = (tx['amount'] as num).toDouble();
         if (tx['type'] == 'income') {
           monthMap[monthKey]!['income'] =
@@ -202,6 +237,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
         } else if (tx['type'] == 'expense') {
           monthMap[monthKey]!['expenses'] =
               (monthMap[monthKey]!['expenses'] ?? 0) + amount;
+        final type = tx['type'] as String;
+
+        // 6-month chart data
+        monthMap.putIfAbsent(monthKey, () => {'income': 0.0, 'expenses': 0.0});
+        if (type == 'income') {
+          monthMap[monthKey]!['income'] = (monthMap[monthKey]!['income'] ?? 0) + amount;
+        } else if (type == 'expense') {
+          monthMap[monthKey]!['expenses'] = (monthMap[monthKey]!['expenses'] ?? 0) + amount;
+        }
+
+        // Current month calculations (Fallback for RPC)
+        if (date.startsWith(currentMonthPrefix)) {
+          if (type == 'income') localIncome += amount;
+          if (type == 'expense') {
+            localExpenses += amount;
+            final cat = tx['category'] as String? ?? 'other';
+            catMap[cat] = (catMap[cat] ?? 0) + amount;
+          }
         }
       }
       final months6 = monthMap.entries
@@ -225,6 +278,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
           catMap[cat] = (catMap[cat] ?? 0) + (tx['amount'] as num).toDouble();
         }
       }
+
+      final months6 = monthMap.entries.map((e) => {
+        'month': e.key,
+        'income': e.value['income'] ?? 0.0,
+        'expenses': e.value['expenses'] ?? 0.0,
+      }).toList();
+
       final totalCatExpenses = catMap.values.fold(0.0, (a, b) => a + b);
       final catData = catMap.entries
           .map(
@@ -262,13 +322,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       final income = (monthly['income'] as num?)?.toDouble() ?? 0.0;
       final txExpenses = (monthly['expenses'] as num?)?.toDouble() ?? 0.0;
+      final income = (monthly['income'] as num?)?.toDouble() ?? localIncome;
+      final txExpenses = (monthly['expenses'] as num?)?.toDouble() ?? localExpenses;
       final net = (monthly['net'] as num?)?.toDouble() ?? (income - txExpenses);
 
       final currency = (profile['currency'] as String? ?? 'JOD').toUpperCase();
-      final usdToLocal = currency != 'USD'
-          ? (await CurrencyService.fetchExchangeRate('USD', currency) ?? 1.0)
-          : 1.0;
-      // Financial dashboard via RPC — fallback to zeros if function not available
+
+      // ⚡ OPTIMIZATION: Sequential wait for exchange rate if needed
+      final usdToLocal = currency == 'USD' ? 1.0 : (await CurrencyService.fetchExchangeRate('USD', currency) ?? 1.0);
+
+      // ⚡ OPTIMIZATION: Final dashboard RPC
       Map<String, dynamic> dash;
       try {
         dash = await FinanceService.fetchFinancialDashboard(usdToLocal);
@@ -306,7 +369,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             (a, d) => a + ((d['monthly_payment'] as num?) ?? 0).toDouble(),
           );
 
-      // Use Centralized Database RPC for Health Score
       int score = (dash['health_score'] as num?)?.toInt() ?? 0;
 
       String stage = 'awareness';
@@ -320,8 +382,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       // ── prev month summary ──
       double prevIncome = 0, prevExpenses = 0;
-      if (now.day <= 7 && results.length > 7) {
-        final prevTxs = results[7] as List;
+      if (now.day <= 7 && results.length > 6) {
+        final prevTxs = results[6] as List;
         for (final tx in prevTxs) {
           if (tx['type'] == 'income') {
             prevIncome += (tx['amount'] as num).toDouble();
@@ -330,6 +392,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           }
         }
       }
+
       if (mounted) {
         setState(() {
           _name = (profile['full_name'] as String?)?.split(' ').first ?? '';
@@ -421,16 +484,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final txVersion = context.watch<AppState>().transactionVersion;
+    // ⚡ OPTIMIZATION: Use Selector for surgically watching transactionVersion
+    final txVersion = context.select<AppState, int>((s) => s.transactionVersion);
     if (txVersion != _loadedTransactionVersion) {
       _loadedTransactionVersion = txVersion;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && !_loading) _load();
       });
     }
+
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final layout = context.watch<DashboardLayoutProvider>();
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -745,9 +809,237 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ],
                     ],
                   ),
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                      const SizedBox(height: 16),
+                      Text('error_generic'.tr()),
+                      const SizedBox(height: 8),
+                      ElevatedButton(onPressed: _load, child: Text('retry'.tr())),
+                    ],
+                  ),
+                )
+              : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              // ── 1. Dashboard Header ──────────────────────────────
+              Row(
+                children: [
+                  Expanded(child: DashboardHeader(name: _name)),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () => showDashboardCustomizer(context),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.2)),
+                      ),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        Icon(Icons.tune_rounded, size: 14, color: colorScheme.primary),
+                        const SizedBox(width: 4),
+                        Text(
+                          'dash_customize'.tr(),
+                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
+                        ),
+                      ]),
+                    ),
+                  ),
+                ],
+              ),
+              if (_lastUpdated != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4, bottom: 12),
+                  child: Text(
+                    '${'last_updated'.tr()}: ${DateFormat('HH:mm').format(_lastUpdated!)}',
+                    style: TextStyle(fontSize: 11, color: colorScheme.onSurface.withValues(alpha: 0.5), fontWeight: FontWeight.w600),
+                  ),
+                ),
+              const SizedBox(height: 12),
+
+              // ── 2. Month Summary Banner (days 1-7 of new month) ──
+              _DashCardSelector(
+                id: DashCardId.monthSummary,
+                builder: (context, isVisible, child) {
+                  if (!isVisible || _loading) return const SizedBox.shrink();
+                  const monthKeys = ['month_jan', 'month_feb', 'month_mar', 'month_apr',
+                    'month_may', 'month_jun', 'month_jul', 'month_aug', 'month_sep',
+                    'month_oct', 'month_nov', 'month_dec'];
+                  final prevIdx = (DateTime.now().month - 2 + 12) % 12;
+                  final prevName = monthKeys[prevIdx].tr();
+                  return MonthSummaryCard(
+                    prevIncome: _prevIncome,
+                    prevExpenses: _prevExpenses,
+                    currency: _currency,
+                    prevMonthName: prevName,
+                  );
+                },
+              ),
+
+              // ── 3. Hero Balance Card ──────────────────────────────
+              _DashCardSelector(
+                id: DashCardId.heroBalance,
+                builder: (context, isVisible, child) {
+                  if (!isVisible) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 400),
+                      child: _accountsLoading
+                          ? const CardSkeleton(height: 110)
+                          : _AccountsBalanceCard(key: const ValueKey('hero-card'), accounts: _accounts, totalBalance: _totalAccountsBalance, currency: _currency),
+                    ),
+                  );
+                },
+              ),
+
+              // ── 4. Monthly Stats ──────────────────────────────────
+              _DashCardSelector(
+                id: DashCardId.monthlyStats,
+                builder: (context, isVisible, child) {
+                  if (!isVisible) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      child: _loading
+                          ? const Row(key: ValueKey('stats-skel'), children: [
+                              Expanded(child: CardSkeleton(height: 70)),
+                              SizedBox(width: 8),
+                              Expanded(child: CardSkeleton(height: 70)),
+                              SizedBox(width: 8),
+                              Expanded(child: CardSkeleton(height: 70)),
+                            ])
+                          : DashboardStats(key: const ValueKey('stats'), income: _income, expenses: _expenses, net: _net, totalBalance: _totalAccountsBalance, monthlyDebtCommitments: _monthlyDebtCommitments, colorScheme: colorScheme),
+                    ),
+                  );
+                },
+              ),
+
+              // ── 5. Quick Add — always visible (required) ──────────
+              DashboardQuickAdd(currency: _currency, onAdd: _quickAdd, colorScheme: colorScheme),
+              const SizedBox(height: 16),
+
+              // ── 6. Recent Transactions ────────────────────────────
+              _DashCardSelector(
+                id: DashCardId.recentTx,
+                builder: (context, isVisible, child) {
+                  if (!isVisible) return const SizedBox.shrink();
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: _loading
+                        ? const CardSkeleton(height: 180)
+                        : RecentTransactionsList(key: const ValueKey('recent'), transactions: _recentTx, currency: _currency, colorScheme: colorScheme),
+                  );
+                },
+              ),
+
+              // ── Secondary sections — after phase 2 ────────────────
+              if (_loading) ...[
+                const SizedBox(height: 16),
+                const SkeletonLoader(width: double.infinity, height: 80, borderRadius: 16),
+                const SizedBox(height: 12),
+                const SkeletonLoader(width: double.infinity, height: 100, borderRadius: 16),
+              ],
+              if (!_loading) ...[
+                const SizedBox(height: 16),
+                _DashCardSelector(
+                  id: DashCardId.netWorth,
+                  builder: (context, isVisible, child) => (isVisible && _invValue + _goalsSaved + _totalDebt > 0)
+                    ? RepaintBoundary(child: NetWorthCard(netWorth: _netWorth, invValue: _invValue, goalsSaved: _goalsSaved, totalDebt: _totalDebt, totalReceivable: _totalReceivable, currency: _currency))
+                    : const SizedBox.shrink(),
+                ),
+                _DashCardSelector(
+                  id: DashCardId.healthScore,
+                  builder: (context, isVisible, child) => isVisible
+                    ? RepaintBoundary(child: DashboardHealthScore(score: _healthScore, colorScheme: colorScheme))
+                    : const SizedBox.shrink(),
+                ),
+                _DashCardSelector(
+                  id: DashCardId.stage,
+                  builder: (context, isVisible, child) => isVisible
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: DashboardStageCard(stage: _stage),
+                      )
+                    : const SizedBox.shrink(),
+                ),
+                _DashCardSelector(
+                  id: DashCardId.charts,
+                  builder: (context, isVisible, child) => isVisible
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: RepaintBoundary(child: ChartsCard(months6Data: _months6Data, categoryData: _categoryData, currency: _currency)),
+                      )
+                    : const SizedBox.shrink(),
+                ),
+                _DashCardSelector(
+                  id: DashCardId.budgets,
+                  builder: (context, isVisible, child) => isVisible
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: BudgetProgressCard(income: _income, expenses: _expenses, currency: _currency),
+                      )
+                    : const SizedBox.shrink(),
+                ),
+                _DashCardSelector(
+                  id: DashCardId.quickLinks,
+                  builder: (context, isVisible, child) => isVisible
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: QuickLinksCards(totalDebt: _totalDebt, invValue: _invValue, goalsSaved: _goalsSaved, goalsTarget: _goalsTarget, currency: _currency),
+                      )
+                    : const SizedBox.shrink(),
+                ),
+                _DashCardSelector(
+                  id: DashCardId.gamification,
+                  builder: (context, isVisible, child) => isVisible
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: GamificationCard(score: _healthScore),
+                      )
+                    : const SizedBox.shrink(),
+                ),
+                _DashCardSelector(
+                  id: DashCardId.simulator,
+                  builder: (context, isVisible, child) => isVisible
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: RepaintBoundary(child: WealthSimulatorCard(currency: _currency)),
+                      )
+                    : const SizedBox.shrink(),
+                ),
+                _DashCardSelector(
+                  id: DashCardId.challenges,
+                  builder: (context, isVisible, child) => isVisible
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: ChallengesCard(expensesFood: _foodSpending, expectedFoodLimit: 50, income: _income, net: _net, prevExpenses: _prevExpenses, currentExpenses: _expenses, expensesEntertainment: _entertainmentSpending, currency: _currency),
+                      )
+                    : const SizedBox.shrink(),
+                ),
+              ],
+            ]),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// ⚡ OPTIMIZATION: A surgical selector for dashboard cards to avoid full-screen rebuilds
+/// when only the layout/visibility of one card changes.
+class _DashCardSelector extends StatelessWidget {
+  final DashCardId id;
+  final ValueWidgetBuilder<bool> builder;
+  const _DashCardSelector({required this.id, required this.builder});
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<DashboardLayoutProvider, bool>(
+      selector: (_, p) => p.isVisible(id),
+      builder: builder,
     );
   }
 }
@@ -868,5 +1160,15 @@ class _AccountsBalanceCard extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class CardSkeleton extends StatelessWidget {
+  final double height;
+  const CardSkeleton({super.key, required this.height});
+
+  @override
+  Widget build(BuildContext context) {
+    return SkeletonLoader(width: double.infinity, height: height, borderRadius: 18);
   }
 }
