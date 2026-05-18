@@ -21,7 +21,11 @@ import '../../widgets/transactions/add_transaction_dialog.dart';
 import '../../widgets/transactions/month_year_picker_dialog.dart';
 import '../../widgets/transactions/transaction_filters.dart';
 import '../../widgets/transactions/transaction_summary.dart';
-import '../../widgets/common/skeleton_loader.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
+import '../../widgets/common/app_button.dart';
+import '../../widgets/common/shimmer_loader.dart';
 import '../../widgets/transactions/transaction_list_item.dart';
 import 'recurring_screen.dart';
 
@@ -449,8 +453,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final filtered = _filtered;
 
     const debtCategories = ['ديون', 'debts_title', 'Debts'];
@@ -469,24 +472,28 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         .fold(0.0, (a, t) => a + (t['amount'] as num).toDouble());
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
       appBar: AppBar(
+        backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surface,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'trans_title'.tr(),
-              style: TextStyle(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.w900,
-                fontSize: 18,
+              style: AppTypography.headingMd.copyWith(
+                color: isDark
+                    ? AppColors.textPrimaryDark
+                    : AppColors.textPrimary,
               ),
             ),
             Text(
               'trans_count'.tr(args: [filtered.length.toString()]),
-              style: TextStyle(
-                color: colorScheme.onSurfaceVariant,
-                fontSize: 12,
+              style: AppTypography.bodySm.copyWith(
+                color: isDark
+                    ? AppColors.textSecondaryDark
+                    : AppColors.textSecondary,
               ),
             ),
           ],
@@ -506,7 +513,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   child: IconButton(
                     onPressed: _triggerSync,
                     icon: const Icon(Icons.cloud_upload_outlined),
-                    color: Colors.orange[600],
+                    color: Colors.orange[600], // intentional — sync badge
                     tooltip: 'tooltip_sync'.tr(),
                   ),
                 ),
@@ -517,29 +524,40 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               context,
               MaterialPageRoute(builder: (_) => const RecurringScreen()),
             ),
-            icon: Icon(Icons.repeat, color: colorScheme.onSurfaceVariant),
+            icon: Icon(
+              Icons.repeat,
+              color: isDark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondary,
+            ),
             tooltip: 'recurring_title'.tr(),
           ),
           IconButton(
             onPressed: _exportCSV,
-            icon: Icon(Icons.download, color: colorScheme.onSurfaceVariant),
+            icon: Icon(
+              Icons.download,
+              color: isDark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondary,
+            ),
             tooltip: 'tooltip_export_csv'.tr(),
           ),
           _generatingPdf
-              ? Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+              ? const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
                   child: SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: colorScheme.primary,
+                      color: AppColors.primary,
                     ),
                   ),
                 )
               : IconButton(
                   onPressed: _generatePdf,
-                  icon: Icon(Icons.picture_as_pdf, color: colorScheme.primary),
+                  icon: const Icon(Icons.picture_as_pdf,
+                      color: AppColors.primary),
                   tooltip: 'tooltip_export_pdf'.tr(),
                 ),
           const SizedBox(width: 4),
@@ -552,7 +570,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             expenses: expenses,
             debtPayments: debtPayments,
             currency: _currency,
-            colorScheme: colorScheme,
           ),
           TransactionFilters(
             currentFilter: _filter,
@@ -569,7 +586,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               _load(reset: true);
             },
             onShowDatePicker: _showMonthYearPicker,
-            colorScheme: colorScheme,
             filterMonth: _filterMonth ?? DateTime.now().month,
             filterYear: _filterYear ?? DateTime.now().year,
             onMonthYearChanged: (m, y) {
@@ -584,44 +600,43 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             child: _hasError && _transactions.isEmpty
                 ? Center(
                     child: Padding(
-                      padding: const EdgeInsets.all(32),
+                      padding: const EdgeInsetsDirectional.all(
+                          AppSpacing.xl),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
                             Icons.wifi_off_rounded,
-                            size: 56,
-                            color: colorScheme.onSurface.withValues(alpha: 0.3),
+                            size: 48,
+                            color: isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textTertiary,
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSpacing.md),
                           Text(
                             'error_load_failed'.tr(),
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: colorScheme.onSurface,
+                            style: AppTypography.headingMd.copyWith(
+                              color: isDark
+                                  ? AppColors.textPrimaryDark
+                                  : AppColors.textPrimary,
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: AppSpacing.xs),
                           Text(
                             'error_check_connection'.tr(),
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: colorScheme.onSurfaceVariant,
+                            style: AppTypography.bodySm.copyWith(
+                              color: isDark
+                                  ? AppColors.textSecondaryDark
+                                  : AppColors.textSecondary,
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 24),
-                          FilledButton.icon(
+                          const SizedBox(height: AppSpacing.lg),
+                          AppButton(
+                            label: 'btn_retry'.tr(),
                             onPressed: () => _load(reset: true),
-                            icon: const Icon(Icons.refresh_rounded),
-                            label: Text(
-                              'btn_retry'.tr(),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
+                            fullWidth: false,
                           ),
                         ],
                       ),
@@ -629,8 +644,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   )
                 : _loading && _transactions.isEmpty
                 ? const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: ListSkeleton(count: 8),
+                    padding: EdgeInsetsDirectional.fromSTEB(0, 8, 0, 0),
+                    child: TransactionShimmer(count: 8),
                   )
                 : filtered.isEmpty
                 ? Center(
@@ -640,38 +655,33 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                         Icon(
                           Icons.payments_outlined,
                           size: 48,
-                          color: colorScheme.onSurfaceVariant,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textTertiary,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppSpacing.md),
                         Text(
                           'trans_empty'.tr(),
-                          style: TextStyle(
-                            color: colorScheme.onSurface,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
+                          style: AppTypography.headingMd.copyWith(
+                            color: isDark
+                                ? AppColors.textPrimaryDark
+                                : AppColors.textPrimary,
                           ),
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
                   )
                 : RefreshIndicator(
                     onRefresh: _triggerSync,
+                    color: AppColors.primary,
                     child: ListView.builder(
                       controller: _scrollController,
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                      itemCount:
-                          filtered.length + (_hasMore && _loadingMore ? 1 : 0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                          0, 8, 0, 100),
+                      itemExtent: AppSpacing.listItemHeight,
+                      itemCount: filtered.length,
                       itemBuilder: (context, index) {
-                        if (index == filtered.length) {
-                          return Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: CircularProgressIndicator(
-                                color: colorScheme.primary,
-                              ),
-                            ),
-                          );
-                        }
                         final tx = filtered[index];
                         return TransactionListItem(
                           key: ValueKey(tx['id']),
@@ -680,6 +690,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                           onDelete: _delete,
                           onTap: (t) => _showAddDialog(existing: t),
                           syncStatus: _syncStatuses[tx['id']],
+                          staggerIndex: index < 6 ? index : null,
                         );
                       },
                     ),

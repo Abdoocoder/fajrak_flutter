@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
+import '../common/filter_chips.dart';
 
 class TransactionFilters extends StatelessWidget {
-  final String currentFilter;
-  final String currentSearch;
-  final Function(String) onSearchChanged;
-  final Function(String) onFilterChanged;
-  final VoidCallback onShowDatePicker;
-  final ColorScheme colorScheme;
-  final int filterMonth;
-  final int filterYear;
-  final void Function(int month, int year) onMonthYearChanged;
-
   const TransactionFilters({
     super.key,
     required this.currentFilter,
@@ -19,13 +14,27 @@ class TransactionFilters extends StatelessWidget {
     required this.onSearchChanged,
     required this.onFilterChanged,
     required this.onShowDatePicker,
-    required this.colorScheme,
     required this.filterMonth,
     required this.filterYear,
     required this.onMonthYearChanged,
   });
 
-  void _goPrev(BuildContext context) {
+  final String currentFilter;
+  final String currentSearch;
+  final ValueChanged<String> onSearchChanged;
+  final ValueChanged<String> onFilterChanged;
+  final VoidCallback onShowDatePicker;
+  final int filterMonth;
+  final int filterYear;
+  final void Function(int month, int year) onMonthYearChanged;
+
+  static const _monthKeys = [
+    'month_jan', 'month_feb', 'month_mar', 'month_apr',
+    'month_may', 'month_jun', 'month_jul', 'month_aug',
+    'month_sep', 'month_oct', 'month_nov', 'month_dec',
+  ];
+
+  void _goPrev() {
     if (filterMonth == 1) {
       onMonthYearChanged(12, filterYear - 1);
     } else {
@@ -33,7 +42,7 @@ class TransactionFilters extends StatelessWidget {
     }
   }
 
-  void _goNext(BuildContext context) {
+  void _goNext() {
     final now = DateTime.now();
     if (filterMonth == now.month && filterYear == now.year) return;
     if (filterMonth == 12) {
@@ -45,166 +54,181 @@ class TransactionFilters extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final now = DateTime.now();
-    final isCurrentMonth = filterMonth == now.month && filterYear == now.year;
+    final isCurrentMonth =
+        filterMonth == now.month && filterYear == now.year;
+    final monthLabel = '${_monthKeys[filterMonth - 1].tr()} $filterYear';
 
-    const monthKeys = [
-      'month_jan',
-      'month_feb',
-      'month_mar',
-      'month_apr',
-      'month_may',
-      'month_jun',
-      'month_jul',
-      'month_aug',
-      'month_sep',
-      'month_oct',
-      'month_nov',
-      'month_dec',
-    ];
-    final monthLabel = '${monthKeys[filterMonth - 1].tr()} $filterYear';
+    final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final surfaceBg = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textTertiary =
+        isDark ? AppColors.textSecondaryDark : AppColors.textTertiary;
+    final hintColor =
+        isDark ? AppColors.textSecondaryDark : AppColors.textTertiary;
+    final inputFill =
+        isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      child: Column(
-        children: [
-          // ── Month Navigator ──
-          Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            decoration: BoxDecoration(
-              color: colorScheme.surface,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: colorScheme.outlineVariant),
-            ),
-            child: Row(
-              children: [
-                _NavButton(
-                  icon: Icons.chevron_right,
-                  onTap: () => _goPrev(context),
-                  colorScheme: colorScheme,
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: onShowDatePicker,
-                    child: Center(
-                      child: Text(
-                        monthLabel,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w900,
-                          color: colorScheme.onSurface,
-                        ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ── Month navigator ──────────────────────────────────────────
+        Container(
+          margin: const EdgeInsetsDirectional.fromSTEB(
+            AppSpacing.screenPaddingHorizontal,
+            AppSpacing.sm,
+            AppSpacing.screenPaddingHorizontal,
+            AppSpacing.xs,
+          ),
+          decoration: BoxDecoration(
+            color: surfaceBg,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border.all(color: borderColor),
+          ),
+          child: Row(
+            children: [
+              _MonthNavButton(
+                icon: Icons.chevron_right,
+                onTap: _goPrev,
+                isDark: isDark,
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: onShowDatePicker,
+                  behavior: HitTestBehavior.opaque,
+                  child: Center(
+                    child: Text(
+                      monthLabel,
+                      style: AppTypography.headingSm.copyWith(
+                        color: textPrimary,
                       ),
                     ),
                   ),
                 ),
-                _NavButton(
-                  icon: Icons.chevron_left,
-                  onTap: isCurrentMonth ? null : () => _goNext(context),
-                  colorScheme: colorScheme,
-                  disabled: isCurrentMonth,
-                ),
-              ],
-            ),
-          ),
-
-          Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  initialValue: currentSearch,
-                  onChanged: onSearchChanged,
-                  style: TextStyle(color: colorScheme.onSurface),
-                  decoration: InputDecoration(
-                    hintText: 'search_hint'.tr(),
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    filled: true,
-                    fillColor: colorScheme.surface,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: colorScheme.outlineVariant),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                  ),
-                ),
+              ),
+              _MonthNavButton(
+                icon: Icons.chevron_left,
+                onTap: isCurrentMonth ? null : _goNext,
+                isDark: isDark,
+                disabled: isCurrentMonth,
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _filterChip('all', 'trans_all'.tr()),
-                const SizedBox(width: 8),
-                _filterChip('income', 'trans_income'.tr()),
-                const SizedBox(width: 8),
-                _filterChip('expense', 'trans_expense'.tr()),
-              ],
+        ),
+
+        // ── Search field ─────────────────────────────────────────────
+        Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            AppSpacing.screenPaddingHorizontal,
+            AppSpacing.xs,
+            AppSpacing.screenPaddingHorizontal,
+            AppSpacing.xs,
+          ),
+          child: TextField(
+            onChanged: onSearchChanged,
+            style: AppTypography.bodyMd.copyWith(color: textPrimary),
+            decoration: InputDecoration(
+              hintText: 'search_hint'.tr(),
+              hintStyle: AppTypography.bodyMd.copyWith(color: hintColor),
+              prefixIcon: Icon(
+                Icons.search_outlined,
+                size: 20,
+                color: textTertiary,
+              ),
+              filled: true,
+              fillColor: inputFill,
+              contentPadding: const EdgeInsetsDirectional.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: 0,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                borderSide: BorderSide(color: borderColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                borderSide: BorderSide(color: borderColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                borderSide: const BorderSide(
+                  color: AppColors.primary,
+                  width: 1.5,
+                ),
+              ),
             ),
           ),
-        ],
-      ),
+        ),
+
+        // ── Type filter chips ────────────────────────────────────────
+        Padding(
+          padding: const EdgeInsetsDirectional.only(
+            bottom: AppSpacing.xs,
+          ),
+          child: AppFilterChips(
+            options: [
+              'trans_all'.tr(),
+              'trans_income'.tr(),
+              'trans_expense'.tr(),
+            ],
+            selected: _filterLabel(currentFilter),
+            onSelected: (label) {
+              if (label == 'trans_income'.tr()) {
+                onFilterChanged('income');
+              } else if (label == 'trans_expense'.tr()) {
+                onFilterChanged('expense');
+              } else {
+                onFilterChanged('all');
+              }
+            },
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _filterChip(String value, String label) {
-    final selected = currentFilter == value;
-    return GestureDetector(
-      onTap: () => onFilterChanged(value),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected ? colorScheme.primary : colorScheme.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? colorScheme.primary : colorScheme.outlineVariant,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: selected ? Colors.white : colorScheme.onSurfaceVariant,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
+  String _filterLabel(String filter) {
+    switch (filter) {
+      case 'income':
+        return 'trans_income'.tr();
+      case 'expense':
+        return 'trans_expense'.tr();
+      default:
+        return 'trans_all'.tr();
+    }
   }
 }
 
-class _NavButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback? onTap;
-  final ColorScheme colorScheme;
-  final bool disabled;
-
-  const _NavButton({
+class _MonthNavButton extends StatelessWidget {
+  const _MonthNavButton({
     required this.icon,
     required this.onTap,
-    required this.colorScheme,
+    required this.isDark,
     this.disabled = false,
   });
 
+  final IconData icon;
+  final VoidCallback? onTap;
+  final bool isDark;
+  final bool disabled;
+
   @override
   Widget build(BuildContext context) {
+    final color = disabled
+        ? (isDark
+            ? AppColors.textSecondaryDark
+            : AppColors.textTertiary)
+        : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimary);
+
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
         width: 44,
         height: 44,
-        alignment: Alignment.center,
-        child: Icon(
-          icon,
-          size: 22,
-          color: disabled
-              ? colorScheme.onSurfaceVariant.withValues(alpha: 0.3)
-              : colorScheme.onSurface,
-        ),
+        child: Icon(icon, size: 22, color: color),
       ),
     );
   }
