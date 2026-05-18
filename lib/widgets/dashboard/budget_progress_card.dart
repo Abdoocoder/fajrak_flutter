@@ -1,41 +1,73 @@
 import 'package:flutter/material.dart';
-import '../../utils/app_colors.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
+import '../common/app_card.dart';
+import '../common/progress_bar.dart';
 
 class BudgetProgressCard extends StatelessWidget {
-  final double income;
-  final double expenses;
-  final String currency;
-
   const BudgetProgressCard({
     super.key,
     required this.income,
     required this.expenses,
     required this.currency,
+    this.onSeeAll,
   });
+
+  final double income;
+  final double expenses;
+  final String currency;
+  final VoidCallback? onSeeAll;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final double remaining = income - expenses;
-    final double percentage = income > 0
-        ? (expenses / income).clamp(0.0, 1.0)
-        : 0.0;
-    final isDark = theme.brightness == Brightness.dark;
-    final Color progressColor = percentage > 0.9
-        ? (isDark ? AppColors.error : const Color(0xFFDC2626))
-        : percentage > 0.7
-        ? (isDark ? AppColors.warning : const Color(0xFFD97706))
-        : (isDark ? AppColors.success : AppColors.successDark);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final labelColor =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.outlineVariant),
-      ),
+    if (income == 0) {
+      return AppCard(
+        variant: AppCardVariant.tight,
+        child: Row(
+          children: [
+            Icon(
+              Icons.account_balance_wallet_outlined,
+              size: 24,
+              color: isDark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textTertiary,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              'dash_monthly_budget'.tr(),
+              style: AppTypography.headingSm.copyWith(color: labelColor),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final fraction = (expenses / income).clamp(0.0, 1.0);
+    final remaining = income - expenses;
+    final n = remaining.abs();
+    final remainingFmt =
+        n % 1 == 0 ? n.toStringAsFixed(0) : n.toStringAsFixed(2);
+
+    // Colour: <0.7 → budget gradient; 0.7–0.9 → warning amber; ≥0.9 → expense red
+    ProgressBarVariant variant;
+    Color? overrideColor;
+    if (fraction >= 0.9) {
+      variant = ProgressBarVariant.overspent;
+    } else if (fraction >= 0.7) {
+      variant = ProgressBarVariant.overspent;
+      overrideColor = AppColors.warning;
+    } else {
+      variant = ProgressBarVariant.budget;
+    }
+
+    return AppCard(
+      variant: AppCardVariant.tight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -43,54 +75,31 @@ class BudgetProgressCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'dash_summary_month'.tr(),
-                style: TextStyle(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 14,
-                ),
+                'dash_monthly_budget'.tr(),
+                style: AppTypography.headingSm.copyWith(color: labelColor),
               ),
-              Text(
-                '${percentage >= 1 ? 0 : remaining.toStringAsFixed(0)} $currency ${"goals_remaining".tr()}',
-                style: TextStyle(
-                  color: colorScheme.onSurfaceVariant,
-                  fontSize: 12,
+              if (onSeeAll != null)
+                GestureDetector(
+                  onTap: onSeeAll,
+                  behavior: HitTestBehavior.opaque,
+                  child: Text(
+                    '${'dash_view_all'.tr()} ←',
+                    style: AppTypography.labelMd.copyWith(
+                      color: AppColors.primary,
+                    ),
+                  ),
                 ),
-              ),
             ],
           ),
-          const SizedBox(height: 16),
-          Semantics(
-            value: '${(percentage * 100).toStringAsFixed(0)}%',
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: LinearProgressIndicator(
-                value: percentage,
-                backgroundColor: colorScheme.outlineVariant,
-                color: progressColor,
-                minHeight: 10,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${"trans_expense".tr()}: ${expenses.toStringAsFixed(0)} $currency',
-                style: TextStyle(
-                  color: colorScheme.onSurfaceVariant,
-                  fontSize: 11,
-                ),
-              ),
-              Text(
-                '${"trans_income".tr()}: ${income.toStringAsFixed(0)} $currency',
-                style: TextStyle(
-                  color: colorScheme.onSurfaceVariant,
-                  fontSize: 11,
-                ),
-              ),
-            ],
+          const SizedBox(height: AppSpacing.md),
+          AppProgressBar(
+            value: fraction,
+            title: '',
+            variant: variant,
+            fillColor: overrideColor,
+            infoEnd: remaining >= 0
+                ? '$remainingFmt $currency ${'goals_remaining'.tr()}'
+                : null,
           ),
         ],
       ),
