@@ -1,12 +1,14 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'utils/error_handler.dart';
 import 'package:provider/provider.dart';
 import 'app_state.dart';
@@ -84,9 +86,7 @@ void main() async {
   // The DB is re-opened with the correct key after the user signs in
   // (handled in AuthService / SplashScreen).
   if (!kIsWeb) {
-    final initialKey = Supabase.instance.client.auth.currentSession?.accessToken
-        ?? dotenv.env['SUPABASE_ANON_KEY']
-        ?? 'fajrak_default_key';
+    final initialKey = await _getLocalDbKey();
     await AppDatabase.initialize(encryptionKey: initialKey);
   }
 
@@ -122,6 +122,35 @@ void main() async {
   // Initialize notifications AFTER runApp — keeps startup fast.
   // Fire-and-forget: no await, doesn't block the first frame.
   NotificationService.initialize();
+}
+
+/// Generates a device-unique, persistent encryption key for the local SQLCipher DB.
+///
+/// Priority order:
+///  1. Supabase JWT access token (user session — strongest, tied to auth)
+///  2. SUPABASE_ANON_KEY from .env (build-time config)
+///  3. Random 256-bit hex key persisted in SharedPreferences (offline-first fallback)
+///
+/// The hardcoded fallback approach is deliberately avoided here because
+/// a predictable DB key would nullify SQLCipher's encryption on the user's
+/// financial data (transactions, debts, accounts, budgets, goals, sync queue).
+Future<String> _getLocalDbKey() async {
+  final sessionKey = Supabase.instance.client.auth.currentSession?.accessToken;
+  if (sessionKey != null) return sessionKey;
+
+  final envKey = dotenv.env['SUPABASE_ANON_KEY'];
+  if (envKey != null && envKey.isNotEmpty) return envKey;
+
+  final prefs = await SharedPreferences.getInstance();
+  const storageKey = 'fajrak_db_encryption_key';
+  final stored = prefs.getString(storageKey);
+  if (stored != null) return stored;
+
+  final random = Random.secure();
+  final bytes = List<int>.generate(32, (_) => random.nextInt(256));
+  final key = bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+  await prefs.setString(storageKey, key);
+  return key;
 }
 
 class FajrakApp extends StatelessWidget {
