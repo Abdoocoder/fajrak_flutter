@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../core/theme/app_colors.dart';
 import '../../utils/error_handler.dart';
 
 class AddGoalDialog extends StatefulWidget {
@@ -71,12 +72,12 @@ class _AddGoalDialogState extends State<AddGoalDialog> {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.warning_amber_rounded, color: Colors.white),
+            const Icon(Icons.warning_amber_rounded, color: AppColors.textInverse),
             const SizedBox(width: 10),
             Expanded(child: Text(message, style: const TextStyle())),
           ],
         ),
-        backgroundColor: const Color(0xFFF59E0B),
+        backgroundColor: AppColors.warning,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         duration: const Duration(seconds: 3),
@@ -132,7 +133,11 @@ class _AddGoalDialogState extends State<AddGoalDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -149,7 +154,7 @@ class _AddGoalDialogState extends State<AddGoalDialog> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: colorScheme.outlineVariant,
+                color: border,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -159,16 +164,16 @@ class _AddGoalDialogState extends State<AddGoalDialog> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w900,
-                color: colorScheme.onSurface,
+                color: textPrimary,
               ),
             ),
             const SizedBox(height: 20),
             Align(
-              alignment: Alignment.centerRight,
+              alignment: AlignmentDirectional.centerEnd,
               child: Text(
                 'goals_choose_icon'.tr(),
                 style: TextStyle(
-                  color: colorScheme.onSurfaceVariant,
+                  color: textSecondary,
                   fontSize: 12,
                 ),
               ),
@@ -191,22 +196,18 @@ class _AddGoalDialogState extends State<AddGoalDialog> {
                     child: Container(
                       decoration: BoxDecoration(
                         color: selected
-                            ? colorScheme.primary.withValues(alpha: 0.25)
-                            : colorScheme.outlineVariant,
+                            ? AppColors.primary.withValues(alpha: 0.25)
+                            : border,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: selected
-                              ? colorScheme.primary
-                              : Colors.transparent,
+                          color: selected ? AppColors.primary : Colors.transparent,
                         ),
                       ),
                       child: Center(
                         child: Icon(
                           icon,
                           size: 18,
-                          color: selected
-                              ? colorScheme.primary
-                              : colorScheme.onSurfaceVariant,
+                          color: selected ? AppColors.primary : textSecondary,
                         ),
                       ),
                     ),
@@ -215,18 +216,21 @@ class _AddGoalDialogState extends State<AddGoalDialog> {
               ),
             ),
             const SizedBox(height: 12),
-            _field('goals_name_hint'.tr(), _nameCtrl, TextInputType.text),
+            _field('goals_name_hint'.tr(), _nameCtrl, TextInputType.text,
+                surface: surface, border: border, textPrimary: textPrimary, textSecondary: textSecondary),
             const SizedBox(height: 10),
             _field(
               'goals_target_amount'.tr(),
               _targetCtrl,
               const TextInputType.numberWithOptions(decimal: true),
+              surface: surface, border: border, textPrimary: textPrimary, textSecondary: textSecondary,
             ),
             const SizedBox(height: 10),
             _field(
               'goals_current_amount'.tr(),
               _currentCtrl,
               const TextInputType.numberWithOptions(decimal: true),
+              surface: surface, border: border, textPrimary: textPrimary, textSecondary: textSecondary,
             ),
             const SizedBox(height: 10),
             GestureDetector(
@@ -252,14 +256,14 @@ class _AddGoalDialogState extends State<AddGoalDialog> {
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: colorScheme.outlineVariant,
+                  color: border,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       Icons.calendar_today_outlined,
-                      color: colorScheme.onSurfaceVariant,
+                      color: textSecondary,
                       size: 18,
                     ),
                     const SizedBox(width: 10),
@@ -268,9 +272,7 @@ class _AddGoalDialogState extends State<AddGoalDialog> {
                           ? 'goals_deadline_value'.tr(args: [_deadlineDate])
                           : 'goals_deadline_hint'.tr(),
                       style: TextStyle(
-                        color: _deadlineDate.isNotEmpty
-                            ? colorScheme.onSurface
-                            : colorScheme.onSurfaceVariant,
+                        color: _deadlineDate.isNotEmpty ? textPrimary : textSecondary,
                         fontSize: 13,
                       ),
                     ),
@@ -284,8 +286,9 @@ class _AddGoalDialogState extends State<AddGoalDialog> {
               child: ElevatedButton(
                 onPressed: _saving ? null : _save,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: colorScheme.primary,
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.textInverse,
+                  elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -309,18 +312,25 @@ class _AddGoalDialogState extends State<AddGoalDialog> {
     );
   }
 
-  Widget _field(String hint, TextEditingController ctrl, TextInputType type) {
-    final colorScheme = Theme.of(context).colorScheme;
+  Widget _field(
+    String hint,
+    TextEditingController ctrl,
+    TextInputType type, {
+    required Color surface,
+    required Color border,
+    required Color textPrimary,
+    required Color textSecondary,
+  }) {
     return TextField(
       controller: ctrl,
       keyboardType: type,
       textAlign: TextAlign.right,
-      style: TextStyle(color: colorScheme.onSurface),
+      style: TextStyle(color: textPrimary),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+        hintStyle: TextStyle(color: textSecondary),
         filled: true,
-        fillColor: colorScheme.outlineVariant,
+        fillColor: border,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide.none,

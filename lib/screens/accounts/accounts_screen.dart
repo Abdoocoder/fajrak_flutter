@@ -16,7 +16,7 @@ const _accountTypes = [
     'type': 'cash',
     'icon': '💵',
     'labelKey': 'acc_type_cash',
-    'color': AppColors.success,
+    'color': AppColors.income,
   },
   {
     'type': 'savings',
@@ -28,16 +28,16 @@ const _accountTypes = [
     'type': 'credit_card',
     'icon': '💳',
     'labelKey': 'acc_type_credit',
-    'color': AppColors.error,
+    'color': AppColors.expense,
   },
 ];
 
 const _presetColors = [
   AppColors.primary,
-  AppColors.success,
+  AppColors.income,
   AppColors.purple,
   AppColors.warning,
-  AppColors.error,
+  AppColors.expense,
   AppColors.cyan,
 ];
 
@@ -86,15 +86,17 @@ class _AccountsScreenState extends State<AccountsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final background = isDark ? AppColors.backgroundDark : AppColors.background;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: background,
       appBar: AppBar(
         title: Text(
           'accounts_title'.tr(),
           style: const TextStyle(fontWeight: FontWeight.w900),
         ),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor: background,
         elevation: 0,
         actions: [
           if (_accounts.length >= 2)
@@ -127,13 +129,13 @@ class _AccountsScreenState extends State<AccountsScreen> {
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       color: _totalBalance >= 0
-                          ? AppColors.success.withValues(alpha: 0.08)
-                          : AppColors.error.withValues(alpha: 0.08),
+                          ? AppColors.income.withValues(alpha: 0.08)
+                          : AppColors.expense.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: _totalBalance >= 0
-                            ? AppColors.success.withValues(alpha: 0.25)
-                            : AppColors.error.withValues(alpha: 0.25),
+                            ? AppColors.income.withValues(alpha: 0.25)
+                            : AppColors.expense.withValues(alpha: 0.25),
                       ),
                     ),
                     child: Column(
@@ -141,7 +143,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
                         Text(
                           'accounts_total_balance'.tr(),
                           style: TextStyle(
-                            color: cs.onSurfaceVariant,
+                            color: textSecondary,
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                           ),
@@ -151,8 +153,8 @@ class _AccountsScreenState extends State<AccountsScreen> {
                           '${_totalBalance >= 0 ? '+' : '-'}${_fmt(_totalBalance)} $_currency',
                           style: TextStyle(
                             color: _totalBalance >= 0
-                                ? AppColors.success
-                                : AppColors.error,
+                                ? AppColors.income
+                                : AppColors.expense,
                             fontSize: 32,
                             fontWeight: FontWeight.w900,
                           ),
@@ -195,7 +197,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
                                       child: Text(
                                         'accounts_archive'.tr(),
                                         style: const TextStyle(
-                                          color: Colors.red,
+                                          color: AppColors.expense,
                                         ),
                                       ),
                                     ),
@@ -222,7 +224,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.surfaceDark : AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -235,7 +237,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.surfaceDark : AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -259,7 +261,11 @@ class _AccountCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final surfaceVariant = isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
     final info = _typeInfo(acc['type'] as String? ?? 'bank');
     final bal = acc['balance'] as double? ?? 0;
     final color = Color(
@@ -275,7 +281,7 @@ class _AccountCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: surface,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
@@ -306,7 +312,7 @@ class _AccountCard extends StatelessWidget {
                     Text(
                       acc['name'] as String? ?? '',
                       style: TextStyle(
-                        color: cs.onSurface,
+                        color: textPrimary,
                         fontWeight: FontWeight.w800,
                         fontSize: 14,
                       ),
@@ -339,7 +345,7 @@ class _AccountCard extends StatelessWidget {
                 ),
                 Text(
                   (info['labelKey'] as String).tr(),
-                  style: TextStyle(color: cs.onSurfaceVariant, fontSize: 11),
+                  style: TextStyle(color: textSecondary, fontSize: 11),
                 ),
               ],
             ),
@@ -350,14 +356,14 @@ class _AccountCard extends StatelessWidget {
               Text(
                 '${bal >= 0 ? '+' : '-'}${fmt(bal)}',
                 style: TextStyle(
-                  color: bal >= 0 ? AppColors.success : AppColors.error,
+                  color: bal >= 0 ? AppColors.income : AppColors.expense,
                   fontWeight: FontWeight.w900,
                   fontSize: 18,
                 ),
               ),
               Text(
                 currency,
-                style: TextStyle(color: cs.onSurfaceVariant, fontSize: 11),
+                style: TextStyle(color: textSecondary, fontSize: 11),
               ),
             ],
           ),
@@ -369,13 +375,13 @@ class _AccountCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: cs.surfaceContainerHighest,
+                    color: surfaceVariant,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     Icons.edit_outlined,
                     size: 16,
-                    color: cs.onSurfaceVariant,
+                    color: textSecondary,
                   ),
                 ),
               ),
@@ -386,13 +392,13 @@ class _AccountCard extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: AppColors.error.withValues(alpha: 0.1),
+                      color: AppColors.expense.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(
                       Icons.archive_outlined,
                       size: 16,
-                      color: AppColors.error,
+                      color: AppColors.expense,
                     ),
                   ),
                 ),
@@ -481,7 +487,7 @@ class _AccountFormSheetState extends State<_AccountFormSheet> {
               '${'accounts_error_save'.tr()}: ${e.toString()}',
               style: const TextStyle(fontSize: 13),
             ),
-            backgroundColor: AppColors.error,
+            backgroundColor: AppColors.expense,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -491,7 +497,12 @@ class _AccountFormSheetState extends State<_AccountFormSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final surfaceVariant = isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -506,7 +517,7 @@ class _AccountFormSheetState extends State<_AccountFormSheet> {
           Text(
             widget.account == null ? 'accounts_new'.tr() : 'accounts_edit'.tr(),
             style: TextStyle(
-              color: cs.onSurface,
+              color: textPrimary,
               fontWeight: FontWeight.w900,
               fontSize: 17,
             ),
@@ -515,7 +526,7 @@ class _AccountFormSheetState extends State<_AccountFormSheet> {
           Text(
             'accounts_type'.tr(),
             style: TextStyle(
-              color: cs.onSurfaceVariant,
+              color: textSecondary,
               fontSize: 12,
               fontWeight: FontWeight.w700,
             ),
@@ -541,7 +552,7 @@ class _AccountFormSheetState extends State<_AccountFormSheet> {
                   decoration: BoxDecoration(
                     color: selected
                         ? tColor.withValues(alpha: 0.12)
-                        : cs.surfaceContainerHighest,
+                        : surfaceVariant,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: selected ? tColor : Colors.transparent,
@@ -558,7 +569,7 @@ class _AccountFormSheetState extends State<_AccountFormSheet> {
                       Text(
                         (t['labelKey'] as String).tr(),
                         style: TextStyle(
-                          color: selected ? tColor : cs.onSurfaceVariant,
+                          color: selected ? tColor : textSecondary,
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
                         ),
@@ -574,15 +585,15 @@ class _AccountFormSheetState extends State<_AccountFormSheet> {
             controller: _nameCtrl,
             textAlign: TextAlign.right,
             autofocus: true,
-            style: TextStyle(color: cs.onSurface),
+            style: TextStyle(color: textPrimary),
             decoration: InputDecoration(
               labelText: 'accounts_name_hint'.tr(),
-              labelStyle: TextStyle(color: cs.onSurfaceVariant),
+              labelStyle: TextStyle(color: textSecondary),
               filled: true,
-              fillColor: cs.surface,
+              fillColor: surface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: cs.outlineVariant),
+                borderSide: BorderSide(color: border),
               ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -594,15 +605,15 @@ class _AccountFormSheetState extends State<_AccountFormSheet> {
           TextField(
             controller: _balanceCtrl,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            style: TextStyle(color: cs.onSurface),
+            style: TextStyle(color: textPrimary),
             decoration: InputDecoration(
               labelText: 'accounts_opening_balance'.tr(),
-              labelStyle: TextStyle(color: cs.onSurfaceVariant),
+              labelStyle: TextStyle(color: textSecondary),
               filled: true,
-              fillColor: cs.surface,
+              fillColor: surface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: cs.outlineVariant),
+                borderSide: BorderSide(color: border),
               ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -624,9 +635,7 @@ class _AccountFormSheetState extends State<_AccountFormSheet> {
                         color: c,
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: _color == c
-                              ? cs.onSurface
-                              : Colors.transparent,
+                          color: _color == c ? textPrimary : Colors.transparent,
                           width: 2,
                         ),
                       ),
@@ -642,7 +651,8 @@ class _AccountFormSheetState extends State<_AccountFormSheet> {
               onPressed: _saving ? null : _save,
               style: ElevatedButton.styleFrom(
                 backgroundColor: _color,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.textInverse,
+                elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -654,7 +664,7 @@ class _AccountFormSheetState extends State<_AccountFormSheet> {
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.white,
+                        color: AppColors.textInverse,
                       ),
                     )
                   : Text(
@@ -739,7 +749,7 @@ class _TransferSheetState extends State<_TransferSheet> {
               '${'accounts_error_transfer'.tr()}: ${e.toString()}',
               style: const TextStyle(fontSize: 13),
             ),
-            backgroundColor: AppColors.error,
+            backgroundColor: AppColors.expense,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -749,17 +759,21 @@ class _TransferSheetState extends State<_TransferSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
     final avail = widget.accounts.where((a) => a['id'] != _fromId).toList();
 
     InputDecoration inputDec(String label) => InputDecoration(
       labelText: label,
-      labelStyle: TextStyle(color: cs.onSurfaceVariant),
+      labelStyle: TextStyle(color: textSecondary),
       filled: true,
-      fillColor: cs.surface,
+      fillColor: surface,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.outlineVariant),
+        borderSide: BorderSide(color: border),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     );
@@ -778,7 +792,7 @@ class _TransferSheetState extends State<_TransferSheet> {
           Text(
             'accounts_transfer_title'.tr(),
             style: TextStyle(
-              color: cs.onSurface,
+              color: textPrimary,
               fontWeight: FontWeight.w900,
               fontSize: 17,
             ),
@@ -830,13 +844,13 @@ class _TransferSheetState extends State<_TransferSheet> {
           TextField(
             controller: _amountCtrl,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            style: TextStyle(color: cs.onSurface),
+            style: TextStyle(color: textPrimary),
             decoration: inputDec('accounts_transfer_amount'.tr()),
           ),
           const SizedBox(height: 10),
           TextField(
             controller: _noteCtrl,
-            style: TextStyle(color: cs.onSurface),
+            style: TextStyle(color: textPrimary),
             decoration: inputDec('accounts_transfer_note'.tr()),
           ),
           const SizedBox(height: 20),
@@ -846,7 +860,8 @@ class _TransferSheetState extends State<_TransferSheet> {
               onPressed: _saving ? null : _save,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.textInverse,
+                elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -858,7 +873,7 @@ class _TransferSheetState extends State<_TransferSheet> {
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.white,
+                        color: AppColors.textInverse,
                       ),
                     )
                   : Text(

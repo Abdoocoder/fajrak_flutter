@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../core/theme/app_colors.dart';
 import '../../services/currency_service.dart';
 
 class AddTransactionDialog extends StatefulWidget {
@@ -197,8 +198,12 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final amountColor = isDark ? AppColors.sky : AppColors.textPrimary;
 
     return Container(
       padding: EdgeInsets.only(
@@ -208,7 +213,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
         top: 12,
       ),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SingleChildScrollView(
@@ -221,7 +226,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 width: 40,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.outlineVariant,
+                  color: border,
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -233,7 +238,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
-                  color: theme.colorScheme.onSurface,
+                  color: textPrimary,
                 ),
               ),
             ),
@@ -245,9 +250,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               builder: (context, type, _) => Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.outlineVariant.withValues(
-                    alpha: 0.5,
-                  ),
+                  color: border.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
@@ -255,13 +258,13 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                     _buildTypeToggle(
                       label: 'trans_income'.tr(),
                       isSelected: type == 'income',
-                      activeColor: const Color(0xFF10B981),
+                      activeColor: AppColors.income,
                       onTap: () => _typeController.value = 'income',
                     ),
                     _buildTypeToggle(
                       label: 'trans_expense'.tr(),
                       isSelected: type == 'expense',
-                      activeColor: const Color(0xFFEF4444),
+                      activeColor: AppColors.expense,
                       onTap: () => _typeController.value = 'expense',
                     ),
                   ],
@@ -271,7 +274,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
             const SizedBox(height: 24),
 
             // Date Picker Field
-            _buildLabel('trans_date'.tr()),
+            _buildLabel('trans_date'.tr(), textSecondary),
             ValueListenableBuilder<DateTime>(
               valueListenable: _dateController,
               builder: (context, date, _) => GestureDetector(
@@ -283,8 +286,8 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                     lastDate: DateTime(2100),
                     builder: (context, child) => Theme(
                       data: Theme.of(context).copyWith(
-                        colorScheme: theme.colorScheme.copyWith(
-                          primary: const Color(0xFF3B7EF6),
+                        colorScheme: Theme.of(context).colorScheme.copyWith(
+                          primary: AppColors.primary,
                         ),
                       ),
                       child: child!,
@@ -298,31 +301,29 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                     vertical: 16,
                   ),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.outlineVariant.withValues(
-                      alpha: 0.3,
-                    ),
+                    color: border.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: theme.colorScheme.outlineVariant),
+                    border: Border.all(color: border),
                   ),
                   child: Row(
                     children: [
                       const Icon(
                         Icons.calendar_month_rounded,
-                        color: Color(0xFF3B7EF6),
+                        color: AppColors.primary,
                         size: 20,
                       ),
                       const SizedBox(width: 12),
                       Text(
                         DateFormat('yyyy-MM-dd').format(date),
                         style: TextStyle(
-                          color: theme.colorScheme.onSurface,
+                          color: textPrimary,
                           fontSize: 16,
                         ),
                       ),
                       const Spacer(),
-                      const Icon(
+                      Icon(
                         Icons.arrow_forward_ios_rounded,
-                        color: Color(0xFF475569),
+                        color: AppColors.textDisabled,
                         size: 14,
                       ),
                     ],
@@ -333,7 +334,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
             const SizedBox(height: 20),
 
             // Amount & Currency
-            _buildLabel('trans_amount'.tr()),
+            _buildLabel('trans_amount'.tr(), textSecondary),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -345,20 +346,16 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                       decimal: true,
                     ),
                     style: TextStyle(
-                      color: isDark
-                          ? const Color(0xFF38BDF8)
-                          : const Color(0xFF0F172A),
+                      color: amountColor,
                       fontSize: 24,
                       fontWeight: FontWeight.w900,
                     ),
                     decoration: InputDecoration(
                       hintText: '0.00',
                       hintStyle: TextStyle(
-                        color: theme.colorScheme.onSurfaceVariant.withValues(
-                          alpha: 0.4,
-                        ),
+                        color: textSecondary.withValues(alpha: 0.4),
                       ),
-                      fillColor: theme.colorScheme.outlineVariant.withValues(
+                      fillColor: border.withValues(
                         alpha: isDark ? 0.3 : 0.6,
                       ),
                       contentPadding: const EdgeInsets.symmetric(
@@ -375,28 +372,22 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                     height: 58,
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.outlineVariant.withValues(
-                        alpha: 0.3,
-                      ),
+                      color: border.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: theme.colorScheme.outlineVariant,
-                      ),
+                      border: Border.all(color: border),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
                         value: _selectedCurrency,
                         icon: const Icon(
                           Icons.keyboard_arrow_down_rounded,
-                          color: Color(0xFF94A3B8),
+                          color: AppColors.textTertiary,
                         ),
-                        dropdownColor: theme.colorScheme.surface,
+                        dropdownColor: surface,
                         borderRadius: BorderRadius.circular(12),
                         isExpanded: true,
                         style: TextStyle(
-                          color: isDark
-                              ? const Color(0xFF38BDF8)
-                              : const Color(0xFF0F172A),
+                          color: amountColor,
                           fontWeight: FontWeight.w900,
                         ),
                         items: ['JOD', 'USD', 'SAR', 'AED', 'EGP', 'TRY', 'EUR']
@@ -422,14 +413,9 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
-                      theme.colorScheme.outlineVariant.withValues(alpha: 0.1),
-                    ],
-                  ),
+                  color: border.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: theme.colorScheme.outlineVariant),
+                  border: Border.all(color: border),
                 ),
                 child: Column(
                   children: [
@@ -442,9 +428,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                               decimal: true,
                             ),
                             style: TextStyle(
-                              color: isDark
-                                  ? const Color(0xFF38BDF8)
-                                  : const Color(0xFF0F172A),
+                              color: amountColor,
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
@@ -452,13 +436,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                               labelText: 'trans_exchange_rate'.tr(),
                               labelStyle: TextStyle(
                                 fontSize: 12,
-                                color: isDark
-                                    ? const Color(
-                                        0xFF38BDF8,
-                                      ).withValues(alpha: 0.7)
-                                    : const Color(
-                                        0xFF0F172A,
-                                      ).withValues(alpha: 0.7),
+                                color: amountColor.withValues(alpha: 0.7),
                               ),
                               isDense: true,
                               fillColor: Colors.transparent,
@@ -472,7 +450,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                         Container(
                           width: 1,
                           height: 30,
-                          color: theme.colorScheme.outlineVariant,
+                          color: border,
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -482,15 +460,15 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                               Text(
                                 'trans_equivalent'.tr(),
                                 style: TextStyle(
-                                  color: theme.colorScheme.onSurfaceVariant,
+                                  color: textSecondary,
                                   fontSize: 10,
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 '${((double.tryParse(_amountController.text) ?? 0) * (double.tryParse(_exchangeRateController.text) ?? 1.0)).toStringAsFixed(2)} ${widget.baseCurrency}',
-                                style: TextStyle(
-                                  color: theme.colorScheme.secondary,
+                                style: const TextStyle(
+                                  color: AppColors.accent,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
                                 ),
@@ -506,7 +484,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
             ],
             const SizedBox(height: 20),
 
-            _buildLabel('trans_category'.tr()),
+            _buildLabel('trans_category'.tr(), textSecondary),
             ValueListenableBuilder<String>(
               valueListenable: _typeController,
               builder: (ctx, type, _) {
@@ -523,7 +501,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                   height: 56,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.outlineVariant.withValues(
+                    color: border.withValues(
                       alpha: isDark ? 0.3 : 0.7,
                     ),
                     borderRadius: BorderRadius.circular(14),
@@ -533,14 +511,12 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                       value: currentValue,
                       icon: const Icon(
                         Icons.keyboard_arrow_down_rounded,
-                        color: Color(0xFF94A3B8),
+                        color: AppColors.textTertiary,
                       ),
-                      dropdownColor: theme.colorScheme.surface,
+                      dropdownColor: surface,
                       isExpanded: true,
                       style: TextStyle(
-                        color: isDark
-                            ? const Color(0xFF38BDF8)
-                            : const Color(0xFF0F172A),
+                        color: amountColor,
                         fontWeight: FontWeight.bold,
                       ),
                       items: categories
@@ -560,24 +536,20 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
             ),
             const SizedBox(height: 20),
 
-            _buildLabel('trans_description'.tr()),
+            _buildLabel('trans_description'.tr(), textSecondary),
             TextFormField(
               controller: _descController,
               maxLines: 2,
               style: TextStyle(
-                color: isDark
-                    ? const Color(0xFF38BDF8)
-                    : const Color(0xFF0F172A),
+                color: amountColor,
                 fontWeight: FontWeight.bold,
               ),
               decoration: InputDecoration(
                 hintText: 'trans_add_note_hint'.tr(),
                 hintStyle: TextStyle(
-                  color: isDark
-                      ? const Color(0xFF38BDF8).withValues(alpha: 0.35)
-                      : const Color(0xFF0F172A).withValues(alpha: 0.35),
+                  color: amountColor.withValues(alpha: 0.35),
                 ),
-                fillColor: theme.colorScheme.outlineVariant.withValues(
+                fillColor: border.withValues(
                   alpha: isDark ? 0.3 : 0.7,
                 ),
               ),
@@ -595,15 +567,13 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                 ),
                 decoration: BoxDecoration(
                   color: _isRecurring
-                      ? const Color(0xFF3B7EF6).withValues(alpha: 0.12)
-                      : theme.colorScheme.outlineVariant.withValues(
-                          alpha: isDark ? 0.3 : 0.6,
-                        ),
+                      ? AppColors.primary.withValues(alpha: 0.12)
+                      : border.withValues(alpha: isDark ? 0.3 : 0.6),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: _isRecurring
-                        ? const Color(0xFF3B7EF6).withValues(alpha: 0.5)
-                        : theme.colorScheme.outlineVariant,
+                        ? AppColors.primary.withValues(alpha: 0.5)
+                        : border,
                   ),
                 ),
                 child: Row(
@@ -618,8 +588,8 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                             'tx_recurring'.tr(),
                             style: TextStyle(
                               color: _isRecurring
-                                  ? const Color(0xFF3B7EF6)
-                                  : theme.colorScheme.onSurface,
+                                  ? AppColors.primary
+                                  : textPrimary,
                               fontWeight: FontWeight.w700,
                               fontSize: 15,
                             ),
@@ -628,7 +598,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                             Text(
                               'tx_recurring_note'.tr(),
                               style: const TextStyle(
-                                color: Color(0xFF3B7EF6),
+                                color: AppColors.primary,
                                 fontSize: 12,
                               ),
                             ),
@@ -638,7 +608,7 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                     Switch(
                       value: _isRecurring,
                       onChanged: (v) => setState(() => _isRecurring = v),
-                      activeThumbColor: const Color(0xFF3B7EF6),
+                      activeThumbColor: AppColors.primary,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                   ],
@@ -648,14 +618,12 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
 
             if (_isRecurring) ...[
               const SizedBox(height: 16),
-              _buildLabel('tx_recurring_day'.tr()),
+              _buildLabel('tx_recurring_day'.tr(), textSecondary),
               Container(
                 height: 56,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.outlineVariant.withValues(
-                    alpha: isDark ? 0.3 : 0.7,
-                  ),
+                  color: border.withValues(alpha: isDark ? 0.3 : 0.7),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: DropdownButtonHideUnderline(
@@ -663,14 +631,12 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
                     value: _recurringDay,
                     icon: const Icon(
                       Icons.keyboard_arrow_down_rounded,
-                      color: Color(0xFF94A3B8),
+                      color: AppColors.textTertiary,
                     ),
-                    dropdownColor: theme.colorScheme.surface,
+                    dropdownColor: surface,
                     isExpanded: true,
                     style: TextStyle(
-                      color: isDark
-                          ? const Color(0xFF38BDF8)
-                          : const Color(0xFF0F172A),
+                      color: amountColor,
                       fontWeight: FontWeight.bold,
                     ),
                     items: List.generate(
@@ -690,44 +656,38 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
 
             const SizedBox(height: 32),
 
-            // Save Button with Gradient
-            Container(
+            // Save Button
+            SizedBox(
               width: double.infinity,
               height: 56,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF3B7EF6), Color(0xFF06B6D4)],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF3B7EF6).withValues(alpha: 0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
               child: ElevatedButton(
                 onPressed: _saving ? null : _save,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.textInverse,
+                  elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                child: Text(
-                  widget.existing != null
-                      ? 'trans_save_edit'.tr()
-                      : 'trans_save'.tr(),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                  ),
-                ),
+                child: _saving
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.textInverse,
+                        ),
+                      )
+                    : Text(
+                        widget.existing != null
+                            ? 'trans_save_edit'.tr()
+                            : 'trans_save'.tr(),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
               ),
             ),
             const SizedBox(height: 12),
@@ -737,13 +697,13 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
     );
   }
 
-  Widget _buildLabel(String label) {
+  Widget _buildLabel(String label, Color color) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 8, right: 4),
+      padding: const EdgeInsetsDirectional.only(start: 4, end: 4, bottom: 8),
       child: Text(
         label,
-        style: const TextStyle(
-          color: Color(0xFF94A3B8),
+        style: TextStyle(
+          color: color,
           fontSize: 14,
           fontWeight: FontWeight.w600,
         ),
@@ -766,21 +726,12 @@ class _AddTransactionDialogState extends State<AddTransactionDialog> {
           decoration: BoxDecoration(
             color: isSelected ? activeColor : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: activeColor.withValues(alpha: 0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
           ),
           child: Center(
             child: Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+                color: isSelected ? AppColors.textInverse : AppColors.textTertiary,
                 fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
                 fontSize: 16,
               ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../core/theme/app_colors.dart';
 
 class AddBudgetDialog extends StatefulWidget {
   final Map<String, dynamic>? existing;
@@ -77,7 +78,7 @@ class _AddBudgetDialogState extends State<AddBudgetDialog> {
                   'budget_category_exists'.tr(),
                   style: const TextStyle(),
                 ),
-                backgroundColor: const Color(0xFFF59E0B),
+                backgroundColor: AppColors.warning,
               ),
             );
           }
@@ -106,7 +107,11 @@ class _AddBudgetDialogState extends State<AddBudgetDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -122,7 +127,7 @@ class _AddBudgetDialogState extends State<AddBudgetDialog> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: colorScheme.outlineVariant,
+              color: border,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -132,17 +137,17 @@ class _AddBudgetDialogState extends State<AddBudgetDialog> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w900,
-              color: colorScheme.onSurface,
+              color: textPrimary,
             ),
           ),
           const SizedBox(height: 20),
           if (widget.existing == null) ...[
             Align(
-              alignment: Alignment.centerRight,
+              alignment: AlignmentDirectional.centerEnd,
               child: Text(
                 'budget_category'.tr(),
                 style: TextStyle(
-                  color: colorScheme.onSurfaceVariant,
+                  color: textSecondary,
                   fontSize: 12,
                 ),
               ),
@@ -162,13 +167,11 @@ class _AddBudgetDialogState extends State<AddBudgetDialog> {
                   child: Container(
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? colorScheme.primary.withValues(alpha: 0.15)
-                          : colorScheme.surface,
+                          ? AppColors.primary.withValues(alpha: 0.15)
+                          : surface,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isSelected
-                            ? colorScheme.primary
-                            : colorScheme.outlineVariant,
+                        color: isSelected ? AppColors.primary : border,
                       ),
                     ),
                     child: Column(
@@ -182,9 +185,7 @@ class _AddBudgetDialogState extends State<AddBudgetDialog> {
                         Text(
                           cat['label'] as String,
                           style: TextStyle(
-                            color: isSelected
-                                ? colorScheme.primary
-                                : colorScheme.onSurfaceVariant,
+                            color: isSelected ? AppColors.primary : textSecondary,
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
                           ),
@@ -202,15 +203,15 @@ class _AddBudgetDialogState extends State<AddBudgetDialog> {
             controller: _limitCtrl,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             textAlign: TextAlign.right,
-            style: TextStyle(color: colorScheme.onSurface),
+            style: TextStyle(color: textPrimary),
             decoration: InputDecoration(
               labelText: 'budget_monthly_limit'.tr(args: [widget.currency]),
-              labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+              labelStyle: TextStyle(color: textSecondary),
               filled: true,
-              fillColor: colorScheme.surface,
+              fillColor: surface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: colorScheme.outlineVariant),
+                borderSide: BorderSide(color: border),
               ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -224,8 +225,9 @@ class _AddBudgetDialogState extends State<AddBudgetDialog> {
             child: ElevatedButton(
               onPressed: _saving ? null : _save,
               style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.textInverse,
+                elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

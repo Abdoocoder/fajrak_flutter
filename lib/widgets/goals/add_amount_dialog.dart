@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../core/theme/app_colors.dart';
 
 class AddAmountDialog extends StatefulWidget {
   final Map<String, dynamic> goal;
@@ -51,7 +52,11 @@ class _AddAmountDialogState extends State<AddAmountDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -66,7 +71,7 @@ class _AddAmountDialogState extends State<AddAmountDialog> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: colorScheme.outlineVariant,
+              color: border,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -76,7 +81,7 @@ class _AddAmountDialogState extends State<AddAmountDialog> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w900,
-              color: colorScheme.onSurface,
+              color: textPrimary,
             ),
           ),
           const SizedBox(height: 20),
@@ -84,12 +89,12 @@ class _AddAmountDialogState extends State<AddAmountDialog> {
             controller: _amountCtrl,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             textAlign: TextAlign.right,
-            style: TextStyle(color: colorScheme.onSurface),
+            style: TextStyle(color: textPrimary),
             decoration: InputDecoration(
               hintText: 'goals_amount_to_add'.tr(),
-              hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+              hintStyle: TextStyle(color: textSecondary),
               filled: true,
-              fillColor: colorScheme.outlineVariant,
+              fillColor: border,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide.none,
@@ -106,8 +111,9 @@ class _AddAmountDialogState extends State<AddAmountDialog> {
             child: ElevatedButton(
               onPressed: _saving ? null : _save,
               style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.textInverse,
+                elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

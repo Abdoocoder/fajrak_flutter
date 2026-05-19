@@ -27,7 +27,7 @@ class _LearnScreenState extends State<LearnScreen> {
 
   final _stageInfo = {
     'awareness': (Icons.eco, 'learn_stage_awareness'.tr(), AppColors.purple),
-    'debt': (Icons.credit_card, 'learn_stage_debt'.tr(), AppColors.error),
+    'debt': (Icons.credit_card, 'learn_stage_debt'.tr(), AppColors.expense),
     'emergency': (
       Icons.shield,
       'learn_stage_emergency'.tr(),
@@ -36,7 +36,7 @@ class _LearnScreenState extends State<LearnScreen> {
     'investing': (
       Icons.trending_up,
       'learn_stage_investing'.tr(),
-      AppColors.success,
+      AppColors.income,
     ),
     'wealth': (
       Icons.workspace_premium,
@@ -281,12 +281,14 @@ class _LearnScreenState extends State<LearnScreen> {
       });
 
       if (!mounted) return;
-      final cs = Theme.of(context).colorScheme;
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      final dialogSurface = isDark ? AppColors.surfaceDark : AppColors.surface;
+      final dialogTextSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
       if (newStreak % 7 == 0) {
         showDialog(
           context: context,
           builder: (_) => AlertDialog(
-            backgroundColor: AppColors.surface0,
+            backgroundColor: dialogSurface,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
@@ -301,8 +303,8 @@ class _LearnScreenState extends State<LearnScreen> {
                 const SizedBox(height: 12),
                 Text(
                   'learn_streak_consecutive'.tr(args: [newStreak.toString()]),
-                  style: TextStyle(
-                    color: cs.primary,
+                  style: const TextStyle(
+                    color: AppColors.primary,
                     fontWeight: FontWeight.w900,
                     fontSize: 22,
                   ),
@@ -310,15 +312,16 @@ class _LearnScreenState extends State<LearnScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'learn_streak_congrats'.tr(),
-                  style: TextStyle(color: cs.onSurfaceVariant),
+                  style: TextStyle(color: dialogTextSecondary),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: cs.primary,
-                    foregroundColor: cs.onPrimary,
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.textInverse,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -524,21 +527,23 @@ class _LearnScreenState extends State<LearnScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final bgColor = theme.scaffoldBackgroundColor;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final background = isDark ? AppColors.backgroundDark : AppColors.background;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
 
     if (_loading) {
       return Scaffold(
-        backgroundColor: bgColor,
-        body: Center(child: CircularProgressIndicator(color: cs.primary)),
+        backgroundColor: background,
+        body: const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       );
     }
 
     final info = _stageInfo[_stage]!;
 
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: background,
       appBar: AppBar(title: Text('learn_title'.tr())),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -570,7 +575,7 @@ class _LearnScreenState extends State<LearnScreen> {
                             Text(
                               'learn_stage_label'.tr(),
                               style: TextStyle(
-                                color: cs.onSurfaceVariant.withValues(
+                                color: textSecondary.withValues(
                                   alpha: 0.7,
                                 ),
                                 fontSize: 10,
@@ -620,7 +625,7 @@ class _LearnScreenState extends State<LearnScreen> {
                         style: TextStyle(
                           color: (!_completed && _streak > 0)
                               ? AppColors.textDisabled
-                              : cs.primary,
+                              : AppColors.primary,
                           fontWeight: FontWeight.w900,
                           fontSize: 18,
                         ),
@@ -628,7 +633,7 @@ class _LearnScreenState extends State<LearnScreen> {
                       Text(
                         'learn_streak_day'.tr(),
                         style: TextStyle(
-                          color: cs.onSurfaceVariant.withValues(alpha: 0.7),
+                          color: textSecondary.withValues(alpha: 0.7),
                           fontSize: 10,
                         ),
                       ),
@@ -643,16 +648,9 @@ class _LearnScreenState extends State<LearnScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: cs.surface,
+                color: surface,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: info.$3.withValues(alpha: 0.2)),
-                boxShadow: [
-                  BoxShadow(
-                    color: info.$3.withValues(alpha: 0.05),
-                    blurRadius: 20,
-                    spreadRadius: 5,
-                  ),
-                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -662,7 +660,7 @@ class _LearnScreenState extends State<LearnScreen> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w900,
-                      color: cs.onSurface,
+                      color: textPrimary,
                       height: 1.4,
                     ),
                   ),
@@ -671,7 +669,7 @@ class _LearnScreenState extends State<LearnScreen> {
                     _lesson['body'] ?? '',
                     style: TextStyle(
                       fontSize: 14,
-                      color: cs.onSurfaceVariant,
+                      color: textSecondary,
                       height: 1.7,
                     ),
                   ),
@@ -683,8 +681,9 @@ class _LearnScreenState extends State<LearnScreen> {
                             ? ElevatedButton(
                                 onPressed: _markComplete,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.success,
-                                  foregroundColor: Colors.white,
+                                  backgroundColor: AppColors.income,
+                                  foregroundColor: AppColors.textInverse,
+                                  elevation: 0,
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 14,
                                   ),
@@ -705,12 +704,12 @@ class _LearnScreenState extends State<LearnScreen> {
                                   vertical: 14,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.success.withValues(
+                                  color: AppColors.income.withValues(
                                     alpha: 0.1,
                                   ),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: AppColors.success.withValues(
+                                    color: AppColors.income.withValues(
                                       alpha: 0.3,
                                     ),
                                   ),
@@ -719,7 +718,7 @@ class _LearnScreenState extends State<LearnScreen> {
                                   child: Text(
                                     'learn_completed_msg'.tr(),
                                     style: const TextStyle(
-                                      color: AppColors.success,
+                                      color: AppColors.income,
                                       fontWeight: FontWeight.w900,
                                       fontSize: 15,
                                     ),
@@ -772,17 +771,17 @@ class _LearnScreenState extends State<LearnScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: cs.primary.withValues(alpha: 0.06),
+                color: AppColors.primary.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: cs.primary.withValues(alpha: 0.15)),
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'learn_did_you_know'.tr(),
-                    style: TextStyle(
-                      color: cs.primary,
+                    style: const TextStyle(
+                      color: AppColors.primary,
                       fontWeight: FontWeight.w800,
                       fontSize: 12,
                     ),
@@ -791,7 +790,7 @@ class _LearnScreenState extends State<LearnScreen> {
                   Text(
                     'learn_did_you_know_msg'.tr(),
                     style: TextStyle(
-                      color: cs.onSurfaceVariant,
+                      color: textSecondary,
                       fontSize: 12,
                       height: 1.6,
                     ),
