@@ -1,23 +1,29 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import '../../utils/app_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
 import '../../utils/error_handler.dart';
 import '../../services/analytics_service.dart';
 
+import '../../widgets/common/app_button.dart';
+import '../../widgets/common/confirm_dialog.dart';
+import '../../widgets/common/empty_state.dart';
+import '../../widgets/common/shimmer_loader.dart';
 import '../../widgets/debts/debt_celebration_dialog.dart';
 import '../../widgets/debts/debt_summary_section.dart';
 import '../../widgets/debts/paid_debt_item.dart';
 import '../../widgets/debts/debt_list_item.dart';
 import '../../widgets/debts/add_debt_dialog.dart';
-import '../../widgets/common/skeleton_loader.dart';
 
-List<Color> _buildPriorityColors(ColorScheme cs) => [
-  cs.error,
-  AppColors.warning, // warning amber — no semantic equivalent in M3
-  cs.primary,
-  cs.onSurfaceVariant,
-  cs.outlineVariant,
+const _priorityColors = [
+  AppColors.expense,
+  AppColors.warning,
+  AppColors.primary,
+  AppColors.textSecondary,
+  AppColors.borderLight,
 ];
 
 class DebtsScreen extends StatefulWidget {
@@ -52,7 +58,6 @@ class _DebtsScreenState extends State<DebtsScreen> {
       if (user == null) return;
       final sb = Supabase.instance.client;
 
-      // ── 4 queries بالتوازي بدل التسلسل (~800ms → ~250ms) ──
       final results = await Future.wait([
         sb.from('profiles').select('currency').eq('id', user.id).maybeSingle(),
         sb
@@ -118,7 +123,6 @@ class _DebtsScreenState extends State<DebtsScreen> {
     }
   }
 
-  // تحديث محلي فوري بعد الدفع — بدل إعادة تحميل كل شيء
   void _onDebtPaymentDone(String debtId, double newRemaining, bool isPaid) {
     setState(() {
       if (isPaid) {
@@ -142,7 +146,6 @@ class _DebtsScreenState extends State<DebtsScreen> {
         }
       }
     });
-    // refresh خفيف في الخلفية لمزامنة البيانات
     Future.delayed(const Duration(seconds: 2), _load);
   }
 
@@ -172,95 +175,64 @@ class _DebtsScreenState extends State<DebtsScreen> {
   }
 
   Future<void> _deleteDebt(String id) async {
-    final cs = Theme.of(context).colorScheme;
-    final confirm = await showDialog<bool>(
+    await ConfirmDialog.show(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text('debts_delete_title'.tr(), style: const TextStyle()),
-        content: Text('confirm_delete'.tr(), style: const TextStyle()),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('cancel'.tr(), style: const TextStyle()),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text('delete'.tr(), style: TextStyle(color: cs.error)),
-          ),
-        ],
-      ),
+      title: 'debts_delete_title'.tr(),
+      message: 'confirm_delete'.tr(),
+      danger: true,
+      onConfirm: () async {
+        if (_saving) return;
+        _saving = true;
+        setState(() {});
+        try {
+          await Supabase.instance.client.from('debts').delete().eq('id', id);
+          await _load();
+        } finally {
+          if (mounted) setState(() => _saving = false);
+        }
+      },
     );
-    if (confirm == true) {
-      if (_saving) return;
-      _saving = true;
-      setState(() {});
-      try {
-        await Supabase.instance.client.from('debts').delete().eq('id', id);
-        await _load();
-      } finally {
-        if (mounted) setState(() => _saving = false);
-      }
-    }
   }
 
   Future<void> _receiveDebt(Map<String, dynamic> debt) async {
-    final cs = Theme.of(context).colorScheme;
-    final confirm = await showDialog<bool>(
+    await ConfirmDialog.show(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text('debts_receive_btn'.tr(), style: const TextStyle()),
-        content: Text(
+      title: 'debts_receive_btn'.tr(),
+      message:
           '${'debts_tab_receivable'.tr()}: ${debt['name']}\n${(debt['remaining_amount'] as num).toStringAsFixed(0)} $_currency',
-          style: const TextStyle(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('cancel'.tr(), style: const TextStyle()),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              'debts_receive_btn'.tr(),
-              style: TextStyle(color: cs.primary),
-            ),
-          ),
-        ],
-      ),
+      danger: false,
+      onConfirm: () async {
+        if (_saving) return;
+        final user = Supabase.instance.client.auth.currentUser;
+        if (user == null) return;
+        _saving = true;
+        setState(() {});
+        try {
+          await Supabase.instance.client
+              .from('debts')
+              .update({'is_paid': true})
+              .eq('id', debt['id']);
+          await Supabase.instance.client.from('transactions').insert({
+            'user_id': user.id,
+            'type': 'income',
+            'amount': debt['remaining_amount'],
+            'category': 'دين مستلم',
+            'description': 'استلام دين: ${debt['name']}',
+            'transaction_date': DateTime.now().toIso8601String().split('T')[0],
+          });
+          if (mounted) {
+            _showCelebration(debt['name']);
+            await _load();
+          }
+        } finally {
+          if (mounted) setState(() => _saving = false);
+        }
+      },
     );
-    if (confirm != true) return;
-    if (_saving) return;
-
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) return;
-
-    _saving = true;
-    setState(() {});
-    try {
-      await Supabase.instance.client
-          .from('debts')
-          .update({'is_paid': true})
-          .eq('id', debt['id']);
-      await Supabase.instance.client.from('transactions').insert({
-        'user_id': user.id,
-        'type': 'income',
-        'amount': debt['remaining_amount'],
-        'category': 'دين مستلم',
-        'description': 'استلام دين: ${debt['name']}',
-        'transaction_date': DateTime.now().toIso8601String().split('T')[0],
-      });
-      if (mounted) {
-        _showCelebration(debt['name']);
-        await _load();
-      }
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
   }
 
   void _showAddDialog({Map<String, dynamic>? existing, List<String>? labels}) {
-    final cs = Theme.of(context).colorScheme;
-    final priorityColors = _buildPriorityColors(cs);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final defaultLabels = [
       'priority_very_high'.tr(),
       'priority_high'.tr(),
@@ -272,14 +244,14 @@ class _DebtsScreenState extends State<DebtsScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: cs.surface,
+      backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
       ),
       builder: (ctx) => AddDebtDialog(
         existing: existing,
         onSaved: _load,
-        priorityColors: priorityColors,
+        priorityColors: _priorityColors,
         priorityLabels: labels ?? defaultLabels,
         baseCurrency: _currency,
       ),
@@ -288,9 +260,11 @@ class _DebtsScreenState extends State<DebtsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final bgColor = Theme.of(context).scaffoldBackgroundColor;
-    final priorityColors = _buildPriorityColors(cs);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
 
     final priorityLabels = [
       'priority_very_high'.tr(),
@@ -318,25 +292,35 @@ class _DebtsScreenState extends State<DebtsScreen> {
     );
 
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
       appBar: AppBar(
-        title: Text('debts_title'.tr()),
+        backgroundColor: surface,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: Text(
+          'debts_title'.tr(),
+          style: AppTypography.headingMd.copyWith(color: textPrimary),
+        ),
+        iconTheme: const IconThemeData(color: AppColors.textSecondary),
         actions: [
           IconButton(
-            icon: Icon(Icons.add, color: cs.primary),
+            icon: const Icon(Icons.add, color: AppColors.primary),
             tooltip: 'debts_add'.tr(),
             onPressed: () => _showAddDialog(labels: priorityLabels),
           ),
         ],
       ),
       body: _loading
-          ? const PageSkeleton()
+          ? const Padding(
+              padding: EdgeInsets.all(AppSpacing.md),
+              child: DashboardShimmer(),
+            )
           : RefreshIndicator(
               onRefresh: _load,
-              color: cs.primary,
+              color: AppColors.primary,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(AppSpacing.md),
                 child: Column(
                   children: [
                     DebtSummarySection(
@@ -356,10 +340,10 @@ class _DebtsScreenState extends State<DebtsScreen> {
                         final isAchievement = type == 'achievement';
                         final isWarning = type == 'warning';
                         final color = isAchievement
-                            ? cs.primary
+                            ? AppColors.primary
                             : isWarning
                             ? AppColors.warning
-                            : cs.secondary;
+                            : AppColors.income;
                         return Dismissible(
                           key: ValueKey(alert['id']),
                           direction: DismissDirection.endToStart,
@@ -369,17 +353,17 @@ class _DebtsScreenState extends State<DebtsScreen> {
                             alignment: Alignment.centerRight,
                             padding: const EdgeInsets.only(right: 16),
                             decoration: BoxDecoration(
-                              color: cs.error.withValues(alpha: 0.15),
+                              color: AppColors.expense.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(14),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.delete_outline,
-                              color: cs.error,
+                              color: AppColors.expense,
                               size: 20,
                             ),
                           ),
                           child: Container(
-                            margin: const EdgeInsets.only(bottom: 8),
+                            margin: const EdgeInsetsDirectional.only(bottom: 8),
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: color.withValues(alpha: 0.07),
@@ -406,9 +390,8 @@ class _DebtsScreenState extends State<DebtsScreen> {
                                     children: [
                                       Text(
                                         alert['title'] ?? '',
-                                        style: TextStyle(
+                                        style: AppTypography.labelSm.copyWith(
                                           color: color,
-                                          fontSize: 12,
                                           fontWeight: FontWeight.w700,
                                         ),
                                       ),
@@ -417,9 +400,8 @@ class _DebtsScreenState extends State<DebtsScreen> {
                                           .isNotEmpty)
                                         Text(
                                           alert['message'],
-                                          style: TextStyle(
-                                            color: cs.onSurfaceVariant,
-                                            fontSize: 11,
+                                          style: AppTypography.labelSm.copyWith(
+                                            color: textSecondary,
                                           ),
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
@@ -451,25 +433,25 @@ class _DebtsScreenState extends State<DebtsScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: cs.error.withValues(alpha: 0.1),
+                            color: AppColors.expense.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color: cs.error.withValues(alpha: 0.2),
+                              color: AppColors.expense.withValues(alpha: 0.2),
                             ),
                           ),
                           child: Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.credit_card,
                                 size: 16,
-                                color: cs.error,
+                                color: AppColors.expense,
                               ),
                               const SizedBox(width: 6),
                               Expanded(
                                 child: Text(
                                   'debts_tab_owed'.tr(),
-                                  style: TextStyle(
-                                    color: cs.error,
+                                  style: AppTypography.bodyMd.copyWith(
+                                    color: AppColors.expense,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -477,10 +459,9 @@ class _DebtsScreenState extends State<DebtsScreen> {
                               if (!_showOwed)
                                 Text(
                                   '${totalRemaining.toStringAsFixed(0)} $_currency',
-                                  style: TextStyle(
-                                    color: cs.error,
+                                  style: AppTypography.labelMd.copyWith(
+                                    color: AppColors.expense,
                                     fontWeight: FontWeight.w900,
-                                    fontSize: 13,
                                   ),
                                 ),
                               const SizedBox(width: 6),
@@ -490,15 +471,14 @@ class _DebtsScreenState extends State<DebtsScreen> {
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: cs.error.withValues(alpha: 0.15),
+                                  color: AppColors.expense.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
                                   '${_debts.length}',
-                                  style: TextStyle(
-                                    color: cs.error,
+                                  style: AppTypography.labelSm.copyWith(
+                                    color: AppColors.expense,
                                     fontWeight: FontWeight.w900,
-                                    fontSize: 12,
                                   ),
                                 ),
                               ),
@@ -507,7 +487,7 @@ class _DebtsScreenState extends State<DebtsScreen> {
                                 _showOwed
                                     ? Icons.keyboard_arrow_up
                                     : Icons.keyboard_arrow_down,
-                                color: cs.error,
+                                color: AppColors.expense,
                               ),
                             ],
                           ),
@@ -520,7 +500,7 @@ class _DebtsScreenState extends State<DebtsScreen> {
                             key: ValueKey(d['id']),
                             debt: d,
                             currency: _currency,
-                            priorityColors: priorityColors,
+                            priorityColors: _priorityColors,
                             priorityLabels: priorityLabels,
                             onEdit: (debt) => _showAddDialog(
                               existing: debt,
@@ -543,25 +523,25 @@ class _DebtsScreenState extends State<DebtsScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: cs.primary.withValues(alpha: 0.08),
+                            color: AppColors.primary.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color: cs.primary.withValues(alpha: 0.2),
+                              color: AppColors.primary.withValues(alpha: 0.2),
                             ),
                           ),
                           child: Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.account_balance_wallet,
                                 size: 16,
-                                color: cs.primary,
+                                color: AppColors.primary,
                               ),
                               const SizedBox(width: 6),
                               Expanded(
                                 child: Text(
                                   'debts_tab_receivable'.tr(),
-                                  style: TextStyle(
-                                    color: cs.primary,
+                                  style: AppTypography.bodyMd.copyWith(
+                                    color: AppColors.primary,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -569,10 +549,9 @@ class _DebtsScreenState extends State<DebtsScreen> {
                               if (!_showReceivable)
                                 Text(
                                   '${totalReceivable.toStringAsFixed(0)} $_currency',
-                                  style: TextStyle(
-                                    color: cs.primary,
+                                  style: AppTypography.labelMd.copyWith(
+                                    color: AppColors.primary,
                                     fontWeight: FontWeight.w900,
-                                    fontSize: 13,
                                   ),
                                 ),
                               const SizedBox(width: 6),
@@ -582,15 +561,14 @@ class _DebtsScreenState extends State<DebtsScreen> {
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: cs.primary.withValues(alpha: 0.15),
+                                  color: AppColors.primary.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
                                   '${_receivableDebts.length}',
-                                  style: TextStyle(
-                                    color: cs.primary,
+                                  style: AppTypography.labelSm.copyWith(
+                                    color: AppColors.primary,
                                     fontWeight: FontWeight.w900,
-                                    fontSize: 12,
                                   ),
                                 ),
                               ),
@@ -599,7 +577,7 @@ class _DebtsScreenState extends State<DebtsScreen> {
                                 _showReceivable
                                     ? Icons.keyboard_arrow_up
                                     : Icons.keyboard_arrow_down,
-                                color: cs.primary,
+                                color: AppColors.primary,
                               ),
                             ],
                           ),
@@ -625,25 +603,10 @@ class _DebtsScreenState extends State<DebtsScreen> {
                     ],
 
                     if (_debts.isEmpty && _receivableDebts.isEmpty)
-                      Container(
-                        padding: const EdgeInsets.all(40),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.celebration,
-                              size: 48,
-                              color: cs.primary,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'debts_no_active'.tr(),
-                              style: const TextStyle(
-                                color: AppColors.textMuted,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ],
-                        ),
+                      EmptyState(
+                        icon: Icons.celebration_outlined,
+                        title: 'debts_no_active'.tr(),
+                        subtitle: '',
                       ),
                     const SizedBox(height: 16),
 
@@ -653,25 +616,25 @@ class _DebtsScreenState extends State<DebtsScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: cs.surface,
+                            color: surface,
                             borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: cs.outlineVariant),
+                            border: Border.all(color: border),
                           ),
                           child: Row(
                             children: [
                               Expanded(
                                 child: Text(
                                   'debts_show_paid'.tr(),
-                                  style: TextStyle(
-                                    color: cs.onSurface,
+                                  style: AppTypography.bodyMd.copyWith(
+                                    color: textPrimary,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
                               ),
                               Text(
                                 '${_paidDebts.length}',
-                                style: TextStyle(
-                                  color: cs.primary,
+                                style: AppTypography.bodyMd.copyWith(
+                                  color: AppColors.primary,
                                   fontWeight: FontWeight.w900,
                                 ),
                               ),
@@ -680,7 +643,7 @@ class _DebtsScreenState extends State<DebtsScreen> {
                                 _showPaid
                                     ? Icons.keyboard_arrow_up
                                     : Icons.keyboard_arrow_down,
-                                color: cs.onSurfaceVariant,
+                                color: textSecondary,
                               ),
                             ],
                           ),
@@ -723,42 +686,36 @@ class _ReceivableDebtCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
     final amount = (debt['remaining_amount'] as num).toStringAsFixed(0);
     final dueDate = debt['due_date'] as String?;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsetsDirectional.only(bottom: 10),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.04),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cs.primary.withValues(alpha: 0.15)),
+        color: AppColors.primary.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.circle, color: cs.primary, size: 10),
+              const Icon(Icons.circle, color: AppColors.primary, size: 10),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   debt['name'] ?? '',
-                  style: TextStyle(
-                    color: cs.onSurface,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
-                  ),
+                  style: AppTypography.headingSm.copyWith(color: textPrimary),
                 ),
               ),
               Text(
                 '$amount $currency',
-                style: TextStyle(
-                  color: cs.primary,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 16,
-                ),
+                style: AppTypography.headingSm.copyWith(color: AppColors.primary),
               ),
             ],
           ),
@@ -767,20 +724,19 @@ class _ReceivableDebtCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               debt['notes'],
-              style: TextStyle(color: cs.onSurfaceVariant, fontSize: 12),
+              style: AppTypography.bodySm.copyWith(color: textSecondary),
             ),
           ],
           if (dueDate != null) ...[
             const SizedBox(height: 6),
             Row(
               children: [
-                Icon(Icons.calendar_today, size: 12, color: cs.primary),
+                const Icon(Icons.calendar_today, size: 12, color: AppColors.primary),
                 const SizedBox(width: 4),
                 Text(
                   "${'debts_due_date'.tr()}: $dueDate",
-                  style: TextStyle(
-                    color: cs.primary,
-                    fontSize: 12,
+                  style: AppTypography.labelSm.copyWith(
+                    color: AppColors.primary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -791,28 +747,10 @@ class _ReceivableDebtCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: GestureDetector(
-                  onTap: onReceive,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: cs.primary.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: cs.primary.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'debts_receive_btn'.tr(),
-                        style: TextStyle(
-                          color: cs.primary,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
-                  ),
+                child: AppButton(
+                  label: 'debts_receive_btn'.tr(),
+                  variant: AppButtonVariant.secondary,
+                  onPressed: onReceive,
                 ),
               ),
               const SizedBox(width: 8),
@@ -821,12 +759,12 @@ class _ReceivableDebtCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: cs.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(10),
+                    color: AppColors.primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.edit_outlined,
-                    color: cs.onSurfaceVariant,
+                    color: AppColors.primary,
                     size: 18,
                   ),
                 ),
@@ -837,10 +775,14 @@ class _ReceivableDebtCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: cs.error.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
+                    color: AppColors.expense.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
                   ),
-                  child: Icon(Icons.delete_outline, color: cs.error, size: 18),
+                  child: const Icon(
+                    Icons.delete_outline,
+                    color: AppColors.expense,
+                    size: 18,
+                  ),
                 ),
               ),
             ],
