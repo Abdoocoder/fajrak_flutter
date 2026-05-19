@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../utils/app_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_typography.dart';
+import '../common/shimmer_loader.dart';
 
 class InvestmentTxHistoryModal extends StatefulWidget {
   final String invId;
@@ -45,21 +48,24 @@ class _InvestmentTxHistoryModalState extends State<InvestmentTxHistoryModal> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final surfaceVariant = isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+
     if (_loading) {
-      return Container(
-        height: 200,
-        alignment: Alignment.center,
-        child: CircularProgressIndicator(
-          color: Theme.of(context).colorScheme.primary,
-        ),
+      return const Padding(
+        padding: EdgeInsets.all(20),
+        child: DashboardShimmer(),
       );
     }
 
     return Padding(
-      padding: EdgeInsets.only(
+      padding: EdgeInsetsDirectional.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: 20,
-        right: 20,
+        start: 20,
+        end: 20,
         top: 20,
       ),
       child: Column(
@@ -69,18 +75,14 @@ class _InvestmentTxHistoryModalState extends State<InvestmentTxHistoryModal> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.outlineVariant,
+              color: border,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
           const SizedBox(height: 16),
           Text(
             'inv_tx_history_symbol'.tr(args: [widget.symbol]),
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w900,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+            style: AppTypography.headingMd.copyWith(color: textPrimary),
           ),
           const SizedBox(height: 20),
           if (_txHistory.isEmpty)
@@ -89,9 +91,7 @@ class _InvestmentTxHistoryModalState extends State<InvestmentTxHistoryModal> {
                 padding: const EdgeInsets.all(20),
                 child: Text(
                   'inv_empty'.tr(),
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                  style: AppTypography.bodyMd.copyWith(color: textSecondary),
                 ),
               ),
             )
@@ -104,24 +104,16 @@ class _InvestmentTxHistoryModalState extends State<InvestmentTxHistoryModal> {
                 itemBuilder: (ctx, i) {
                   final tx = _txHistory[i];
                   final isBuy = tx['type'] == 'buy';
-                  final color = isBuy
-                      ? (Theme.of(context).brightness == Brightness.dark
-                            ? AppColors.success
-                            : AppColors.success)
-                      : (Theme.of(context).brightness == Brightness.dark
-                            ? AppColors.error
-                            : AppColors.error);
+                  final color = isBuy ? AppColors.income : AppColors.expense;
                   final shares = (tx['shares'] as num).toDouble();
                   final price = (tx['price'] as num).toDouble();
                   final comm = (tx['commission'] as num?)?.toDouble() ?? 0;
                   return Container(
-                    margin: const EdgeInsets.only(bottom: 8),
+                    margin: EdgeInsetsDirectional.only(bottom: 8),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(12),
+                      color: surfaceVariant,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
                     child: Row(
                       children: [
@@ -147,22 +139,14 @@ class _InvestmentTxHistoryModalState extends State<InvestmentTxHistoryModal> {
                             children: [
                               Text(
                                 '${isBuy ? "inv_buy".tr() : "inv_sell".tr()} ${shares.toStringAsFixed(4)} ${"inv_unit".tr()}',
-                                style: TextStyle(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurface,
+                                style: AppTypography.labelMd.copyWith(
+                                  color: textPrimary,
                                   fontWeight: FontWeight.w700,
-                                  fontSize: 13,
                                 ),
                               ),
                               Text(
                                 '${tx['transaction_date']} • ${"inv_price".tr()} \$${price.toStringAsFixed(2)}',
-                                style: TextStyle(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                  fontSize: 11,
-                                ),
+                                style: AppTypography.labelSm.copyWith(color: textSecondary),
                               ),
                             ],
                           ),
@@ -172,23 +156,15 @@ class _InvestmentTxHistoryModalState extends State<InvestmentTxHistoryModal> {
                           children: [
                             Text(
                               '${isBuy ? "-" : "+"}\$${(shares * price).toStringAsFixed(0)}',
-                              style: TextStyle(
+                              style: AppTypography.labelMd.copyWith(
                                 color: color,
                                 fontWeight: FontWeight.w900,
-                                fontSize: 13,
                               ),
                             ),
                             if (comm > 0)
                               Text(
-                                'inv_commission'.tr(
-                                  args: [comm.toStringAsFixed(2)],
-                                ),
-                                style: TextStyle(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                  fontSize: 10,
-                                ),
+                                'inv_commission'.tr(args: [comm.toStringAsFixed(2)]),
+                                style: AppTypography.labelSm.copyWith(color: textSecondary),
                               ),
                           ],
                         ),

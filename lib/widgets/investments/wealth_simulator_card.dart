@@ -1,6 +1,8 @@
-import '../../utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_typography.dart';
 
 class WealthSimulatorCard extends StatefulWidget {
   final String currency;
@@ -26,8 +28,11 @@ class _WealthSimulatorCardState extends State<WealthSimulatorCard> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
     final fv = _calcFV(_monthly, _years, _rate);
     final totalInvested = _monthly * _years * 12;
 
@@ -38,35 +43,26 @@ class _WealthSimulatorCardState extends State<WealthSimulatorCard> {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: colorScheme.surface,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: colorScheme.secondary.withValues(alpha: 0.3),
-              ),
+              color: surface,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
-                const Icon(
-                  Icons.rocket_launch,
-                  size: 20,
-                  color: AppColors.primary,
-                ),
+                const Icon(Icons.rocket_launch, size: 20, color: AppColors.primary),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     'wealthSimulator'.tr(),
-                    style: TextStyle(
-                      color: colorScheme.onSurface,
+                    style: AppTypography.bodyMd.copyWith(
+                      color: textPrimary,
                       fontWeight: FontWeight.w900,
-                      fontSize: 14,
                     ),
                   ),
                 ),
                 Icon(
-                  _showSimulator
-                      ? Icons.keyboard_arrow_up
-                      : Icons.keyboard_arrow_down,
-                  color: colorScheme.onSurfaceVariant,
+                  _showSimulator ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                  color: textSecondary,
                 ),
               ],
             ),
@@ -77,9 +73,9 @@ class _WealthSimulatorCardState extends State<WealthSimulatorCard> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: colorScheme.surface,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: colorScheme.outlineVariant),
+              color: surface,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(color: border),
             ),
             child: Column(
               children: [
@@ -111,35 +107,23 @@ class _WealthSimulatorCardState extends State<WealthSimulatorCard> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: colorScheme.secondary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: colorScheme.secondary.withValues(alpha: 0.3),
-                    ),
+                    color: AppColors.accent.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                    border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
                   ),
                   child: Column(
                     children: [
                       Text(
                         'inv_sim_after_years'.tr(args: [_years.toString()]),
-                        style: TextStyle(
-                          color: colorScheme.onSurfaceVariant,
-                          fontSize: 12,
-                        ),
+                        style: AppTypography.labelSm.copyWith(color: textSecondary),
                       ),
                       Text(
                         '${fv.toStringAsFixed(0)} ${widget.currency}',
-                        style: TextStyle(
-                          color: colorScheme.secondary,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 28,
-                        ),
+                        style: AppTypography.displayMedium.copyWith(color: AppColors.accent),
                       ),
                       Text(
                         '${'youInvested'.tr()}: ${totalInvested.toStringAsFixed(0)} ${widget.currency} | ${'inv_profit'.tr()}: ${(fv - totalInvested).toStringAsFixed(0)} ${widget.currency}',
-                        style: TextStyle(
-                          color: colorScheme.onSurfaceVariant,
-                          fontSize: 11,
-                        ),
+                        style: AppTypography.labelSm.copyWith(color: textSecondary),
                       ),
                     ],
                   ),
@@ -160,35 +144,28 @@ class _WealthSimulatorCardState extends State<WealthSimulatorCard> {
     double max,
     ValueChanged<double> onChanged,
   ) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: colorScheme.onSurfaceVariant,
-                fontSize: 12,
-              ),
-            ),
-            Text(
-              value,
-              style: TextStyle(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.w700,
-                fontSize: 12,
-              ),
-            ),
+            Text(label, style: AppTypography.labelSm.copyWith(color: textSecondary)),
+            Text(value, style: AppTypography.labelSm.copyWith(
+              color: textPrimary,
+              fontWeight: FontWeight.w700,
+            )),
           ],
         ),
         Slider(
           value: v,
           min: min,
           max: max,
-          activeColor: colorScheme.secondary,
-          inactiveColor: colorScheme.outlineVariant,
+          activeColor: AppColors.accent,
+          inactiveColor: border,
           onChanged: onChanged,
         ),
       ],

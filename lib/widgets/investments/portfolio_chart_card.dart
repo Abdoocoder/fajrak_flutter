@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../utils/app_colors.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_typography.dart';
 
 class PortfolioChartCard extends StatelessWidget {
   final List<Map<String, dynamic>> investments;
@@ -14,35 +16,37 @@ class PortfolioChartCard extends StatelessWidget {
 
   static const List<Color> _colors = [
     AppColors.primary,
-    AppColors.success,
+    AppColors.income,
     AppColors.warning,
     AppColors.purple,
-    AppColors.error,
+    AppColors.expense,
   ];
 
   @override
   Widget build(BuildContext context) {
     if (investments.isEmpty || totalValue <= 0) return const SizedBox.shrink();
 
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface0,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.surface2),
+        color: surface,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(color: border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'inv_portfolio_chart'.tr(),
-            style: TextStyle(
-              color: colorScheme.onSurface,
+            style: AppTypography.labelMd.copyWith(
+              color: textPrimary,
               fontWeight: FontWeight.w900,
-              fontSize: 14,
             ),
           ),
           const SizedBox(height: 12),
@@ -54,8 +58,7 @@ class PortfolioChartCard extends StatelessWidget {
                     (inv['shares'] as num).toDouble() *
                     (inv['current_price'] as num).toDouble();
                 final pct = val / totalValue * 100;
-                final color =
-                    _colors[investments.indexOf(inv) % _colors.length];
+                final color = _colors[investments.indexOf(inv) % _colors.length];
                 return Expanded(
                   flex: pct.round() == 0 ? 1 : pct.round(),
                   child: Container(
@@ -63,7 +66,7 @@ class PortfolioChartCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: color,
                       border: Border(
-                        right: BorderSide(color: colorScheme.surface, width: 2),
+                        right: BorderSide(color: surface, width: 2),
                       ),
                     ),
                   ),
@@ -94,27 +97,22 @@ class PortfolioChartCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       inv['symbol'] ?? '',
-                      style: TextStyle(
-                        color: colorScheme.onSurface,
+                      style: AppTypography.labelMd.copyWith(
+                        color: textPrimary,
                         fontWeight: FontWeight.w700,
-                        fontSize: 13,
                       ),
                     ),
                   ),
                   Text(
                     '${pct.toStringAsFixed(1)}%',
-                    style: TextStyle(
-                      color: colorScheme.onSurfaceVariant,
-                      fontSize: 12,
-                    ),
+                    style: AppTypography.labelSm.copyWith(color: textSecondary),
                   ),
                   const SizedBox(width: 8),
                   Text(
                     '\$${val.toStringAsFixed(0)}',
-                    style: TextStyle(
-                      color: colorScheme.onSurface,
+                    style: AppTypography.labelMd.copyWith(
+                      color: textPrimary,
                       fontWeight: FontWeight.w900,
-                      fontSize: 13,
                     ),
                   ),
                 ],
