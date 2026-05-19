@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
-import '../../utils/app_colors.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
 import '../../utils/error_handler.dart';
 import '../../widgets/common/calculator_disclaimer.dart';
+import '../../widgets/common/progress_bar.dart';
+import '../../widgets/common/shimmer_loader.dart';
 
 double? _yearsToFIRE(
   double target,
@@ -93,10 +98,8 @@ class _FIRECalculatorScreenState extends State<FIRECalculatorScreen> {
       final income = (profile['monthly_income'] as num?)?.toDouble() ?? 0;
       if (mounted) {
         setState(() {
-          _currentNetWorth = (invValue + goalsSaved - totalDebt).clamp(
-            0,
-            double.infinity,
-          );
+          _currentNetWorth =
+              (invValue + goalsSaved - totalDebt).clamp(0, double.infinity);
           _currency = profile['currency'] as String? ?? 'JOD';
           if (income > 0) {
             _monthlyExpenses = (income * 0.7).roundToDouble();
@@ -105,11 +108,7 @@ class _FIRECalculatorScreenState extends State<FIRECalculatorScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ErrorHandler.handle(
-          e,
-          context: context,
-          developerMessage: 'FIRE Calc Load',
-        );
+        ErrorHandler.handle(e, context: context, developerMessage: 'FIRE Calc Load');
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -118,14 +117,30 @@ class _FIRECalculatorScreenState extends State<FIRECalculatorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final background = isDark ? AppColors.backgroundDark : AppColors.background;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
 
-    final modeMultiplier = _mode == 'lean'
-        ? 0.7
-        : _mode == 'fat'
-        ? 1.5
-        : 1.0;
+    if (_loading) {
+      return Scaffold(
+        backgroundColor: background,
+        appBar: AppBar(
+          title: Text('fire_title'.tr(), style: AppTypography.headingMd.copyWith(color: textPrimary)),
+          backgroundColor: surface,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: AppColors.textSecondary),
+        ),
+        body: const Padding(
+          padding: EdgeInsets.all(AppSpacing.md),
+          child: DashboardShimmer(),
+        ),
+      );
+    }
+
+    final modeMultiplier = _mode == 'lean' ? 0.7 : _mode == 'fat' ? 1.5 : 1.0;
     final annualExpenses = _monthlyExpenses * 12 * modeMultiplier;
     final fireNumber = annualExpenses / (_withdrawalRate / 100);
     final progress = ((_currentNetWorth / fireNumber) * 100).clamp(0.0, 100.0);
@@ -135,46 +150,38 @@ class _FIRECalculatorScreenState extends State<FIRECalculatorScreen> {
       _monthlyContrib,
       _annualReturn,
     );
-    final color = progress >= 75
-        ? AppColors.success
+    final progressColor = progress >= 75
+        ? AppColors.income
         : progress >= 40
         ? AppColors.warning
-        : cs.primary;
+        : AppColors.primary;
 
     String fmt(double n) => NumberFormat('#,##0', 'en').format(n);
 
-    if (_loading) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text('fire_title'.tr()),
-          backgroundColor: cs.surface,
-        ),
-        body: Center(child: CircularProgressIndicator(color: cs.primary)),
-      );
-    }
-
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: background,
       appBar: AppBar(
         title: Text(
           'fire_title'.tr(),
-          style: TextStyle(fontWeight: FontWeight.w900, color: cs.onSurface),
+          style: AppTypography.headingMd.copyWith(color: textPrimary),
         ),
-        backgroundColor: cs.surface,
+        backgroundColor: surface,
         elevation: 0,
-        iconTheme: IconThemeData(color: cs.onSurface),
+        scrolledUnderElevation: 0,
+        iconTheme: const IconThemeData(color: AppColors.textSecondary),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           children: [
             const CalculatorDisclaimer(storageKey: 'disclaimer_fire'),
+
             // Mode toggle
             Container(
               decoration: BoxDecoration(
-                color: cs.surface,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: cs.outlineVariant),
+                color: surface,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                border: Border.all(color: border),
               ),
               child: Row(
                 children: ['lean', 'full', 'fat'].map((m) {
@@ -190,16 +197,15 @@ class _FIRECalculatorScreenState extends State<FIRECalculatorScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         decoration: BoxDecoration(
-                          color: active ? cs.primary : Colors.transparent,
-                          borderRadius: BorderRadius.circular(12),
+                          color: active ? AppColors.primary : Colors.transparent,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
                         ),
                         child: Text(
                           label,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: AppTypography.labelSm.copyWith(
                             fontWeight: FontWeight.w700,
-                            fontSize: 12,
-                            color: active ? Colors.white : cs.onSurfaceVariant,
+                            color: active ? AppColors.textInverse : textSecondary,
                           ),
                         ),
                       ),
@@ -212,73 +218,41 @@ class _FIRECalculatorScreenState extends State<FIRECalculatorScreen> {
 
             // FIRE Number Card
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(AppSpacing.cardPadding),
               decoration: BoxDecoration(
-                color: cs.surface,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: cs.outlineVariant),
+                color: surface,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                border: Border.all(color: border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'fire_number_label'.tr(),
-                    style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
+                    style: AppTypography.labelSm.copyWith(color: textSecondary),
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       Text(
                         fmt(fireNumber),
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w900,
-                          color: color,
-                        ),
+                        style: AppTypography.displaySmall.copyWith(color: progressColor),
                       ),
                       const SizedBox(width: 6),
                       Text(
                         _currency,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: cs.onSurfaceVariant,
-                        ),
+                        style: AppTypography.labelMd.copyWith(color: textSecondary),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // Progress
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'fire_progress'.tr(),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                      Text(
-                        '${progress.toStringAsFixed(1)}%',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w900,
-                          color: color,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Semantics(
-                    value: '${progress.toStringAsFixed(1)}%',
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: progress / 100,
-                        backgroundColor: cs.surfaceContainerHighest,
-                        valueColor: AlwaysStoppedAnimation(color),
-                        minHeight: 8,
-                      ),
-                    ),
+                  AppProgressBar(
+                    value: progress / 100,
+                    title: 'fire_progress'.tr(),
+                    percentageLabel: '${progress.toStringAsFixed(1)}%',
+                    variant: ProgressBarVariant.goal,
+                    fillColor: progressColor,
+                    trackHeight: 8,
                   ),
                   const SizedBox(height: 14),
                   Row(
@@ -288,8 +262,8 @@ class _FIRECalculatorScreenState extends State<FIRECalculatorScreen> {
                           label: 'current_net_worth'.tr(),
                           value: fmt(_currentNetWorth),
                           currency: _currency,
-                          color: AppColors.success,
-                          cs: cs,
+                          color: AppColors.income,
+                          isDark: isDark,
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -297,14 +271,11 @@ class _FIRECalculatorScreenState extends State<FIRECalculatorScreen> {
                         child: _StatBox(
                           label: 'remaining'.tr(),
                           value: fmt(
-                            (fireNumber - _currentNetWorth).clamp(
-                              0,
-                              double.infinity,
-                            ),
+                            (fireNumber - _currentNetWorth).clamp(0, double.infinity),
                           ),
                           currency: _currency,
-                          color: AppColors.error,
-                          cs: cs,
+                          color: AppColors.expense,
+                          isDark: isDark,
                         ),
                       ),
                     ],
@@ -315,53 +286,43 @@ class _FIRECalculatorScreenState extends State<FIRECalculatorScreen> {
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: years != null && years <= 10
-                          ? AppColors.success.withValues(alpha: 0.08)
-                          : cs.primary.withValues(alpha: 0.06),
-                      borderRadius: BorderRadius.circular(14),
+                          ? AppColors.income.withValues(alpha: 0.08)
+                          : AppColors.primary.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
                       border: Border.all(
                         color: years != null && years <= 10
-                            ? AppColors.success.withValues(alpha: 0.2)
-                            : cs.primary.withValues(alpha: 0.15),
+                            ? AppColors.income.withValues(alpha: 0.2)
+                            : AppColors.primary.withValues(alpha: 0.15),
                       ),
                     ),
                     child: years == null
                         ? Text(
                             'fire_increase_contrib'.tr(),
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
+                            style: AppTypography.labelMd.copyWith(
                               fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                              color: AppColors.error,
+                              color: AppColors.expense,
                             ),
                           )
                         : years == 0
                         ? Text(
                             'fire_already_there'.tr(),
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 18,
-                              color: AppColors.success,
+                            style: AppTypography.headingMd.copyWith(
+                              color: AppColors.income,
                             ),
                           )
                         : Column(
                             children: [
                               Text(
                                 'fire_time_label'.tr(),
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: cs.onSurfaceVariant,
-                                ),
+                                style: AppTypography.labelSm.copyWith(color: textSecondary),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 '$years ${'fire_years'.tr()}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 26,
-                                  color: years <= 10
-                                      ? AppColors.success
-                                      : cs.primary,
+                                style: AppTypography.displaySmall.copyWith(
+                                  color: years <= 10 ? AppColors.income : AppColors.primary,
                                 ),
                               ),
                             ],
@@ -374,22 +335,18 @@ class _FIRECalculatorScreenState extends State<FIRECalculatorScreen> {
 
             // Sliders
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(AppSpacing.cardPadding),
               decoration: BoxDecoration(
-                color: cs.surface,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: cs.outlineVariant),
+                color: surface,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                border: Border.all(color: border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'settings'.tr(),
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 13,
-                      color: cs.onSurface,
-                    ),
+                    style: AppTypography.headingSm.copyWith(color: textPrimary),
                   ),
                   const SizedBox(height: 16),
                   _Slider(
@@ -438,40 +395,42 @@ class _FIRECalculatorScreenState extends State<FIRECalculatorScreen> {
 class _StatBox extends StatelessWidget {
   final String label, value, currency;
   final Color color;
-  final ColorScheme cs;
+  final bool isDark;
+
   const _StatBox({
     required this.label,
     required this.value,
     required this.currency,
     required this.color,
-    required this.cs,
+    required this.isDark,
   });
+
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      color: cs.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Column(
-      children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 10, color: cs.onSurfaceVariant),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w900,
-            color: color,
+  Widget build(BuildContext context) {
+    final surfaceVariant = isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: surfaceVariant,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: AppTypography.labelSm.copyWith(color: textSecondary),
+            textAlign: TextAlign.center,
           ),
-        ),
-      ],
-    ),
-  );
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: AppTypography.headingMd.copyWith(color: color),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _Slider extends StatelessWidget {
@@ -479,6 +438,7 @@ class _Slider extends StatelessWidget {
   final double value, min, max;
   final int divisions;
   final ValueChanged<double> onChanged;
+
   const _Slider({
     required this.label,
     required this.value,
@@ -487,11 +447,15 @@ class _Slider extends StatelessWidget {
     required this.divisions,
     required this.onChanged,
   });
+
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
+      padding: EdgeInsetsDirectional.only(bottom: 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -501,15 +465,14 @@ class _Slider extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
+                  style: AppTypography.labelSm.copyWith(color: textSecondary),
                 ),
               ),
               Text(
                 value.toStringAsFixed(value % 1 == 0 ? 0 : 1),
-                style: TextStyle(
+                style: AppTypography.labelMd.copyWith(
+                  color: textPrimary,
                   fontWeight: FontWeight.w900,
-                  fontSize: 13,
-                  color: cs.onSurface,
                 ),
               ),
             ],
@@ -519,7 +482,8 @@ class _Slider extends StatelessWidget {
             min: min,
             max: max,
             divisions: divisions,
-            activeColor: cs.primary,
+            activeColor: AppColors.primary,
+            inactiveColor: border,
             onChanged: onChanged,
           ),
         ],
