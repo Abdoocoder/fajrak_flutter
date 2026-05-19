@@ -379,7 +379,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               'حدث خطأ أثناء إنشاء التقرير',
               style: const TextStyle(),
             ),
-            backgroundColor: Theme.of(context).colorScheme.error,
+            backgroundColor: AppColors.expense,
           ),
         );
       }
