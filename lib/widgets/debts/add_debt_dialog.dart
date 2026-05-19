@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_typography.dart';
 import '../../services/currency_service.dart';
+import '../common/app_button.dart';
 
 class AddDebtDialog extends StatefulWidget {
   final Map<String, dynamic>? existing;
@@ -116,7 +119,7 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.red.shade700,
+        backgroundColor: AppColors.expense,
         duration: const Duration(seconds: 3),
       ),
     );
@@ -237,17 +240,20 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
     String hint,
     TextInputType type,
   ) {
-    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final surfaceVariant = isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant;
     return TextField(
       controller: ctrl,
       keyboardType: type,
       textAlign: TextAlign.right,
-      style: TextStyle(color: cs.onSurface),
+      style: TextStyle(color: textPrimary),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: cs.onSurfaceVariant.withValues(alpha: 0.6)),
+        hintStyle: TextStyle(color: textSecondary.withValues(alpha: 0.6)),
         filled: true,
-        fillColor: cs.surfaceContainerHigh,
+        fillColor: surfaceVariant,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide.none,
@@ -262,7 +268,12 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final surfaceVariant = isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant;
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -278,18 +289,14 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: cs.outlineVariant,
+                color: border,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 16),
             Text(
               widget.existing != null ? 'debts_edit'.tr() : 'debts_new'.tr(),
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w900,
-                color: cs.onSurface,
-              ),
+              style: AppTypography.headingMd.copyWith(color: textPrimary),
             ),
             const SizedBox(height: 20),
             // نوع الدين
@@ -305,12 +312,12 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       decoration: BoxDecoration(
                         color: _debtType == 'owed'
-                            ? const Color(0x1AEF4444)
-                            : cs.surfaceContainerHigh,
+                            ? AppColors.expense.withValues(alpha: 0.1)
+                            : surfaceVariant,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: _debtType == 'owed'
-                              ? const Color(0xFFEF4444)
+                              ? AppColors.expense
                               : Colors.transparent,
                         ),
                       ),
@@ -320,15 +327,15 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
                           const Icon(
                             Icons.credit_card,
                             size: 16,
-                            color: Color(0xFFEF4444),
+                            color: AppColors.expense,
                           ),
                           const SizedBox(width: 6),
                           Text(
                             'debts_tab_owed'.tr(),
                             style: TextStyle(
                               color: _debtType == 'owed'
-                                  ? const Color(0xFFEF4444)
-                                  : const Color(0xFF94A3B8),
+                                  ? AppColors.expense
+                                  : AppColors.textSecondary,
                               fontWeight: FontWeight.w700,
                               fontSize: 13,
                             ),
@@ -349,12 +356,12 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       decoration: BoxDecoration(
                         color: _debtType == 'receivable'
-                            ? const Color(0x1A10B981)
-                            : cs.surfaceContainerHigh,
+                            ? AppColors.income.withValues(alpha: 0.1)
+                            : surfaceVariant,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: _debtType == 'receivable'
-                              ? const Color(0xFF10B981)
+                              ? AppColors.income
                               : Colors.transparent,
                         ),
                       ),
@@ -364,15 +371,15 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
                           const Icon(
                             Icons.account_balance_wallet,
                             size: 16,
-                            color: Color(0xFF10B981),
+                            color: AppColors.income,
                           ),
                           const SizedBox(width: 6),
                           Text(
                             'debts_tab_receivable'.tr(),
                             style: TextStyle(
                               color: _debtType == 'receivable'
-                                  ? const Color(0xFF10B981)
-                                  : const Color(0xFF94A3B8),
+                                  ? AppColors.income
+                                  : AppColors.textSecondary,
                               fontWeight: FontWeight.w700,
                               fontSize: 13,
                             ),
@@ -400,14 +407,14 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
-                    color: cs.outlineVariant,
+                    color: border,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: _selectedCurrency,
-                      dropdownColor: cs.surface,
-                      style: TextStyle(color: cs.onSurface, fontSize: 13),
+                      dropdownColor: surface,
+                      style: TextStyle(color: textPrimary, fontSize: 13),
                       items: ['JOD', 'USD', 'SAR', 'AED', 'EGP', 'TRY', 'EUR']
                           .map(
                             (c) => DropdownMenuItem(value: c, child: Text(c)),
@@ -443,7 +450,7 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
                         Text(
                           'trans_equivalent'.tr(),
                           style: TextStyle(
-                            color: cs.onSurfaceVariant,
+                            color: textSecondary,
                             fontSize: 10,
                           ),
                         ),
@@ -451,7 +458,7 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
                         Text(
                           '${((double.tryParse(_originalCtrl.text.replaceAll(',', '.')) ?? 0) * (double.tryParse(_exchangeRateCtrl.text) ?? 1.0)).toStringAsFixed(2)} ${widget.baseCurrency}',
                           style: const TextStyle(
-                            color: Color(0xFF10B981),
+                            color: AppColors.income,
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
                           ),
@@ -514,14 +521,14 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: cs.outlineVariant,
+                  color: border,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.calendar_today_outlined,
-                      color: Color(0xFF64748B),
+                      color: AppColors.textTertiary,
                       size: 18,
                     ),
                     const SizedBox(width: 10),
@@ -530,9 +537,7 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
                           ? 'debts_due_date_value'.tr(args: [_dueDate])
                           : 'debts_due_date_hint'.tr(),
                       style: TextStyle(
-                        color: _dueDate.isNotEmpty
-                            ? cs.onSurface
-                            : cs.onSurfaceVariant,
+                        color: _dueDate.isNotEmpty ? textPrimary : textSecondary,
                         fontSize: 13,
                       ),
                     ),
@@ -547,7 +552,7 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
               alignment: Alignment.centerRight,
               child: Text(
                 'debts_priority'.tr(),
-                style: TextStyle(color: cs.onSurfaceVariant, fontSize: 12),
+                style: TextStyle(color: textSecondary, fontSize: 12),
               ),
             ),
             const SizedBox(height: 8),
@@ -563,7 +568,7 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
                       decoration: BoxDecoration(
                         color: _priority == i + 1
                             ? widget.priorityColors[i].withValues(alpha: 0.25)
-                            : cs.surfaceContainerHigh,
+                            : surfaceVariant,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: _priority == i + 1
@@ -597,13 +602,13 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: _autoDeduct
-                        ? const Color(0xFF10B981).withValues(alpha: 0.1)
-                        : cs.outlineVariant,
+                        ? AppColors.income.withValues(alpha: 0.1)
+                        : surfaceVariant,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: _autoDeduct
-                          ? const Color(0xFF10B981).withValues(alpha: 0.4)
-                          : cs.outlineVariant,
+                          ? AppColors.income.withValues(alpha: 0.4)
+                          : border,
                     ),
                   ),
                   child: Row(
@@ -611,8 +616,8 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
                       Icon(
                         _autoDeduct ? Icons.toggle_on : Icons.toggle_off,
                         color: _autoDeduct
-                            ? const Color(0xFF10B981)
-                            : const Color(0xFF64748B),
+                            ? AppColors.income
+                            : AppColors.textTertiary,
                         size: 24,
                       ),
                       const SizedBox(width: 10),
@@ -624,15 +629,15 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
                               'debts_auto_deduct'.tr(),
                               style: TextStyle(
                                 color: _autoDeduct
-                                    ? const Color(0xFF10B981)
-                                    : const Color(0xFF94A3B8),
+                                    ? AppColors.income
+                                    : AppColors.textSecondary,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
                             Text(
                               'debts_auto_deduct_desc'.tr(),
-                              style: const TextStyle(
-                                color: Color(0xFF64748B),
+                              style: TextStyle(
+                                color: AppColors.textTertiary,
                                 fontSize: 11,
                               ),
                             ),
@@ -652,13 +657,13 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: _receivedAmount
-                        ? cs.primary.withValues(alpha: 0.1)
-                        : cs.surfaceContainerHigh,
+                        ? AppColors.primary.withValues(alpha: 0.1)
+                        : surfaceVariant,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: _receivedAmount
-                          ? cs.primary.withValues(alpha: 0.4)
-                          : cs.outlineVariant,
+                          ? AppColors.primary.withValues(alpha: 0.4)
+                          : border,
                     ),
                   ),
                   child: Column(
@@ -671,8 +676,8 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
                                 ? Icons.check_circle
                                 : Icons.circle_outlined,
                             color: _receivedAmount
-                                ? const Color(0xFF3B7EF6)
-                                : const Color(0xFF64748B),
+                                ? AppColors.primary
+                                : AppColors.textTertiary,
                             size: 20,
                           ),
                           const SizedBox(width: 10),
@@ -680,8 +685,8 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
                             'debts_received_today'.tr(),
                             style: TextStyle(
                               color: _receivedAmount
-                                  ? const Color(0xFF3B7EF6)
-                                  : const Color(0xFF94A3B8),
+                                  ? AppColors.primary
+                                  : AppColors.textSecondary,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -692,8 +697,8 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
                           padding: const EdgeInsets.only(top: 4, right: 30),
                           child: Text(
                             'debts_received_today_desc'.tr(),
-                            style: const TextStyle(
-                              color: Color(0xFF64748B),
+                            style: TextStyle(
+                              color: AppColors.textTertiary,
                               fontSize: 11,
                             ),
                           ),
@@ -712,13 +717,13 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: _paidFromAccount
-                        ? const Color(0xFFEF4444).withValues(alpha: 0.08)
-                        : cs.surfaceContainerHigh,
+                        ? AppColors.expense.withValues(alpha: 0.08)
+                        : surfaceVariant,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: _paidFromAccount
-                          ? const Color(0xFFEF4444).withValues(alpha: 0.35)
-                          : cs.outlineVariant,
+                          ? AppColors.expense.withValues(alpha: 0.35)
+                          : border,
                     ),
                   ),
                   child: Column(
@@ -731,8 +736,8 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
                                 ? Icons.check_circle
                                 : Icons.circle_outlined,
                             color: _paidFromAccount
-                                ? const Color(0xFFEF4444)
-                                : const Color(0xFF64748B),
+                                ? AppColors.expense
+                                : AppColors.textTertiary,
                             size: 20,
                           ),
                           const SizedBox(width: 10),
@@ -740,8 +745,8 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
                             'debts_paid_from_account'.tr(),
                             style: TextStyle(
                               color: _paidFromAccount
-                                  ? const Color(0xFFEF4444)
-                                  : const Color(0xFF94A3B8),
+                                  ? AppColors.expense
+                                  : AppColors.textSecondary,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -755,8 +760,8 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
                               : 'debts_not_paid_from_account_desc'.tr(),
                           style: TextStyle(
                             color: _paidFromAccount
-                                ? const Color(0xFF64748B)
-                                : const Color(0xFF94A3B8),
+                                ? AppColors.textTertiary
+                                : AppColors.textSecondary,
                             fontSize: 11,
                           ),
                         ),
@@ -767,28 +772,13 @@ class _AddDebtDialogState extends State<AddDebtDialog> {
               ),
             ],
             const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _saving ? null : _save,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF3B7EF6),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  widget.existing != null
-                      ? 'debts_save_edit'.tr()
-                      : 'debts_save'.tr(),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
+            AppButton(
+              label: widget.existing != null
+                  ? 'debts_save_edit'.tr()
+                  : 'debts_save'.tr(),
+              variant: AppButtonVariant.primary,
+              onPressed: _saving ? null : _save,
+              isLoading: _saving,
             ),
             const SizedBox(height: 16),
           ],
