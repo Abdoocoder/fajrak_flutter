@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_typography.dart';
 import '../../services/investments_service.dart';
 
 class AddInvestmentDialog extends StatefulWidget {
@@ -135,37 +138,42 @@ class _AddInvestmentDialogState extends State<AddInvestmentDialog> {
     String hint,
     TextInputType type,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final surfaceVariant = isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant;
     return TextField(
       controller: ctrl,
       keyboardType: type,
       textAlign: TextAlign.right,
-      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+      style: AppTypography.bodyMd.copyWith(color: textPrimary),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
+        hintStyle: AppTypography.bodyMd.copyWith(color: textSecondary),
         filled: true,
-        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+        fillColor: surfaceVariant,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppRadius.md),
           borderSide: BorderSide.none,
         ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceVariant = isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+
     return Padding(
-      padding: EdgeInsets.only(
+      padding: EdgeInsetsDirectional.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: 20,
-        right: 20,
+        start: 20,
+        end: 20,
         top: 20,
       ),
       child: SingleChildScrollView(
@@ -176,18 +184,14 @@ class _AddInvestmentDialogState extends State<AddInvestmentDialog> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.outlineVariant,
+                color: border,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 16),
             Text(
               'inv_new'.tr(),
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w900,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+              style: AppTypography.headingMd.copyWith(color: textPrimary),
             ),
             const SizedBox(height: 20),
             Row(
@@ -206,12 +210,12 @@ class _AddInvestmentDialogState extends State<AddInvestmentDialog> {
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.primary,
+                          ),
                         )
-                      : Icon(
-                          Icons.download,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+                      : const Icon(Icons.download, color: AppColors.primary),
                   tooltip: 'inv_fetch_price'.tr(),
                 ),
               ],
@@ -249,42 +253,29 @@ class _AddInvestmentDialogState extends State<AddInvestmentDialog> {
                 if (picked != null) setState(() => _purchaseDate = picked);
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(10),
+                  color: surfaceVariant,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.calendar_today,
-                      size: 18,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                    const Icon(Icons.calendar_today, size: 18, color: AppColors.primary),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         _purchaseDate != null
                             ? '${_purchaseDate!.day}/${_purchaseDate!.month}/${_purchaseDate!.year}'
                             : 'inv_purchase_date_hint'.tr(),
-                        style: TextStyle(
-                          color: _purchaseDate != null
-                              ? Theme.of(context).colorScheme.onSurface
-                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                        style: AppTypography.bodyMd.copyWith(
+                          color: _purchaseDate != null ? textPrimary : textSecondary,
                         ),
                       ),
                     ),
                     if (_purchaseDate != null)
                       GestureDetector(
                         onTap: () => setState(() => _purchaseDate = null),
-                        child: Icon(
-                          Icons.close,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                        child: Icon(Icons.close, size: 16, color: textSecondary),
                       ),
                   ],
                 ),
@@ -297,37 +288,27 @@ class _AddInvestmentDialogState extends State<AddInvestmentDialog> {
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: _isHalal
-                      ? (Theme.of(context).brightness == Brightness.dark
-                                ? const Color(0xFF10B981)
-                                : const Color(0xFF10B981))
-                            .withValues(alpha: 0.1)
-                      : Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(10),
+                      ? AppColors.income.withValues(alpha: 0.1)
+                      : surfaceVariant,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                   border: Border.all(
                     color: _isHalal
-                        ? (Theme.of(context).brightness == Brightness.dark
-                                  ? const Color(0xFF10B981)
-                                  : const Color(0xFF10B981))
-                              .withValues(alpha: 0.4)
-                        : Theme.of(context).colorScheme.outlineVariant,
+                        ? AppColors.income.withValues(alpha: 0.4)
+                        : border,
                   ),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       _isHalal ? Icons.check_circle : Icons.circle_outlined,
-                      color: _isHalal
-                          ? const Color(0xFF10B981)
-                          : const Color(0xFF64748B),
+                      color: _isHalal ? AppColors.income : textSecondary,
                       size: 20,
                     ),
                     const SizedBox(width: 10),
                     Text(
                       'inv_halal'.tr(),
-                      style: TextStyle(
-                        color: _isHalal
-                            ? const Color(0xFF10B981)
-                            : const Color(0xFF94A3B8),
+                      style: AppTypography.labelMd.copyWith(
+                        color: _isHalal ? AppColors.income : textSecondary,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -341,24 +322,25 @@ class _AddInvestmentDialogState extends State<AddInvestmentDialog> {
               child: ElevatedButton(
                 onPressed: _saving ? null : _addInvestment,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.textInverse,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                 ),
                 child: _saving
-                    ? CircularProgressIndicator(
-                        color: Theme.of(context).colorScheme.onPrimary,
-                        strokeWidth: 2,
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: AppColors.textInverse,
+                          strokeWidth: 2,
+                        ),
                       )
                     : Text(
                         'inv_save'.tr(),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 15,
-                        ),
+                        style: AppTypography.labelLg.copyWith(fontWeight: FontWeight.w900),
                       ),
               ),
             ),
