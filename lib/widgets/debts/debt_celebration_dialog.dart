@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../core/theme/app_colors.dart';
+import '../common/app_button.dart';
 
 // ── Confetti Particle ──────────────────────────────────────────────────────
 class _Particle {
@@ -187,7 +189,7 @@ class _DebtCelebrationDialogState extends State<DebtCelebrationDialog>
               Text(
                 'debts_celebration_title'.tr(),
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppColors.textInverse,
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
                 ),
@@ -219,23 +221,10 @@ class _DebtCelebrationDialogState extends State<DebtCelebrationDialog>
                 ),
               ),
               const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF10B981),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    'debts_celebration_btn'.tr(),
-                    style: const TextStyle(fontWeight: FontWeight.w900),
-                  ),
-                ),
+              AppButton(
+                label: 'debts_celebration_btn'.tr(),
+                variant: AppButtonVariant.primary,
+                onPressed: () => Navigator.pop(context),
               ),
               const SizedBox(height: 8),
             ],

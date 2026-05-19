@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../utils/app_colors.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_typography.dart';
+import '../common/progress_bar.dart';
 
 class DebtSummarySection extends StatelessWidget {
   final double totalRemaining;
@@ -22,22 +25,24 @@ class DebtSummarySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
     final paidPct = totalOriginal > 0
         ? ((totalOriginal - totalRemaining) / totalOriginal * 100)
         : 0.0;
 
     return Column(
       children: [
-        // Summary stats cards
         Row(
           children: [
             Expanded(
               child: _statCard(
                 'debts_total_remaining'.tr(),
                 '${totalRemaining.toStringAsFixed(0)} $currency',
-                AppColors.error,
-                cs,
+                AppColors.expense,
+                isDark: isDark,
               ),
             ),
             const SizedBox(width: 8),
@@ -45,8 +50,8 @@ class DebtSummarySection extends StatelessWidget {
               child: _statCard(
                 'debts_paid'.tr(),
                 '${paidPct.toStringAsFixed(0)}%',
-                AppColors.success,
-                cs,
+                AppColors.income,
+                isDark: isDark,
               ),
             ),
             const SizedBox(width: 8),
@@ -55,50 +60,36 @@ class DebtSummarySection extends StatelessWidget {
                 'debts_monthly_total'.tr(),
                 '${totalMonthly.toStringAsFixed(0)} $currency',
                 AppColors.warning,
-                cs,
+                isDark: isDark,
               ),
             ),
           ],
         ),
         const SizedBox(height: 12),
 
-        // Life-time paid badge
         if (lifeTimePaid > 0)
           Container(
             padding: const EdgeInsets.all(14),
-            margin: const EdgeInsets.only(bottom: 12),
+            margin: const EdgeInsetsDirectional.only(bottom: 12),
             decoration: BoxDecoration(
-              color: AppColors.success.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: AppColors.success.withValues(alpha: 0.2),
-              ),
+              color: AppColors.income.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(color: AppColors.income.withValues(alpha: 0.2)),
             ),
             child: Row(
               children: [
-                const Icon(
-                  Icons.emoji_events,
-                  size: 28,
-                  color: AppColors.success,
-                ),
+                const Icon(Icons.emoji_events, size: 28, color: AppColors.income),
                 const SizedBox(width: 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'debts_total_paid_life'.tr(),
-                      style: TextStyle(
-                        color: cs.onSurfaceVariant,
-                        fontSize: 12,
-                      ),
+                      style: AppTypography.labelSm.copyWith(color: textSecondary),
                     ),
                     Text(
                       '${lifeTimePaid.toStringAsFixed(0)} $currency',
-                      style: const TextStyle(
-                        color: AppColors.successLight,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                      ),
+                      style: AppTypography.headingMd.copyWith(color: AppColors.income),
                     ),
                   ],
                 ),
@@ -108,26 +99,19 @@ class DebtSummarySection extends StatelessWidget {
                   children: [
                     Text(
                       'debts_paid_count'.tr(),
-                      style: TextStyle(
-                        color: cs.onSurfaceVariant,
-                        fontSize: 11,
-                      ),
+                      style: AppTypography.labelSm.copyWith(color: textSecondary),
                     ),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           '$paidCount ',
-                          style: const TextStyle(
-                            color: AppColors.successLight,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w900,
-                          ),
+                          style: AppTypography.headingSm.copyWith(color: AppColors.income),
                         ),
                         const Icon(
                           Icons.check_circle_outline,
                           size: 16,
-                          color: AppColors.successLight,
+                          color: AppColors.income,
                         ),
                       ],
                     ),
@@ -137,14 +121,13 @@ class DebtSummarySection extends StatelessWidget {
             ),
           ),
 
-        // Overall progress
         Container(
           padding: const EdgeInsets.all(14),
-          margin: const EdgeInsets.only(bottom: 16),
+          margin: const EdgeInsetsDirectional.only(bottom: 16),
           decoration: BoxDecoration(
-            color: cs.surface,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: cs.outlineVariant),
+            color: surface,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border.all(color: border),
           ),
           child: Column(
             children: [
@@ -153,55 +136,32 @@ class DebtSummarySection extends StatelessWidget {
                 children: [
                   Text(
                     'debts_overall_progress'.tr(),
-                    style: TextStyle(
-                      color: cs.onSurfaceVariant,
-                      fontSize: 12,
+                    style: AppTypography.labelSm.copyWith(
+                      color: textSecondary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   Text(
                     '${paidPct.toStringAsFixed(1)}%',
-                    style: const TextStyle(
-                      color: AppColors.successLight,
-                      fontSize: 12,
+                    style: AppTypography.labelSm.copyWith(
+                      color: AppColors.income,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              Semantics(
-                value: '${paidPct.toStringAsFixed(0)}%',
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(5),
-                  child: LinearProgressIndicator(
-                    value: (paidPct / 100).clamp(0.0, 1.0),
-                    backgroundColor: cs.outlineVariant,
-                    color: AppColors.success,
-                    minHeight: 10,
-                  ),
+              AppProgressBar(
+                value: (paidPct / 100).clamp(0.0, 1.0),
+                title: '',
+                percentageLabel: '${paidPct.toStringAsFixed(0)}%',
+                variant: ProgressBarVariant.goal,
+                infoStart: 'debts_paid_amount'.tr(
+                  args: [(totalOriginal - totalRemaining).toStringAsFixed(0), currency],
                 ),
-              ),
-              const SizedBox(height: 6),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'debts_paid_amount'.tr(
-                      args: [
-                        (totalOriginal - totalRemaining).toStringAsFixed(0),
-                        currency,
-                      ],
-                    ),
-                    style: TextStyle(color: cs.onSurfaceVariant, fontSize: 10),
-                  ),
-                  Text(
-                    'debts_original_amount_label'.tr(
-                      args: [totalOriginal.toStringAsFixed(0), currency],
-                    ),
-                    style: TextStyle(color: cs.onSurfaceVariant, fontSize: 10),
-                  ),
-                ],
+                infoEnd: 'debts_original_amount_label'.tr(
+                  args: [totalOriginal.toStringAsFixed(0), currency],
+                ),
               ),
             ],
           ),
@@ -210,28 +170,28 @@ class DebtSummarySection extends StatelessWidget {
     );
   }
 
-  Widget _statCard(String label, String value, Color color, ColorScheme cs) {
+  Widget _statCard(String label, String value, Color color, {required bool isDark}) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
       decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: cs.outlineVariant),
+        color: isDark ? AppColors.surfaceDark : AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
       ),
       child: Column(
         children: [
           Text(
             value,
-            style: TextStyle(
-              color: color,
-              fontSize: 14,
-              fontWeight: FontWeight.w900,
-            ),
+            style: AppTypography.headingMd.copyWith(color: color),
           ),
           const SizedBox(height: 4),
           Text(
             label,
-            style: TextStyle(color: cs.onSurfaceVariant, fontSize: 10),
+            style: AppTypography.labelSm.copyWith(
+              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondary,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
