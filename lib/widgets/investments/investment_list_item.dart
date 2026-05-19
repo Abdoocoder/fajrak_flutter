@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../utils/app_colors.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_typography.dart';
 import '../../services/currency_service.dart';
 import 'investment_transaction_history.dart';
 import 'add_investment_dialog.dart';
@@ -47,13 +49,14 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
   }
 
   void _showAddDialog() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
       ),
       builder: (_) =>
           AddInvestmentDialog(existing: widget.inv, onSaved: widget.onChanged),
@@ -61,13 +64,14 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
   }
 
   void _showTxHistory() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
       ),
       builder: (_) => InvestmentTxHistoryModal(
         invId: widget.inv['id'].toString(),
@@ -152,69 +156,51 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
     final realizedPnl = proceeds - costBasis;
     final isGain = realizedPnl >= 0;
 
+    final isDarkSell = Theme.of(context).brightness == Brightness.dark;
+    final surfaceSell = isDarkSell ? AppColors.surfaceDark : AppColors.surface;
+    final textPrimarySell = isDarkSell ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondarySell = isDarkSell ? AppColors.textSecondaryDark : AppColors.textSecondary;
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: Theme.of(ctx).colorScheme.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: surfaceSell,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
         title: Text(
           'inv_sell_confirm_btn'.tr(),
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            color: Theme.of(ctx).colorScheme.onSurface,
-          ),
+          style: AppTypography.headingSm.copyWith(color: textPrimarySell),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _summaryRow(
-              ctx,
-              'inv_sell_avg_buy'.tr(),
-              '\$${avgBuyPrice.toStringAsFixed(2)}',
-              Theme.of(ctx).colorScheme.onSurfaceVariant,
-            ),
+            _summaryRow('inv_sell_avg_buy'.tr(), '\$${avgBuyPrice.toStringAsFixed(2)}', textSecondarySell),
             const SizedBox(height: 8),
-            _summaryRow(
-              ctx,
-              'inv_price'.tr(),
-              '\$${price.toStringAsFixed(2)}',
-              Theme.of(ctx).colorScheme.onSurfaceVariant,
-            ),
+            _summaryRow('inv_price'.tr(), '\$${price.toStringAsFixed(2)}', textSecondarySell),
             const SizedBox(height: 8),
-            _summaryRow(
-              ctx,
-              'inv_sell_proceeds'.tr(),
-              '\$${proceeds.toStringAsFixed(2)}',
-              Theme.of(ctx).colorScheme.onSurface,
-            ),
+            _summaryRow('inv_sell_proceeds'.tr(), '\$${proceeds.toStringAsFixed(2)}', textPrimarySell),
             const Divider(height: 20),
             _summaryRow(
-              ctx,
-              isGain
-                  ? 'inv_sell_realized_gain'.tr()
-                  : 'inv_sell_realized_loss'.tr(),
+              isGain ? 'inv_sell_realized_gain'.tr() : 'inv_sell_realized_loss'.tr(),
               '${isGain ? '+' : ''}\$${realizedPnl.toStringAsFixed(2)}',
-              isGain ? AppColors.success : AppColors.error,
+              isGain ? AppColors.income : AppColors.expense,
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('inv_cancel'.tr(), style: const TextStyle()),
+            child: Text('inv_cancel'.tr(), style: AppTypography.labelMd.copyWith(color: textSecondarySell)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+              backgroundColor: AppColors.expense,
+              foregroundColor: AppColors.textInverse,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
             ),
             child: Text(
               'inv_sell_confirm_btn'.tr(),
-              style: const TextStyle(fontWeight: FontWeight.w900),
+              style: AppTypography.labelMd.copyWith(fontWeight: FontWeight.w900),
             ),
           ),
         ],
@@ -296,30 +282,14 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
     }
   }
 
-  Widget _summaryRow(
-    BuildContext ctx,
-    String label,
-    String value,
-    Color valueColor,
-  ) {
+  Widget _summaryRow(String label, String value, Color valueColor) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            color: Theme.of(ctx).colorScheme.onSurfaceVariant,
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w900,
-            color: valueColor,
-          ),
-        ),
+        Text(label, style: AppTypography.labelMd.copyWith(color: textSecondary)),
+        Text(value, style: AppTypography.labelMd.copyWith(color: valueColor, fontWeight: FontWeight.w900)),
       ],
     );
   }
@@ -329,19 +299,22 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
     String hint,
     TextInputType type,
   ) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
     return TextField(
       controller: ctrl,
       keyboardType: type,
       textAlign: TextAlign.center,
-      style: TextStyle(color: colorScheme.onSurface, fontSize: 12),
+      style: TextStyle(color: textPrimary, fontSize: 12),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 10),
+        hintStyle: TextStyle(color: textSecondary, fontSize: 10),
         filled: true,
-        fillColor: colorScheme.surface,
+        fillColor: surface,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppRadius.sm),
           borderSide: BorderSide.none,
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -361,16 +334,20 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
     final gainPct = cost > 0 ? (gain / cost * 100) : 0.0;
     final isHalal = inv['is_halal'] as bool? ?? false;
 
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final surfaceVariant = isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: EdgeInsetsDirectional.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: colorScheme.outlineVariant),
+        color: surface,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: border),
       ),
       child: Column(
         children: [
@@ -380,17 +357,13 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 child: Center(
                   child: Text(
                     inv['symbol']?.toString().substring(0, 1) ?? '?',
-                    style: TextStyle(
-                      color: colorScheme.primary,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 18,
-                    ),
+                    style: AppTypography.headingMd.copyWith(color: AppColors.primary),
                   ),
                 ),
               ),
@@ -403,28 +376,20 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
                       children: [
                         Text(
                           inv['symbol'] ?? '',
-                          style: TextStyle(
-                            color: colorScheme.onSurface,
+                          style: AppTypography.labelMd.copyWith(
+                            color: textPrimary,
                             fontWeight: FontWeight.w900,
-                            fontSize: 14,
                           ),
                         ),
                         if (isHalal) ...[
                           const SizedBox(width: 6),
-                          Icon(
-                            Icons.mosque,
-                            size: 12,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
+                          Icon(Icons.mosque, size: 12, color: textSecondary),
                         ],
                       ],
                     ),
                     Text(
                       '${shares.toStringAsFixed(4)} ${"inv_shares_suffix".tr()} • \$${currentPrice.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        color: colorScheme.onSurfaceVariant,
-                        fontSize: 11,
-                      ),
+                      style: AppTypography.labelSm.copyWith(color: textSecondary),
                     ),
                   ],
                 ),
@@ -434,16 +399,15 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
                 children: [
                   Text(
                     '\$${value.toStringAsFixed(2)}',
-                    style: TextStyle(
-                      color: colorScheme.onSurface,
+                    style: AppTypography.labelMd.copyWith(
+                      color: textPrimary,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                   Text(
                     '${gain >= 0 ? '+' : ''}${gainPct.toStringAsFixed(1)}%',
-                    style: TextStyle(
-                      color: gain >= 0 ? AppColors.success : AppColors.error,
-                      fontSize: 12,
+                    style: AppTypography.labelSm.copyWith(
+                      color: gain >= 0 ? AppColors.income : AppColors.expense,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -456,13 +420,11 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
                   width: 28,
                   height: 28,
                   decoration: BoxDecoration(
-                    color: colorScheme.primary.withValues(alpha: 0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(7),
-                    border: Border.all(
-                      color: colorScheme.primary.withValues(alpha: 0.2),
-                    ),
+                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
                   ),
-                  child: Icon(Icons.edit, color: colorScheme.primary, size: 14),
+                  child: const Icon(Icons.edit, color: AppColors.primary, size: 14),
                 ),
               ),
               const SizedBox(width: 6),
@@ -472,13 +434,11 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
                   width: 28,
                   height: 28,
                   decoration: BoxDecoration(
-                    color: colorScheme.error.withValues(alpha: 0.1),
+                    color: AppColors.expense.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(7),
-                    border: Border.all(
-                      color: colorScheme.error.withValues(alpha: 0.2),
-                    ),
+                    border: Border.all(color: AppColors.expense.withValues(alpha: 0.2)),
                   ),
-                  child: Icon(Icons.close, color: colorScheme.error, size: 14),
+                  child: const Icon(Icons.close, color: AppColors.expense, size: 14),
                 ),
               ),
             ],
@@ -489,16 +449,12 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
             children: [
               Text(
                 '${"inv_sell_avg_buy".tr()}: \$${avgPrice.toStringAsFixed(2)}',
-                style: TextStyle(
-                  color: colorScheme.onSurfaceVariant,
-                  fontSize: 10,
-                ),
+                style: AppTypography.labelSm.copyWith(color: textSecondary),
               ),
               Text(
                 '${'inv_roi_label'.tr()}: ${gain >= 0 ? "+" : ""}\$${gain.toStringAsFixed(2)}',
-                style: TextStyle(
-                  color: gain >= 0 ? AppColors.success : AppColors.error,
-                  fontSize: 10,
+                style: AppTypography.labelSm.copyWith(
+                  color: gain >= 0 ? AppColors.income : AppColors.expense,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -510,12 +466,12 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
                 ? '${((value / cost - 1) * 100).toStringAsFixed(1)}%'
                 : '0%',
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(AppRadius.xs),
               child: LinearProgressIndicator(
                 value: cost > 0 ? (value / (cost * 2)).clamp(0.0, 1.0) : 0,
-                backgroundColor: colorScheme.outlineVariant,
+                backgroundColor: border,
                 valueColor: AlwaysStoppedAnimation(
-                  gain >= 0 ? AppColors.success : colorScheme.error,
+                  gain >= 0 ? AppColors.income : AppColors.expense,
                 ),
                 minHeight: 4,
               ),
@@ -528,16 +484,16 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
                 child: OutlinedButton(
                   onPressed: _showTxHistory,
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: colorScheme.onSurfaceVariant,
-                    side: BorderSide(color: colorScheme.outlineVariant),
+                    foregroundColor: textSecondary,
+                    side: BorderSide(color: border),
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
                     ),
                   ),
                   child: Text(
                     'inv_tx_history'.tr(),
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+                    style: AppTypography.labelSm.copyWith(fontWeight: FontWeight.w700),
                   ),
                 ),
               ),
@@ -549,18 +505,16 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
                     _showSellForm = false;
                   }),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.success,
-                    side: BorderSide(
-                      color: AppColors.success.withValues(alpha: 0.3),
-                    ),
+                    foregroundColor: AppColors.income,
+                    side: BorderSide(color: AppColors.income.withValues(alpha: 0.3)),
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
                     ),
                   ),
                   child: Text(
                     'inv_record_buy'.tr(),
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+                    style: AppTypography.labelSm.copyWith(fontWeight: FontWeight.w700),
                   ),
                 ),
               ),
@@ -575,16 +529,16 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
                 _showBuyForm = false;
               }),
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.error,
-                side: BorderSide(color: AppColors.error.withValues(alpha: 0.3)),
+                foregroundColor: AppColors.expense,
+                side: BorderSide(color: AppColors.expense.withValues(alpha: 0.3)),
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
               ),
               child: Text(
                 'inv_record_sell'.tr(),
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+                style: AppTypography.labelSm.copyWith(fontWeight: FontWeight.w700),
               ),
             ),
           ),
@@ -593,8 +547,8 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(10),
+                color: surfaceVariant,
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: Column(
                 children: [
@@ -631,11 +585,11 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
                     child: ElevatedButton(
                       onPressed: _savingBuy ? null : _recordBuy,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.success,
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppColors.income,
+                        foregroundColor: AppColors.textInverse,
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
                         ),
                       ),
                       child: _savingBuy
@@ -644,15 +598,12 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
                               height: 14,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.white,
+                                color: AppColors.textInverse,
                               ),
                             )
                           : Text(
                               'inv_submit_btn'.tr(),
-                              style: TextStyle(
-                                fontWeight: FontWeight.w900,
-                                fontSize: 12,
-                              ),
+                              style: AppTypography.labelSm.copyWith(fontWeight: FontWeight.w900),
                             ),
                     ),
                   ),
@@ -665,11 +616,9 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.error.withValues(alpha: 0.07),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: AppColors.error.withValues(alpha: 0.2),
-                ),
+                color: AppColors.expense.withValues(alpha: 0.07),
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                border: Border.all(color: AppColors.expense.withValues(alpha: 0.2)),
               ),
               child: Column(
                 children: [
@@ -703,10 +652,7 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
                   const SizedBox(height: 8),
                   Text(
                     '${'inv_sell_max_shares'.tr()}: ${shares.toStringAsFixed(4)} ${'inv_shares_suffix'.tr()}',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
+                    style: AppTypography.labelSm.copyWith(color: textSecondary),
                   ),
                   const SizedBox(height: 10),
                   SizedBox(
@@ -714,11 +660,11 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
                     child: ElevatedButton(
                       onPressed: _savingSell ? null : _recordSell,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.error,
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppColors.expense,
+                        foregroundColor: AppColors.textInverse,
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
                         ),
                       ),
                       child: _savingSell
@@ -727,15 +673,12 @@ class _InvestmentListItemState extends State<InvestmentListItem> {
                               height: 14,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.white,
+                                color: AppColors.textInverse,
                               ),
                             )
                           : Text(
                               'inv_sell_confirm_btn'.tr(),
-                              style: TextStyle(
-                                fontWeight: FontWeight.w900,
-                                fontSize: 12,
-                              ),
+                              style: AppTypography.labelSm.copyWith(fontWeight: FontWeight.w900),
                             ),
                     ),
                   ),
