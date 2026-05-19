@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import '../../utils/app_colors.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/currency_service.dart';
@@ -29,6 +31,7 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen>
   bool _saving = false;
   bool _saved = false;
   bool _fetchingPrices = false;
+  bool _refreshingHaul = false;
   final int _currentYear = DateTime.now().year;
 
   static const int _haulDays = 354;
@@ -53,67 +56,113 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen>
 
   Future<void> _fetchLivePrices() async {
     if (!mounted) return;
+    if (kIsWeb) return; // Yahoo Finance blocks browser-origin requests
     setState(() => _fetchingPrices = true);
     try {
-      final results = await Future.wait([
-        http
-            .get(
-              Uri.parse(
-                'https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=1d&range=1d',
-              ),
-              headers: {'User-Agent': 'Mozilla/5.0'},
-            )
-            .timeout(const Duration(seconds: 10)),
-        http
-            .get(
-              Uri.parse(
-                'https://query1.finance.yahoo.com/v8/finance/chart/SI=F?interval=1d&range=1d',
-              ),
-              headers: {'User-Agent': 'Mozilla/5.0'},
-            )
-            .timeout(const Duration(seconds: 10)),
-        CurrencyService.fetchExchangeRate('USD', _currency),
-      ]).catchError((e) => [http.Response('', 404), http.Response('', 404), 1.0]);
-
-      double usdRate = results[2] as double? ?? 1.0;
+      final usdRate =
+          await CurrencyService.fetchExchangeRate('USD', _currency) ?? 1.0;
       double? goldP;
       double? silverP;
 
-      final goldRes = results[0] as http.Response;
-      if (goldRes.statusCode == 200 && goldRes.body.isNotEmpty) {
-        final d = json.decode(goldRes.body);
-        final priceOz =
-            (d['chart']?['result']?[0]?['meta']?['regularMarketPrice'] as num?)
-                ?.toDouble() ??
-            0;
-        if (priceOz > 0) goldP = (priceOz / _troyOzToGram) * usdRate;
+      // 1. Twelve Data — most reliable (already used for stock prices in this app)
+      final tdKey = dotenv.env['TWELVE_DATA_KEY'] ?? '';
+      if (tdKey.isNotEmpty) {
+        try {
+          final tdResults = await Future.wait([
+            http
+                .get(
+                  Uri.parse(
+                    'https://api.twelvedata.com/price?symbol=XAU/USD&apikey=$tdKey',
+                  ),
+                )
+                .timeout(const Duration(seconds: 10)),
+            http
+                .get(
+                  Uri.parse(
+                    'https://api.twelvedata.com/price?symbol=XAG/USD&apikey=$tdKey',
+                  ),
+                )
+                .timeout(const Duration(seconds: 10)),
+          ]);
+          final tdGold = tdResults[0];
+          if (tdGold.statusCode == 200 && tdGold.body.isNotEmpty) {
+            final d = json.decode(tdGold.body);
+            final priceOz = double.tryParse(d['price']?.toString() ?? '') ?? 0;
+            if (priceOz > 0) goldP = (priceOz / _troyOzToGram) * usdRate;
+          }
+          final tdSilver = tdResults[1];
+          if (tdSilver.statusCode == 200 && tdSilver.body.isNotEmpty) {
+            final d = json.decode(tdSilver.body);
+            final priceOz = double.tryParse(d['price']?.toString() ?? '') ?? 0;
+            if (priceOz > 0) silverP = (priceOz / _troyOzToGram) * usdRate;
+          }
+        } catch (_) {}
       }
 
-      final silverRes = results[1] as http.Response;
-      if (silverRes.statusCode == 200 && silverRes.body.isNotEmpty) {
-        final d = json.decode(silverRes.body);
-        final priceOz =
-            (d['chart']?['result']?[0]?['meta']?['regularMarketPrice'] as num?)
-                ?.toDouble() ??
-            0;
-        if (priceOz > 0) silverP = (priceOz / _troyOzToGram) * usdRate;
-      }
-
-      // Fallback Source: FreeGoldAPI
+      // 2. Fallback: Yahoo Finance
       if (goldP == null || silverP == null) {
-        final fbRes = await http
-            .get(Uri.parse('https://freegoldapi.com/data/latest.json'))
-            .timeout(const Duration(seconds: 5))
-            .catchError((_) => http.Response('', 404));
-        if (fbRes.statusCode == 200 && fbRes.body.isNotEmpty) {
-          final fb = json.decode(fbRes.body);
-          if (goldP == null && fb['gold'] != null) {
-            goldP = (fb['gold'] as num).toDouble() * usdRate;
+        try {
+          final yahooResults = await Future.wait([
+            http
+                .get(
+                  Uri.parse(
+                    'https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=1d&range=1d',
+                  ),
+                  headers: {'User-Agent': 'Mozilla/5.0'},
+                )
+                .timeout(const Duration(seconds: 8)),
+            http
+                .get(
+                  Uri.parse(
+                    'https://query1.finance.yahoo.com/v8/finance/chart/SI=F?interval=1d&range=1d',
+                  ),
+                  headers: {'User-Agent': 'Mozilla/5.0'},
+                )
+                .timeout(const Duration(seconds: 8)),
+          ]);
+          if (goldP == null) {
+            final goldRes = yahooResults[0];
+            if (goldRes.statusCode == 200 && goldRes.body.isNotEmpty) {
+              final d = json.decode(goldRes.body);
+              final priceOz = (d['chart']?['result']?[0]?['meta']
+                          ?['regularMarketPrice'] as num?)
+                      ?.toDouble() ??
+                  0;
+              if (priceOz > 0) goldP = (priceOz / _troyOzToGram) * usdRate;
+            }
           }
-          if (silverP == null && fb['silver'] != null) {
-            silverP = (fb['silver'] as num).toDouble() * usdRate;
+          if (silverP == null) {
+            final silverRes = yahooResults[1];
+            if (silverRes.statusCode == 200 && silverRes.body.isNotEmpty) {
+              final d = json.decode(silverRes.body);
+              final priceOz = (d['chart']?['result']?[0]?['meta']
+                          ?['regularMarketPrice'] as num?)
+                      ?.toDouble() ??
+                  0;
+              if (priceOz > 0) silverP = (priceOz / _troyOzToGram) * usdRate;
+            }
           }
-        }
+        } catch (_) {}
+      }
+
+      // 3. Fallback: FreeGoldAPI
+      if (goldP == null || silverP == null) {
+        try {
+          final fbRes = await http
+              .get(Uri.parse('https://freegoldapi.com/data/latest.json'))
+              .timeout(const Duration(seconds: 5));
+          if (fbRes.statusCode == 200 && fbRes.body.isNotEmpty) {
+            final fb = json.decode(fbRes.body);
+            if (goldP == null && fb['gold'] != null) {
+              final parsed = double.tryParse(fb['gold'].toString()) ?? 0;
+              if (parsed > 0) goldP = (parsed / _troyOzToGram) * usdRate;
+            }
+            if (silverP == null && fb['silver'] != null) {
+              final parsed = double.tryParse(fb['silver'].toString()) ?? 0;
+              if (parsed > 0) silverP = (parsed / _troyOzToGram) * usdRate;
+            }
+          }
+        } catch (_) {}
       }
 
       if (mounted) {
@@ -383,7 +432,15 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen>
                           ),
                         ),
                         GestureDetector(
-                          onTap: _load,
+                          onTap: _refreshingHaul
+                              ? null
+                              : () async {
+                                  setState(() => _refreshingHaul = true);
+                                  await _load();
+                                  if (mounted) {
+                                    setState(() => _refreshingHaul = false);
+                                  }
+                                },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 10,
@@ -393,25 +450,34 @@ class _ZakatCalculatorScreenState extends State<ZakatCalculatorScreen>
                               color: cs.surfaceContainerHighest,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.refresh,
-                                  size: 14,
-                                  color: cs.onSurfaceVariant,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'zakat_refresh'.tr(),
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: cs.onSurfaceVariant,
+                            child: _refreshingHaul
+                                ? const SizedBox(
+                                    width: 14,
+                                    height: 14,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.primary,
+                                    ),
+                                  )
+                                : Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.refresh,
+                                        size: 14,
+                                        color: cs.onSurfaceVariant,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'zakat_refresh'.tr(),
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                          color: cs.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
-                            ),
                           ),
                         ),
                       ],
