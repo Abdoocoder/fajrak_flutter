@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../utils/app_colors.dart';
+import '../../core/theme/app_colors.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class AlertActions extends StatelessWidget {
@@ -7,7 +7,6 @@ class AlertActions extends StatelessWidget {
   final bool hasAlerts;
   final VoidCallback onMarkAllRead;
   final VoidCallback onDeleteAll;
-  final ColorScheme colorScheme;
 
   const AlertActions({
     super.key,
@@ -15,7 +14,6 @@ class AlertActions extends StatelessWidget {
     required this.hasAlerts,
     required this.onMarkAllRead,
     required this.onDeleteAll,
-    required this.colorScheme,
   });
 
   @override
@@ -27,8 +25,8 @@ class AlertActions extends StatelessWidget {
             onPressed: onMarkAllRead,
             child: Text(
               'alerts_mark_all_read'.tr(),
-              style: TextStyle(
-                color: colorScheme.primary,
+              style: const TextStyle(
+                color: AppColors.primary,
                 fontSize: 12,
                 fontWeight: FontWeight.w900,
               ),
@@ -40,7 +38,7 @@ class AlertActions extends StatelessWidget {
             child: Text(
               'alerts_delete_all'.tr(),
               style: const TextStyle(
-                color: AppColors.error,
+                color: AppColors.expense,
                 fontSize: 12,
                 fontWeight: FontWeight.w900,
               ),

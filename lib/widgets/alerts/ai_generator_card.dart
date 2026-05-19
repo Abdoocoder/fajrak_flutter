@@ -1,30 +1,30 @@
 import 'package:flutter/material.dart';
+import '../../core/theme/app_colors.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class AIGeneratorCard extends StatelessWidget {
   final bool generating;
   final VoidCallback onGenerate;
-  final ColorScheme colorScheme;
 
   const AIGeneratorCard({
     super.key,
     required this.generating,
     required this.onGenerate,
-    required this.colorScheme,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            colorScheme.primary.withValues(alpha: 0.08),
-            colorScheme.secondary.withValues(alpha: 0.08),
-          ],
-        ),
-        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.2)),
+        color: AppColors.primary.withValues(alpha: 0.06),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -36,19 +36,15 @@ class AIGeneratorCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [colorScheme.primary, colorScheme.secondary],
-                  ),
+                  color: AppColors.primary,
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: colorScheme.primary.withValues(alpha: 0.4),
-                      blurRadius: 16,
-                    ),
-                  ],
                 ),
                 child: const Center(
-                  child: Icon(Icons.smart_toy, size: 20, color: Colors.white),
+                  child: Icon(
+                    Icons.smart_toy,
+                    size: 20,
+                    color: AppColors.textInverse,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -59,17 +55,14 @@ class AIGeneratorCard extends StatelessWidget {
                     Text(
                       'alerts_ai_title'.tr(),
                       style: TextStyle(
-                        color: colorScheme.onSurface,
+                        color: textPrimary,
                         fontWeight: FontWeight.w900,
                         fontSize: 14,
                       ),
                     ),
                     Text(
                       'alerts_ai_subtitle'.tr(),
-                      style: TextStyle(
-                        color: colorScheme.onSurfaceVariant,
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: textSecondary, fontSize: 12),
                     ),
                   ],
                 ),
@@ -82,8 +75,9 @@ class AIGeneratorCard extends StatelessWidget {
             child: ElevatedButton(
               onPressed: generating ? null : onGenerate,
               style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.textInverse,
+                elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -95,7 +89,7 @@ class AIGeneratorCard extends StatelessWidget {
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.white,
+                        color: AppColors.textInverse,
                       ),
                     )
                   : Text(

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/theme/app_colors.dart';
 import '../../utils/error_handler.dart';
 import '../../services/analytics_service.dart';
 
@@ -70,21 +71,21 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final background = isDark ? AppColors.backgroundDark : AppColors.background;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: background,
       appBar: AppBar(
-        backgroundColor: colorScheme.surface,
+        backgroundColor: surface,
         title: Text(
           'auth_forgot_password_title'.tr(),
-          style: TextStyle(
-            fontWeight: FontWeight.w900,
-            color: colorScheme.onSurface,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w900, color: textPrimary),
         ),
-        iconTheme: IconThemeData(color: colorScheme.onSurface),
+        iconTheme: IconThemeData(color: textPrimary),
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
@@ -92,16 +93,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.mark_email_read_outlined,
                     size: 64,
-                    color: colorScheme.primary,
+                    color: AppColors.primary,
                   ),
                   const SizedBox(height: 20),
                   Text(
                     'auth_sent_title'.tr(),
                     style: TextStyle(
-                      color: colorScheme.onSurface,
+                      color: textPrimary,
                       fontWeight: FontWeight.w900,
                       fontSize: 24,
                     ),
@@ -109,16 +110,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   const SizedBox(height: 12),
                   Text(
                     'auth_sent_subtitle'.tr(),
-                    style: TextStyle(color: colorScheme.onSurfaceVariant),
+                    style: TextStyle(color: textSecondary),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
                   ElevatedButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      'auth_back_to_login'.tr(),
-                      style: const TextStyle(),
-                    ),
+                    child: Text('auth_back_to_login'.tr()),
                   ),
                 ],
               )
@@ -127,19 +125,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 children: [
                   Text(
                     'auth_forgot_password_desc'.tr(),
-                    style: TextStyle(color: colorScheme.onSurfaceVariant),
+                    style: TextStyle(color: textSecondary),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
                   TextField(
                     controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
-                    style: TextStyle(color: colorScheme.onSurface),
+                    style: TextStyle(color: textPrimary),
                     decoration: InputDecoration(
                       labelText: 'auth_email'.tr(),
                       prefixIcon: Icon(
                         Icons.email_outlined,
-                        color: colorScheme.onSurfaceVariant,
+                        color: textSecondary,
                       ),
                     ),
                   ),
@@ -147,12 +145,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ElevatedButton(
                     onPressed: (_loading || _cooldown > 0) ? null : _send,
                     child: _loading
-                        ? CircularProgressIndicator(
-                            color: colorScheme.onPrimary,
+                        ? const CircularProgressIndicator(
+                            color: AppColors.textInverse,
                             strokeWidth: 2,
                           )
                         : _cooldown > 0
-                        ? Text('انتظر $_cooldown ث', style: const TextStyle())
+                        ? Text('انتظر $_cooldown ث')
                         : Text(
                             'auth_send_reset_link'.tr(),
                             style: const TextStyle(fontWeight: FontWeight.w900),

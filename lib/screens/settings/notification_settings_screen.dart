@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/theme/app_colors.dart';
 import '../../models/notification_settings.dart';
 import '../../utils/error_handler.dart';
 
@@ -107,7 +108,7 @@ class _NotificationSettingsScreenState
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.bold,
-          color: Theme.of(context).colorScheme.primary,
+          color: AppColors.primary,
         ),
       ),
     );
@@ -121,7 +122,7 @@ class _NotificationSettingsScreenState
       margin: const EdgeInsets.only(bottom: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: SwitchListTile(
-        secondary: Icon(icon, color: Theme.of(context).colorScheme.primary),
+        secondary: Icon(icon, color: AppColors.primary),
         title: Text(
           label,
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
@@ -168,24 +169,22 @@ class _NotificationSettingsScreenState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(
-          context,
-        ).colorScheme.primaryContainer.withValues(alpha: 0.3),
+        color: AppColors.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
           Icon(
             Icons.info_outline,
-            color: Theme.of(context).colorScheme.primary,
+            color: AppColors.primary,
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               'هذه الإعدادات تساعدك على البقاء على اطلاع بوضعك المالي دون إزعاج.',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 12,
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                color: AppColors.primary,
               ),
             ),
           ),

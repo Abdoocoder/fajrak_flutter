@@ -244,7 +244,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
       case 'warning':
         return AppColors.warning;
       case 'achievement':
-        return AppColors.success;
+        return AppColors.income;
       case 'motivation':
         return AppColors.purple;
       default:
@@ -254,8 +254,11 @@ class _AlertsScreenState extends State<AlertsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final background = isDark ? AppColors.backgroundDark : AppColors.background;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
     final unreadCount = _alerts.where((a) => a['is_read'] == false).length;
     final filtered = _alerts.where((a) {
       if (_filter == 'unread') return a['is_read'] == false;
@@ -266,23 +269,23 @@ class _AlertsScreenState extends State<AlertsScreen> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: background,
       appBar: AppBar(
         title: Text(
           'alerts_title'.tr(),
           style: TextStyle(
             fontWeight: FontWeight.w900,
-            color: colorScheme.onSurface,
+            color: textPrimary,
           ),
         ),
-        iconTheme: IconThemeData(color: colorScheme.onSurface),
+        iconTheme: IconThemeData(color: textPrimary),
       ),
       body: _loading
-          ? Center(child: CircularProgressIndicator(color: colorScheme.primary))
+          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
           : RefreshIndicator(
               onRefresh: _load,
-              color: colorScheme.primary,
-              backgroundColor: colorScheme.surface,
+              color: AppColors.primary,
+              backgroundColor: surface,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(16),
@@ -295,14 +298,12 @@ class _AlertsScreenState extends State<AlertsScreen> {
                         AlertHeader(
                           totalCount: _alerts.length,
                           unreadCount: unreadCount,
-                          colorScheme: colorScheme,
                         ),
                         AlertActions(
                           unreadCount: unreadCount,
                           hasAlerts: _alerts.isNotEmpty,
                           onMarkAllRead: _markAllRead,
                           onDeleteAll: _deleteAll,
-                          colorScheme: colorScheme,
                         ),
                       ],
                     ),
@@ -310,7 +311,6 @@ class _AlertsScreenState extends State<AlertsScreen> {
                     AIGeneratorCard(
                       generating: _generating,
                       onGenerate: _generateAlerts,
-                      colorScheme: colorScheme,
                     ),
                     const SizedBox(height: 20),
                     AlertFilterTabs(
@@ -318,7 +318,6 @@ class _AlertsScreenState extends State<AlertsScreen> {
                       totalCount: _alerts.length,
                       unreadCount: unreadCount,
                       onFilterChanged: (v) => setState(() => _filter = v),
-                      colorScheme: colorScheme,
                     ),
                     const SizedBox(height: 16),
                     if (filtered.isEmpty)
@@ -336,13 +335,13 @@ class _AlertsScreenState extends State<AlertsScreen> {
                                     ? Icons.emoji_events_outlined
                                     : Icons.lightbulb_outline,
                                 size: 40,
-                                color: colorScheme.onSurfaceVariant,
+                                color: textSecondary,
                               ),
                               const SizedBox(height: 12),
                               Text(
                                 'alerts_empty'.tr(),
                                 style: TextStyle(
-                                  color: colorScheme.onSurfaceVariant,
+                                  color: textSecondary,
                                   fontSize: 14,
                                 ),
                               ),
@@ -364,7 +363,6 @@ class _AlertsScreenState extends State<AlertsScreen> {
                             onTap: () => _navigateAlert(alert),
                             onDelete: () =>
                                 _deleteAlert(alert['id'].toString()),
-                            colorScheme: colorScheme,
                           );
                         },
                       ),

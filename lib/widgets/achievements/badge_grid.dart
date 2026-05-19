@@ -1,24 +1,29 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import '../../core/theme/app_colors.dart';
 
 class BadgeGrid extends StatelessWidget {
   final List<String> earnedBadges;
   final Map<String, dynamic> badgeInfo;
-  final ColorScheme colorScheme;
 
   const BadgeGrid({
     super.key,
     required this.earnedBadges,
     required this.badgeInfo,
-    required this.colorScheme,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+
     return Column(
       children: [
         Align(
-          alignment: Alignment.centerRight,
+          alignment: AlignmentDirectional.centerEnd,
           child: Text(
             'gamif_badges_title'.tr(
               namedArgs: {
@@ -27,7 +32,7 @@ class BadgeGrid extends StatelessWidget {
               },
             ),
             style: TextStyle(
-              color: colorScheme.onSurface,
+              color: textPrimary,
               fontWeight: FontWeight.w900,
               fontSize: 16,
             ),
@@ -46,14 +51,10 @@ class BadgeGrid extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: earned
-                      ? colorScheme.primary.withValues(alpha: 0.1)
-                      : colorScheme.surface,
+                  color: earned ? AppColors.primary.withValues(alpha: 0.1) : surface,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: earned
-                        ? colorScheme.primary.withValues(alpha: 0.4)
-                        : colorScheme.outlineVariant,
+                    color: earned ? AppColors.primary.withValues(alpha: 0.4) : border,
                   ),
                 ),
                 child: Column(
@@ -62,17 +63,13 @@ class BadgeGrid extends StatelessWidget {
                     Icon(
                       info.$1 as IconData,
                       size: 28,
-                      color: earned
-                          ? colorScheme.primary
-                          : colorScheme.outlineVariant.withValues(alpha: 0.5),
+                      color: earned ? AppColors.primary : border,
                     ),
                     const SizedBox(height: 6),
                     Text(
                       info.$2,
                       style: TextStyle(
-                        color: earned
-                            ? colorScheme.onSurface
-                            : colorScheme.onSurfaceVariant,
+                        color: earned ? textPrimary : textSecondary,
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
                       ),
@@ -81,10 +78,7 @@ class BadgeGrid extends StatelessWidget {
                     ),
                     Text(
                       info.$3,
-                      style: TextStyle(
-                        color: colorScheme.onSurfaceVariant,
-                        fontSize: 11,
-                      ),
+                      style: TextStyle(color: textSecondary, fontSize: 11),
                     ),
                   ],
                 ),

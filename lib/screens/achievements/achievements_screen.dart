@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../core/theme/app_colors.dart';
 import '../../utils/error_handler.dart';
 import '../../services/analytics_service.dart';
 
@@ -121,22 +122,23 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final background = isDark ? AppColors.backgroundDark : AppColors.background;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
 
     if (_loading) {
       return Scaffold(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        body: Center(
-          child: CircularProgressIndicator(color: colorScheme.primary),
+        backgroundColor: background,
+        body: const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
         ),
       );
     }
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: background,
       appBar: AppBar(
-        backgroundColor: colorScheme.surface,
+        backgroundColor: surface,
         title: const Text(
           'الإنجازات',
           style: TextStyle(fontWeight: FontWeight.w900),
@@ -151,13 +153,11 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
               levelTitle: _levelTitle,
               points: _points,
               nextLevel: _nextLevel,
-              colorScheme: colorScheme,
             ),
             const SizedBox(height: 20),
             BadgeGrid(
               earnedBadges: _badges,
               badgeInfo: _badgeInfo,
-              colorScheme: colorScheme,
             ),
           ],
         ),

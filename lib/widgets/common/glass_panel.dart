@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/theme/app_colors.dart';
 
 class GlassPanel extends StatelessWidget {
   final Widget child;
@@ -8,7 +9,6 @@ class GlassPanel extends StatelessWidget {
   final Color? borderColor;
   final Color? color;
   final EdgeInsetsGeometry? padding;
-
   final bool topBorderOnly;
 
   const GlassPanel({
@@ -25,29 +25,22 @@ class GlassPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+
+    final effectiveBorderColor = borderColor ?? border.withValues(alpha: 0.3);
+
     // BackdropFilter/blur removed — causes vertical-line rendering artifacts
     // on Android. Replaced with a solid semi-transparent surface.
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: (color ?? colorScheme.surface).withValues(alpha: opacity + 0.08),
+        color: (color ?? surface).withValues(alpha: opacity + 0.08),
         borderRadius: BorderRadius.circular(borderRadius),
         border: topBorderOnly
-            ? Border(
-                top: BorderSide(
-                  color:
-                      borderColor ??
-                      colorScheme.outlineVariant.withValues(alpha: 0.3),
-                  width: 1,
-                ),
-              )
-            : Border.all(
-                color:
-                    borderColor ??
-                    colorScheme.outlineVariant.withValues(alpha: 0.3),
-                width: 1,
-              ),
+            ? Border(top: BorderSide(color: effectiveBorderColor, width: 1))
+            : Border.all(color: effectiveBorderColor, width: 1),
       ),
       child: child,
     );

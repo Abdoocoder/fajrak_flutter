@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../utils/app_colors.dart';
+import '../../core/theme/app_colors.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'settings_accordion.dart';
@@ -81,7 +81,7 @@ class _AssetsFormState extends State<AssetsForm> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('toast_saved'.tr(), style: const TextStyle()),
-            backgroundColor: AppColors.success,
+            backgroundColor: AppColors.income,
           ),
         );
       }
@@ -92,7 +92,12 @@ class _AssetsFormState extends State<AssetsForm> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+
     final totalDynamicAssets =
         (double.tryParse(_realEstateCtrl.text) ?? 0) +
         (double.tryParse(_vehiclesCtrl.text) ?? 0) +
@@ -114,23 +119,16 @@ class _AssetsFormState extends State<AssetsForm> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.primary.withValues(alpha: 0.05),
-                  AppColors.success.withValues(alpha: 0.03),
-                ],
-              ),
+              color: AppColors.primary.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.15),
-              ),
+              border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
             ),
             child: Column(
               children: [
                 Text(
                   'settings_your_net_worth'.tr(),
                   style: TextStyle(
-                    color: colorScheme.onSurfaceVariant,
+                    color: textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                   ),
@@ -139,9 +137,7 @@ class _AssetsFormState extends State<AssetsForm> {
                 Text(
                   '${displayedNetWorth.toStringAsFixed(0)} ${widget.currency}',
                   style: TextStyle(
-                    color: displayedNetWorth >= 0
-                        ? AppColors.success
-                        : AppColors.error,
+                    color: displayedNetWorth >= 0 ? AppColors.income : AppColors.expense,
                     fontSize: 24,
                     fontWeight: FontWeight.w900,
                   ),
@@ -150,30 +146,10 @@ class _AssetsFormState extends State<AssetsForm> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _netWorthStat(
-                      'health_tracking'.tr(),
-                      widget.cashBalance,
-                      AppColors.primary,
-                      colorScheme,
-                    ),
-                    _netWorthStat(
-                      'health_savings'.tr(),
-                      widget.savings,
-                      AppColors.purple,
-                      colorScheme,
-                    ),
-                    _netWorthStat(
-                      'health_investing'.tr(),
-                      widget.investments,
-                      AppColors.success,
-                      colorScheme,
-                    ),
-                    _netWorthStat(
-                      'health_debt'.tr(),
-                      -widget.totalDebt,
-                      AppColors.error,
-                      colorScheme,
-                    ),
+                    _netWorthStat('health_tracking'.tr(), widget.cashBalance, AppColors.primary, textSecondary),
+                    _netWorthStat('health_savings'.tr(), widget.savings, AppColors.purple, textSecondary),
+                    _netWorthStat('health_investing'.tr(), widget.investments, AppColors.income, textSecondary),
+                    _netWorthStat('health_debt'.tr(), -widget.totalDebt, AppColors.expense, textSecondary),
                   ],
                 ),
               ],
@@ -186,7 +162,8 @@ class _AssetsFormState extends State<AssetsForm> {
                 child: _assetField(
                   _realEstateCtrl,
                   'settings_assets_realestate'.tr(),
-                  colorScheme,
+                  isDark: isDark, surface: surface, border: border,
+                  textPrimary: textPrimary, textSecondary: textSecondary,
                 ),
               ),
               const SizedBox(width: 8),
@@ -194,7 +171,8 @@ class _AssetsFormState extends State<AssetsForm> {
                 child: _assetField(
                   _vehiclesCtrl,
                   'settings_assets_vehicles'.tr(),
-                  colorScheme,
+                  isDark: isDark, surface: surface, border: border,
+                  textPrimary: textPrimary, textSecondary: textSecondary,
                 ),
               ),
             ],
@@ -206,7 +184,8 @@ class _AssetsFormState extends State<AssetsForm> {
                 child: _assetField(
                   _jewelryCtrl,
                   'settings_assets_jewelry'.tr(),
-                  colorScheme,
+                  isDark: isDark, surface: surface, border: border,
+                  textPrimary: textPrimary, textSecondary: textSecondary,
                 ),
               ),
               const SizedBox(width: 8),
@@ -214,7 +193,8 @@ class _AssetsFormState extends State<AssetsForm> {
                 child: _assetField(
                   _otherAssetsCtrl,
                   'settings_assets_other'.tr(),
-                  colorScheme,
+                  isDark: isDark, surface: surface, border: border,
+                  textPrimary: textPrimary, textSecondary: textSecondary,
                 ),
               ),
             ],
@@ -225,8 +205,9 @@ class _AssetsFormState extends State<AssetsForm> {
             child: ElevatedButton(
               onPressed: _savingAssets ? null : _saveAssets,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.success,
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.income,
+                foregroundColor: AppColors.textInverse,
+                elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -238,7 +219,7 @@ class _AssetsFormState extends State<AssetsForm> {
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.white,
+                        color: AppColors.textInverse,
                       ),
                     )
                   : Text(
@@ -252,57 +233,47 @@ class _AssetsFormState extends State<AssetsForm> {
     );
   }
 
-  Widget _netWorthStat(
-    String label,
-    double value,
-    Color color,
-    ColorScheme colorScheme,
-  ) {
+  Widget _netWorthStat(String label, double value, Color color, Color textSecondary) {
     return Column(
       children: [
         Text(
           value.toStringAsFixed(0),
-          style: TextStyle(
-            color: color,
-            fontWeight: FontWeight.w900,
-            fontSize: 12,
-          ),
+          style: TextStyle(color: color, fontWeight: FontWeight.w900, fontSize: 12),
         ),
-        Text(
-          label,
-          style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 11),
-        ),
+        Text(label, style: TextStyle(color: textSecondary, fontSize: 11)),
       ],
     );
   }
 
   Widget _assetField(
     TextEditingController ctrl,
-    String label,
-    ColorScheme colorScheme,
-  ) {
+    String label, {
+    required bool isDark,
+    required Color surface,
+    required Color border,
+    required Color textPrimary,
+    required Color textSecondary,
+  }) {
     return TextField(
       controller: ctrl,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       textAlign: TextAlign.right,
       onChanged: (_) => setState(() {}),
-      style: TextStyle(color: colorScheme.onSurface, fontSize: 13),
+      style: TextStyle(color: textPrimary, fontSize: 13),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(
-          color: colorScheme.onSurfaceVariant,
-          fontSize: 12,
-        ),
+        labelStyle: TextStyle(color: textSecondary, fontSize: 12),
         filled: true,
-        fillColor: colorScheme.surface,
+        fillColor: surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: colorScheme.outlineVariant),
+          borderSide: BorderSide(color: border),
         ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 10,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: border),
         ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       ),
     );
   }

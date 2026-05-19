@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../utils/app_colors.dart';
+import '../../core/theme/app_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -22,16 +22,7 @@ class _TestimonialCardState extends State<TestimonialCard> {
   bool _existing = false;
 
   final List<String> _countries = [
-    '🇯🇴',
-    '🇸🇦',
-    '🇦🇪',
-    '🇰🇼',
-    '🇧🇭',
-    '🇪🇬',
-    '🇲🇦',
-    '🇮🇶',
-    '🇱🇧',
-    '🇴🇲',
+    '🇯🇴', '🇸🇦', '🇦🇪', '🇰🇼', '🇧🇭', '🇪🇬', '🇲🇦', '🇮🇶', '🇱🇧', '🇴🇲',
   ];
 
   @override
@@ -108,7 +99,7 @@ class _TestimonialCardState extends State<TestimonialCard> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('testimonial_success'.tr(), style: const TextStyle()),
-            backgroundColor: AppColors.success,
+            backgroundColor: AppColors.income,
           ),
         );
       }
@@ -117,56 +108,48 @@ class _TestimonialCardState extends State<TestimonialCard> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('testimonial_error'.tr(), style: const TextStyle()),
-            backgroundColor: AppColors.error,
+            backgroundColor: AppColors.expense,
           ),
         );
       }
     } finally {
-      if (mounted) {
-        setState(() => _saving = false);
-      }
+      if (mounted) setState(() => _saving = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
     final isEn = context.locale.languageCode == 'en';
     final canSubmit = _nameCtrl.text.isNotEmpty && _textCtrl.text.length >= 20;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: border.withValues(alpha: 0.5)),
       ),
       clipBehavior: Clip.antiAlias,
       child: Theme(
-        data: theme.copyWith(dividerColor: Colors.transparent),
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          iconColor: colorScheme.onSurfaceVariant,
-          collapsedIconColor: colorScheme.onSurfaceVariant,
+          iconColor: textSecondary,
+          collapsedIconColor: textSecondary,
           title: Row(
             children: [
-              Icon(Icons.star, size: 18, color: Colors.amber),
+              const Icon(Icons.star, size: 18, color: Colors.amber),
               const SizedBox(width: 14),
               Expanded(
                 child: Text(
                   'testimonial_share_title'.tr(),
                   style: TextStyle(
-                    color: colorScheme.onSurface,
+                    color: textPrimary,
                     fontWeight: FontWeight.w900,
                     fontSize: 13,
                   ),
@@ -175,13 +158,13 @@ class _TestimonialCardState extends State<TestimonialCard> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: colorScheme.primary.withValues(alpha: 0.15),
+                  color: AppColors.primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   'testimonial_new'.tr(),
-                  style: TextStyle(
-                    color: colorScheme.primary,
+                  style: const TextStyle(
+                    color: AppColors.primary,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
@@ -194,8 +177,10 @@ class _TestimonialCardState extends State<TestimonialCard> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               child: _submitted && !_existing
-                  ? _buildSuccess(isEn, colorScheme)
-                  : _buildForm(isEn, canSubmit, colorScheme),
+                  ? _buildSuccess()
+                  : _buildForm(isEn, canSubmit,
+                      isDark: isDark, surface: surface, border: border,
+                      textPrimary: textPrimary, textSecondary: textSecondary),
             ),
           ],
         ),
@@ -203,22 +188,22 @@ class _TestimonialCardState extends State<TestimonialCard> {
     );
   }
 
-  Widget _buildSuccess(bool isEn, ColorScheme colorScheme) {
+  Widget _buildSuccess() {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.success.withValues(alpha: 0.1),
-        border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
+        color: AppColors.income.withValues(alpha: 0.1),
+        border: Border.all(color: AppColors.income.withValues(alpha: 0.3)),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
         children: [
-          const Icon(Icons.celebration, size: 32, color: AppColors.success),
+          const Icon(Icons.celebration, size: 32, color: AppColors.income),
           const SizedBox(height: 8),
           Text(
             'testimonial_thankyou'.tr(),
             style: const TextStyle(
-              color: AppColors.success,
+              color: AppColors.income,
               fontWeight: FontWeight.w800,
               fontSize: 14,
             ),
@@ -228,28 +213,24 @@ class _TestimonialCardState extends State<TestimonialCard> {
     );
   }
 
-  Widget _buildForm(bool isEn, bool canSubmit, ColorScheme colorScheme) {
+  Widget _buildForm(bool isEn, bool canSubmit, {
+    required bool isDark,
+    required Color surface,
+    required Color border,
+    required Color textPrimary,
+    required Color textSecondary,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'testimonial_approval_notice'.tr(),
-          style: TextStyle(
-            color: colorScheme.onSurfaceVariant,
-            fontSize: 12,
-            height: 1.7,
-          ),
+          style: TextStyle(color: textSecondary, fontSize: 12, height: 1.7),
         ),
         const SizedBox(height: 16),
-
-        // Stars
         Text(
           'testimonial_rating'.tr(),
-          style: TextStyle(
-            color: colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
-          ),
+          style: TextStyle(color: textSecondary, fontWeight: FontWeight.bold, fontSize: 12),
         ),
         const SizedBox(height: 8),
         Row(
@@ -264,7 +245,7 @@ class _TestimonialCardState extends State<TestimonialCard> {
                   starNum <= _stars ? Icons.star : Icons.star_border,
                   color: starNum <= _stars
                       ? AppColors.warning
-                      : colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                      : textSecondary.withValues(alpha: 0.3),
                   size: 32,
                 ),
               ),
@@ -272,8 +253,6 @@ class _TestimonialCardState extends State<TestimonialCard> {
           }),
         ),
         const SizedBox(height: 16),
-
-        // Name & Country
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -284,18 +263,11 @@ class _TestimonialCardState extends State<TestimonialCard> {
                 children: [
                   Text(
                     'testimonial_name'.tr(),
-                    style: TextStyle(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: textSecondary, fontWeight: FontWeight.bold, fontSize: 12),
                   ),
                   const SizedBox(height: 6),
-                  _inputField(
-                    _nameCtrl,
-                    'testimonial_name_hint'.tr(),
-                    colorScheme,
-                  ),
+                  _inputField(_nameCtrl, 'testimonial_name_hint'.tr(),
+                      surface: surface, border: border, textPrimary: textPrimary, textSecondary: textSecondary),
                 ],
               ),
             ),
@@ -307,39 +279,27 @@ class _TestimonialCardState extends State<TestimonialCard> {
                 children: [
                   Text(
                     'testimonial_country'.tr(),
-                    style: TextStyle(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: textSecondary, fontWeight: FontWeight.bold, fontSize: 12),
                   ),
                   const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
-                      color: colorScheme.outlineVariant,
+                      color: border,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: colorScheme.outlineVariant),
+                      border: Border.all(color: border),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
                         value: _country,
                         isExpanded: true,
-                        dropdownColor: colorScheme.surface,
-                        icon: Icon(
-                          Icons.arrow_drop_down,
-                          color: colorScheme.onSurface,
-                        ),
+                        dropdownColor: surface,
+                        icon: Icon(Icons.arrow_drop_down, color: textPrimary),
                         items: _countries
-                            .map(
-                              (c) => DropdownMenuItem(
-                                value: c,
-                                child: Text(
-                                  c,
-                                  style: const TextStyle(fontSize: 20),
-                                ),
-                              ),
-                            )
+                            .map((c) => DropdownMenuItem(
+                                  value: c,
+                                  child: Text(c, style: const TextStyle(fontSize: 20)),
+                                ))
                             .toList(),
                         onChanged: (val) {
                           if (val != null) setState(() => _country = val);
@@ -353,38 +313,25 @@ class _TestimonialCardState extends State<TestimonialCard> {
           ],
         ),
         const SizedBox(height: 16),
-
-        // Role
         Text(
           'testimonial_job_title'.tr(),
-          style: TextStyle(
-            color: colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
-          ),
+          style: TextStyle(color: textSecondary, fontWeight: FontWeight.bold, fontSize: 12),
         ),
         const SizedBox(height: 6),
-        _inputField(_roleCtrl, 'testimonial_job_hint'.tr(), colorScheme),
+        _inputField(_roleCtrl, 'testimonial_job_hint'.tr(),
+            surface: surface, border: border, textPrimary: textPrimary, textSecondary: textSecondary),
         const SizedBox(height: 16),
-
-        // Text
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               'testimonial_your_review'.tr(),
-              style: TextStyle(
-                color: colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-              ),
+              style: TextStyle(color: textSecondary, fontWeight: FontWeight.bold, fontSize: 12),
             ),
             Text(
               '${_textCtrl.text.length}/20+',
               style: TextStyle(
-                color: _textCtrl.text.length < 20
-                    ? colorScheme.error
-                    : AppColors.success,
+                color: _textCtrl.text.length < 20 ? AppColors.expense : AppColors.income,
                 fontSize: 12,
               ),
             ),
@@ -395,67 +342,54 @@ class _TestimonialCardState extends State<TestimonialCard> {
           controller: _textCtrl,
           onChanged: (v) => setState(() {}),
           maxLines: 4,
-          style: TextStyle(color: colorScheme.onSurface, fontSize: 13),
+          style: TextStyle(color: textPrimary, fontSize: 13),
           decoration: InputDecoration(
             hintText: 'testimonial_review_hint'.tr(),
-            hintStyle: TextStyle(
-              color: colorScheme.onSurfaceVariant,
-              fontSize: 13,
-            ),
+            hintStyle: TextStyle(color: textSecondary, fontSize: 13),
             filled: true,
-            fillColor: colorScheme.outlineVariant,
+            fillColor: border,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: colorScheme.outlineVariant),
+              borderSide: BorderSide(color: border),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: colorScheme.outlineVariant),
+              borderSide: BorderSide(color: border),
             ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 12,
-            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           ),
         ),
         const SizedBox(height: 16),
-
-        // Submit Button
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
             onPressed: (!canSubmit || _saving) ? null : _submit,
             style: ElevatedButton.styleFrom(
-              backgroundColor: canSubmit
-                  ? AppColors.warning
-                  : colorScheme.outlineVariant,
-              foregroundColor: Colors.white,
+              backgroundColor: canSubmit ? AppColors.warning : border,
+              foregroundColor: AppColors.textInverse,
+              elevation: 0,
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
             child: _saving
-                ? SizedBox(
+                ? const SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: colorScheme.onPrimary,
+                      color: AppColors.textInverse,
                     ),
                   )
                 : Text(
                     _existing
                         ? 'testimonial_update_btn'.tr()
                         : 'testimonial_submit_btn'.tr(),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14,
-                    ),
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
                   ),
           ),
         ),
-
         if (_existing) ...[
           const SizedBox(height: 12),
           Center(
@@ -475,25 +409,28 @@ class _TestimonialCardState extends State<TestimonialCard> {
 
   Widget _inputField(
     TextEditingController ctrl,
-    String hint,
-    ColorScheme colorScheme,
-  ) {
+    String hint, {
+    required Color surface,
+    required Color border,
+    required Color textPrimary,
+    required Color textSecondary,
+  }) {
     return TextField(
       controller: ctrl,
       onChanged: (v) => setState(() {}),
-      style: TextStyle(color: colorScheme.onSurface, fontSize: 13),
+      style: TextStyle(color: textPrimary, fontSize: 13),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
+        hintStyle: TextStyle(color: textSecondary, fontSize: 13),
         filled: true,
-        fillColor: colorScheme.outlineVariant,
+        fillColor: border,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: colorScheme.outlineVariant),
+          borderSide: BorderSide(color: border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: colorScheme.outlineVariant),
+          borderSide: BorderSide(color: border),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
       ),

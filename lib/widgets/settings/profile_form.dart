@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../utils/app_colors.dart';
+import '../../core/theme/app_colors.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'settings_accordion.dart';
@@ -127,7 +127,7 @@ class _ProfileFormState extends State<ProfileForm> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('toast_saved'.tr(), style: const TextStyle()),
-            backgroundColor: AppColors.success,
+            backgroundColor: AppColors.income,
           ),
         );
       }
@@ -138,7 +138,11 @@ class _ProfileFormState extends State<ProfileForm> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
 
     return SettingsAccordion(
       icon: Icons.person_outline,
@@ -147,13 +151,12 @@ class _ProfileFormState extends State<ProfileForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Profile header card
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: colorScheme.surface,
+              color: surface,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: colorScheme.outlineVariant),
+              border: Border.all(color: border),
             ),
             child: Row(
               children: [
@@ -161,10 +164,8 @@ class _ProfileFormState extends State<ProfileForm> {
                   width: 50,
                   height: 50,
                   decoration: BoxDecoration(
+                    color: AppColors.primary,
                     borderRadius: BorderRadius.circular(14),
-                    gradient: const LinearGradient(
-                      colors: [AppColors.primary, AppColors.purple],
-                    ),
                   ),
                   child: Center(
                     child: Text(
@@ -176,7 +177,7 @@ class _ProfileFormState extends State<ProfileForm> {
                           ? widget.userEmail.substring(0, 2).toUpperCase()
                           : 'U',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppColors.textInverse,
                         fontWeight: FontWeight.w900,
                         fontSize: 16,
                       ),
@@ -193,17 +194,14 @@ class _ProfileFormState extends State<ProfileForm> {
                             ? _nameCtrl.text
                             : 'settings_your_name'.tr(),
                         style: TextStyle(
-                          color: colorScheme.onSurface,
+                          color: textPrimary,
                           fontWeight: FontWeight.w900,
                           fontSize: 14,
                         ),
                       ),
                       Text(
                         widget.userEmail,
-                        style: TextStyle(
-                          color: colorScheme.onSurfaceVariant,
-                          fontSize: 11,
-                        ),
+                        style: TextStyle(color: textSecondary, fontSize: 11),
                       ),
                     ],
                   ),
@@ -213,15 +211,12 @@ class _ProfileFormState extends State<ProfileForm> {
                   children: [
                     Text(
                       'settings_member'.tr(),
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 11,
-                      ),
+                      style: TextStyle(color: textSecondary, fontSize: 11),
                     ),
                     Text(
                       widget.memberSince,
                       style: TextStyle(
-                        color: colorScheme.onSurfaceVariant,
+                        color: textSecondary,
                         fontWeight: FontWeight.w800,
                         fontSize: 11,
                       ),
@@ -232,27 +227,15 @@ class _ProfileFormState extends State<ProfileForm> {
             ),
           ),
           const SizedBox(height: 20),
-          _inputField(
-            _nameCtrl,
-            'settings_name'.tr(),
-            Icons.person_outline,
-            colorScheme,
-          ),
+          _inputField(_nameCtrl, 'settings_name'.tr(), Icons.person_outline,
+              isDark: isDark, surface: surface, border: border, textPrimary: textPrimary, textSecondary: textSecondary),
           const SizedBox(height: 10),
-          _inputField(
-            _jobTitleCtrl,
-            'settings_job_title'.tr(),
-            Icons.work_outline,
-            colorScheme,
-          ),
+          _inputField(_jobTitleCtrl, 'settings_job_title'.tr(), Icons.work_outline,
+              isDark: isDark, surface: surface, border: border, textPrimary: textPrimary, textSecondary: textSecondary),
           const SizedBox(height: 10),
-          _inputField(
-            _phoneCtrl,
-            'settings_phone'.tr(),
-            Icons.phone_outlined,
-            colorScheme,
-            type: TextInputType.phone,
-          ),
+          _inputField(_phoneCtrl, 'settings_phone'.tr(), Icons.phone_outlined,
+              type: TextInputType.phone,
+              isDark: isDark, surface: surface, border: border, textPrimary: textPrimary, textSecondary: textSecondary),
           const SizedBox(height: 10),
           GestureDetector(
             onTap: () async {
@@ -275,59 +258,42 @@ class _ProfileFormState extends State<ProfileForm> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: colorScheme.surface,
+                color: surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: colorScheme.outlineVariant),
+                border: Border.all(color: border),
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.cake_outlined,
-                    color: colorScheme.onSurfaceVariant,
-                    size: 20,
-                  ),
+                  Icon(Icons.cake_outlined, color: textSecondary, size: 20),
                   const SizedBox(width: 12),
                   Text(
                     _birthDate.isNotEmpty
                         ? _birthDate
                         : 'settings_birth_date'.tr(),
                     style: TextStyle(
-                      color: _birthDate.isNotEmpty
-                          ? colorScheme.onSurface
-                          : colorScheme.onSurfaceVariant,
+                      color: _birthDate.isNotEmpty ? textPrimary : textSecondary,
                     ),
                   ),
                   const Spacer(),
-                  Icon(
-                    Icons.calendar_today_outlined,
-                    color: colorScheme.onSurfaceVariant,
-                    size: 16,
-                  ),
+                  Icon(Icons.calendar_today_outlined, color: textSecondary, size: 16),
                 ],
               ),
             ),
           ),
           const SizedBox(height: 20),
-          _sectionTitle('settings_financial'.tr(), colorScheme),
-          _inputField(
-            _incomeCtrl,
-            'settings_income'.tr(),
-            Icons.account_balance_wallet_outlined,
-            colorScheme,
-            type: const TextInputType.numberWithOptions(decimal: true),
-          ),
+          _sectionTitle('settings_financial'.tr(), textSecondary),
+          _inputField(_incomeCtrl, 'settings_income'.tr(), Icons.account_balance_wallet_outlined,
+              type: const TextInputType.numberWithOptions(decimal: true),
+              isDark: isDark, surface: surface, border: border, textPrimary: textPrimary, textSecondary: textSecondary),
           const SizedBox(height: 10),
-          _inputField(
-            _openingBalanceCtrl,
-            'الرصيد الابتدائي (النقد قبل التطبيق)',
-            Icons.account_balance_wallet_outlined,
-            colorScheme,
-            type: const TextInputType.numberWithOptions(decimal: true),
-          ),
+          _inputField(_openingBalanceCtrl, 'الرصيد الابتدائي (النقد قبل التطبيق)',
+              Icons.account_balance_wallet_outlined,
+              type: const TextInputType.numberWithOptions(decimal: true),
+              isDark: isDark, surface: surface, border: border, textPrimary: textPrimary, textSecondary: textSecondary),
           const SizedBox(height: 12),
           Text(
             'settings_currency'.tr(),
-            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
+            style: TextStyle(color: textSecondary, fontSize: 13),
           ),
           const SizedBox(height: 8),
           GestureDetector(
@@ -341,15 +307,14 @@ class _ProfileFormState extends State<ProfileForm> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: colorScheme.surface,
+                color: surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: colorScheme.outlineVariant),
+                border: Border.all(color: border),
               ),
               child: Row(
                 children: [
                   Text(
-                    CurrencyService.findByCode(_currency)?['flag'] as String? ??
-                        '🌐',
+                    CurrencyService.findByCode(_currency)?['flag'] as String? ?? '🌐',
                     style: const TextStyle(fontSize: 22),
                   ),
                   const SizedBox(width: 10),
@@ -358,29 +323,21 @@ class _ProfileFormState extends State<ProfileForm> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          CurrencyService.findByCode(_currency)?['labelAr']
-                                  as String? ??
-                              _currency,
+                          CurrencyService.findByCode(_currency)?['labelAr'] as String? ?? _currency,
                           style: TextStyle(
-                            color: colorScheme.onSurface,
+                            color: textPrimary,
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                         Text(
                           _currency,
-                          style: TextStyle(
-                            color: colorScheme.onSurfaceVariant,
-                            fontSize: 11,
-                          ),
+                          style: TextStyle(color: textSecondary, fontSize: 11),
                         ),
                       ],
                     ),
                   ),
-                  Icon(
-                    Icons.arrow_drop_down,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                  Icon(Icons.arrow_drop_down, color: textSecondary),
                 ],
               ),
             ),
@@ -392,7 +349,8 @@ class _ProfileFormState extends State<ProfileForm> {
               onPressed: _savingProfile ? null : _saveProfile,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.textInverse,
+                elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -404,15 +362,12 @@ class _ProfileFormState extends State<ProfileForm> {
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.white,
+                        color: AppColors.textInverse,
                       ),
                     )
                   : Text(
                       'save'.tr(),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 15,
-                      ),
+                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15),
                     ),
             ),
           ),
@@ -421,16 +376,12 @@ class _ProfileFormState extends State<ProfileForm> {
     );
   }
 
-  Widget _sectionTitle(String title, ColorScheme colorScheme) {
+  Widget _sectionTitle(String title, Color textSecondary) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Text(
         title,
-        style: TextStyle(
-          color: colorScheme.onSurfaceVariant,
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-        ),
+        style: TextStyle(color: textSecondary, fontSize: 13, fontWeight: FontWeight.w700),
       ),
     );
   }
@@ -438,33 +389,38 @@ class _ProfileFormState extends State<ProfileForm> {
   Widget _inputField(
     TextEditingController ctrl,
     String label,
-    IconData icon,
-    ColorScheme colorScheme, {
+    IconData icon, {
     TextInputType type = TextInputType.text,
+    required bool isDark,
+    required Color surface,
+    required Color border,
+    required Color textPrimary,
+    required Color textSecondary,
   }) {
     return TextField(
       controller: ctrl,
       keyboardType: type,
       textAlign: TextAlign.right,
-      style: TextStyle(color: colorScheme.onSurface),
+      style: TextStyle(color: textPrimary),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
-        prefixIcon: Icon(icon, color: colorScheme.onSurfaceVariant, size: 20),
+        labelStyle: TextStyle(color: textSecondary),
+        prefixIcon: Icon(icon, color: textSecondary, size: 20),
         filled: true,
-        fillColor: colorScheme.surface,
+        fillColor: surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colorScheme.outlineVariant),
+          borderSide: BorderSide(color: border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colorScheme.primary),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );
   }

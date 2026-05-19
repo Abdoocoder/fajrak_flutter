@@ -37,7 +37,8 @@ class _CalculatorDisclaimerState extends State<CalculatorDisclaimer> {
   @override
   Widget build(BuildContext context) {
     if (_dismissed) return const SizedBox.shrink();
-    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
     final isAr = context.locale.languageCode == 'ar';
 
     return Container(
@@ -88,7 +89,7 @@ class _CalculatorDisclaimerState extends State<CalculatorDisclaimer> {
                         isAr ? '✕ إخفاء' : '✕ Dismiss',
                         style: TextStyle(
                           fontSize: 11,
-                          color: colorScheme.onSurfaceVariant,
+                          color: textSecondary,
                         ),
                       ),
                     ),

@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import '../../core/theme/app_colors.dart';
 import '../../utils/error_handler.dart';
 import '../../services/analytics_service.dart';
 import '../../widgets/common/auth_error_banner.dart';
@@ -103,12 +104,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final background = isDark ? AppColors.backgroundDark : AppColors.background;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
     final showChecklist = _passwordController.text.isNotEmpty;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: background,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -119,9 +122,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 width: 72,
                 height: 72,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [colorScheme.primary, colorScheme.secondary],
-                  ),
+                  color: AppColors.primary,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Center(
@@ -130,7 +131,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     style: TextStyle(
                       fontSize: 36,
                       fontWeight: FontWeight.w900,
-                      color: Colors.white,
+                      color: AppColors.textInverse,
                     ),
                   ),
                 ),
@@ -141,16 +142,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.w900,
-                  color: colorScheme.onSurface,
+                  color: textPrimary,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 'auth_register_subtitle'.tr(),
-                style: TextStyle(
-                  fontSize: 14,
-                  color: colorScheme.onSurfaceVariant,
-                ),
+                style: TextStyle(fontSize: 14, color: textSecondary),
               ),
               const SizedBox(height: 32),
               if (_error != null) ...[
@@ -160,45 +158,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
               TextFormField(
                 controller: _nameController,
                 autofocus: true,
-                style: TextStyle(color: colorScheme.onSurface),
+                style: TextStyle(color: textPrimary),
                 decoration: InputDecoration(
                   labelText: 'auth_full_name'.tr(),
-                  prefixIcon: Icon(
-                    Icons.person_outlined,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                  prefixIcon: Icon(Icons.person_outlined, color: textSecondary),
                 ),
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                style: TextStyle(color: colorScheme.onSurface),
+                style: TextStyle(color: textPrimary),
                 decoration: InputDecoration(
                   labelText: 'auth_email'.tr(),
-                  prefixIcon: Icon(
-                    Icons.email_outlined,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                  prefixIcon: Icon(Icons.email_outlined, color: textSecondary),
                 ),
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _passwordController,
                 obscureText: _obscure,
-                style: TextStyle(color: colorScheme.onSurface),
+                style: TextStyle(color: textPrimary),
                 decoration: InputDecoration(
                   labelText: 'auth_password'.tr(),
-                  prefixIcon: Icon(
-                    Icons.lock_outlined,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                  prefixIcon: Icon(Icons.lock_outlined, color: textSecondary),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscure
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
-                      color: colorScheme.onSurfaceVariant,
+                      color: textSecondary,
                     ),
                     tooltip: _obscure
                         ? 'tooltip_show_password'.tr()
@@ -209,18 +198,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               if (showChecklist) ...[
                 const SizedBox(height: 12),
-                _PasswordChecklist(checks: _checks, colorScheme: colorScheme),
+                _PasswordChecklist(checks: _checks, isDark: isDark),
               ],
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: (_loading || !_checks.allMet) ? null : _register,
                 child: _loading
-                    ? SizedBox(
+                    ? const SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: colorScheme.onPrimary,
+                          color: AppColors.textInverse,
                         ),
                       )
                     : Text('auth_register_button'.tr()),
@@ -231,15 +220,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 children: [
                   Text(
                     'auth_have_account'.tr(),
-                    style: TextStyle(color: colorScheme.onSurfaceVariant),
+                    style: TextStyle(color: textSecondary),
                   ),
                   TextButton(
                     onPressed: () =>
                         Navigator.pushReplacementNamed(context, '/login'),
                     child: Text(
                       'auth_login_now'.tr(),
-                      style: TextStyle(
-                        color: colorScheme.primary,
+                      style: const TextStyle(
+                        color: AppColors.primary,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -256,23 +245,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
 class _PasswordChecklist extends StatelessWidget {
   final _PasswordChecks checks;
-  final ColorScheme colorScheme;
+  final bool isDark;
 
-  const _PasswordChecklist({required this.checks, required this.colorScheme});
+  const _PasswordChecklist({required this.checks, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
-    final metColor = Colors.green.shade400;
-    final unmetColor = colorScheme.onSurfaceVariant.withValues(alpha: 0.5);
+    final surfaceVariant = isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+
+    const metColor = AppColors.income;
+    final unmetColor = textSecondary.withValues(alpha: 0.5);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+        color: surfaceVariant.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-        ),
+        border: Border.all(color: border.withValues(alpha: 0.5)),
       ),
       child: Column(
         children: [
@@ -320,8 +311,7 @@ class _PasswordChecklist extends StatelessWidget {
           const SizedBox(height: 6),
           _Req(
             met: checks.length >= _kMinLength,
-            label:
-                '${'auth_pass_req_length'.tr()}: ${checks.length}/$_kMinLength',
+            label: '${'auth_pass_req_length'.tr()}: ${checks.length}/$_kMinLength',
             metColor: metColor,
             unmetColor: unmetColor,
           ),

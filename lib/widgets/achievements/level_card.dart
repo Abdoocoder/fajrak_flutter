@@ -1,12 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import '../../core/theme/app_colors.dart';
 
 class LevelCard extends StatelessWidget {
   final int level;
   final String levelTitle;
   final int points;
   final int nextLevel;
-  final ColorScheme colorScheme;
 
   const LevelCard({
     super.key,
@@ -14,23 +14,24 @@ class LevelCard extends StatelessWidget {
     required this.levelTitle,
     required this.points,
     required this.nextLevel,
-    required this.colorScheme,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+
     final progress = nextLevel < 9999 ? points / nextLevel : 1.0;
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [colorScheme.surfaceContainerHighest, colorScheme.surface],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3)),
+        color: surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: border),
       ),
       child: Column(
         children: [
@@ -43,34 +44,28 @@ class LevelCard extends StatelessWidget {
                   Text(
                     levelTitle,
                     style: TextStyle(
-                      color: colorScheme.onSurface,
+                      color: textPrimary,
                       fontWeight: FontWeight.w900,
                       fontSize: 22,
                     ),
                   ),
                   Text(
                     'المستوى $level',
-                    style: TextStyle(
-                      color: colorScheme.onSurfaceVariant,
-                      fontSize: 13,
-                    ),
+                    style: TextStyle(color: textSecondary, fontSize: 13),
                   ),
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: colorScheme.primary.withValues(alpha: 0.2),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: colorScheme.primary),
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
                 ),
                 child: Text(
                   '$points نقطة',
-                  style: TextStyle(
-                    color: colorScheme.primary,
+                  style: const TextStyle(
+                    color: AppColors.primary,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -84,8 +79,8 @@ class LevelCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
                 value: progress.clamp(0.0, 1.0),
-                backgroundColor: colorScheme.outlineVariant,
-                valueColor: AlwaysStoppedAnimation(colorScheme.primary),
+                backgroundColor: border,
+                valueColor: const AlwaysStoppedAnimation(AppColors.primary),
                 minHeight: 8,
               ),
             ),
@@ -96,20 +91,14 @@ class LevelCard extends StatelessWidget {
             children: [
               Text(
                 '$points نقطة',
-                style: TextStyle(
-                  color: colorScheme.onSurfaceVariant,
-                  fontSize: 11,
-                ),
+                style: TextStyle(color: textSecondary, fontSize: 11),
               ),
               if (nextLevel < 9999)
                 Text(
                   'gamif_points_to_next'.tr(
                     namedArgs: {'points': nextLevel.toString()},
                   ),
-                  style: TextStyle(
-                    color: colorScheme.onSurfaceVariant,
-                    fontSize: 11,
-                  ),
+                  style: TextStyle(color: textSecondary, fontSize: 11),
                 ),
             ],
           ),

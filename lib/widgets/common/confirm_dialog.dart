@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../core/theme/app_colors.dart';
 
 class ConfirmDialog extends StatelessWidget {
   final String title;
@@ -52,53 +53,47 @@ class ConfirmDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+
+    final actionColor = danger ? AppColors.expense : AppColors.primary;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        border: Border.all(color: colorScheme.outlineVariant),
+        border: Border.all(color: border),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Handle
           Container(
             width: 40,
             height: 4,
             margin: const EdgeInsets.only(bottom: 24),
             decoration: BoxDecoration(
-              color: colorScheme.outlineVariant,
+              color: border,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-
-          // Icon
           Container(
             width: 64,
             height: 64,
             margin: const EdgeInsets.only(bottom: 20),
             decoration: BoxDecoration(
-              color: danger
-                  ? colorScheme.error.withValues(alpha: 0.1)
-                  : colorScheme.primary.withValues(alpha: 0.1),
+              color: actionColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: (danger ? colorScheme.error : colorScheme.primary)
-                    .withValues(alpha: 0.2),
-              ),
+              border: Border.all(color: actionColor.withValues(alpha: 0.2)),
             ),
             child: Icon(
               danger ? Icons.warning_amber_rounded : Icons.info_outline_rounded,
               size: 32,
-              color: danger ? colorScheme.error : colorScheme.primary,
+              color: actionColor,
             ),
           ),
-
-          // Content
           Text(
             title,
             textAlign: TextAlign.center,
@@ -108,15 +103,9 @@ class ConfirmDialog extends StatelessWidget {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 15,
-              color: colorScheme.onSurfaceVariant,
-              height: 1.6,
-            ),
+            style: TextStyle(fontSize: 15, color: textSecondary, height: 1.6),
           ),
           const SizedBox(height: 32),
-
-          // Buttons
           Column(
             children: [
               SizedBox(
@@ -124,10 +113,8 @@ class ConfirmDialog extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: onConfirm,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: danger
-                        ? colorScheme.error
-                        : colorScheme.primary,
-                    foregroundColor: Colors.white,
+                    backgroundColor: actionColor,
+                    foregroundColor: AppColors.textInverse,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -157,7 +144,7 @@ class ConfirmDialog extends StatelessWidget {
                   child: Text(
                     cancelLabel ?? 'cancel'.tr(),
                     style: TextStyle(
-                      color: colorScheme.onSurfaceVariant,
+                      color: textSecondary,
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                     ),

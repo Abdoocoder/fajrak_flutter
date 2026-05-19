@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import '../../utils/app_colors.dart';
+import '../../core/theme/app_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../utils/error_handler.dart';
 import '../../services/analytics_service.dart';
@@ -62,19 +62,21 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final background = isDark ? AppColors.backgroundDark : AppColors.background;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: background,
       appBar: AppBar(
         title: Text(
           'auth_reset_password_title'.tr(),
-          style: TextStyle(color: colorScheme.onSurface),
+          style: TextStyle(color: textPrimary),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: IconThemeData(color: colorScheme.onSurface),
+        iconTheme: IconThemeData(color: textPrimary),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -86,13 +88,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 width: 72,
                 height: 72,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [colorScheme.primary, colorScheme.secondary],
-                  ),
+                  color: AppColors.primary,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Center(
-                  child: Icon(Icons.lock_reset, size: 40, color: Colors.white),
+                  child: Icon(Icons.lock_reset, size: 40, color: AppColors.textInverse),
                 ),
               ),
               const SizedBox(height: 24),
@@ -101,16 +101,13 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w900,
-                  color: colorScheme.onSurface,
+                  color: textPrimary,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 'auth_reset_password_desc'.tr(),
-                style: TextStyle(
-                  fontSize: 14,
-                  color: colorScheme.onSurfaceVariant,
-                ),
+                style: TextStyle(fontSize: 14, color: textSecondary),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -119,28 +116,13 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   padding: const EdgeInsets.all(12),
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color:
-                        (theme.brightness == Brightness.dark
-                                ? AppColors.success
-                                : AppColors.successDark)
-                            .withValues(alpha: 0.1),
+                    color: AppColors.income.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color:
-                          (theme.brightness == Brightness.dark
-                                  ? AppColors.success
-                                  : AppColors.successDark)
-                              .withValues(alpha: 0.3),
-                    ),
+                    border: Border.all(color: AppColors.income.withValues(alpha: 0.3)),
                   ),
                   child: Text(
                     'auth_reset_password_success'.tr(),
-                    style: TextStyle(
-                      color: theme.brightness == Brightness.dark
-                          ? AppColors.success
-                          : AppColors.successDark,
-                      fontSize: 13,
-                    ),
+                    style: const TextStyle(color: AppColors.income, fontSize: 13),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -151,15 +133,13 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   padding: const EdgeInsets.all(12),
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: colorScheme.error.withValues(alpha: 0.1),
+                    color: AppColors.expense.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: colorScheme.error.withValues(alpha: 0.3),
-                    ),
+                    border: Border.all(color: AppColors.expense.withValues(alpha: 0.3)),
                   ),
                   child: Text(
                     _error!,
-                    style: TextStyle(color: colorScheme.error, fontSize: 13),
+                    style: const TextStyle(color: AppColors.expense, fontSize: 13),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -168,19 +148,16 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               TextFormField(
                 controller: _passwordController,
                 obscureText: _obscure,
-                style: TextStyle(color: colorScheme.onSurface),
+                style: TextStyle(color: textPrimary),
                 decoration: InputDecoration(
                   labelText: 'auth_new_password'.tr(),
-                  prefixIcon: Icon(
-                    Icons.lock_outline,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                  prefixIcon: Icon(Icons.lock_outline, color: textSecondary),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscure
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
-                      color: colorScheme.onSurfaceVariant,
+                      color: textSecondary,
                     ),
                     tooltip: _obscure
                         ? 'tooltip_show_password'.tr()
@@ -193,25 +170,22 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               TextFormField(
                 controller: _confirmController,
                 obscureText: _obscure,
-                style: TextStyle(color: colorScheme.onSurface),
+                style: TextStyle(color: textPrimary),
                 decoration: InputDecoration(
                   labelText: 'auth_confirm_password'.tr(),
-                  prefixIcon: Icon(
-                    Icons.lock_outline,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                  prefixIcon: Icon(Icons.lock_outline, color: textSecondary),
                 ),
               ),
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: _loading || _success ? null : _reset,
                 child: _loading
-                    ? SizedBox(
+                    ? const SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: colorScheme.onPrimary,
+                          color: AppColors.textInverse,
                         ),
                       )
                     : Text('auth_reset_password_button'.tr()),

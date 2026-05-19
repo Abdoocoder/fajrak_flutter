@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../utils/app_colors.dart';
+import '../../core/theme/app_colors.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:share_plus/share_plus.dart';
@@ -131,7 +131,11 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
 
     return Column(
       children: [
@@ -161,9 +165,9 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
                     style: const TextStyle(fontWeight: FontWeight.w900),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.surface,
-                    foregroundColor: colorScheme.onSurface,
-                    side: BorderSide(color: colorScheme.outlineVariant),
+                    backgroundColor: surface,
+                    foregroundColor: textPrimary,
+                    side: BorderSide(color: border),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -199,7 +203,7 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
               Text(
                 'share_subtitle'.tr(),
                 style: TextStyle(
-                  color: colorScheme.onSurface,
+                  color: textPrimary,
                   fontWeight: FontWeight.w900,
                   fontSize: 14,
                 ),
@@ -208,10 +212,7 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
               Text(
                 'share_body'.tr(),
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: colorScheme.onSurfaceVariant,
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: textSecondary, fontSize: 12),
               ),
               const SizedBox(height: 20),
               SizedBox(
@@ -220,7 +221,8 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
                   onPressed: _shareApp,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppColors.textInverse,
+                    elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -263,7 +265,7 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: AppColors.error,
+                            color: AppColors.expense,
                           ),
                         )
                       : Text(
@@ -273,7 +275,7 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
                 ),
               ),
               const SizedBox(height: 20),
-              Divider(color: colorScheme.outlineVariant),
+              Divider(color: border),
               const SizedBox(height: 10),
               if (!_showDeleteConfirm)
                 SizedBox(
@@ -281,7 +283,7 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
                   child: TextButton(
                     onPressed: () => setState(() => _showDeleteConfirm = true),
                     style: TextButton.styleFrom(
-                      foregroundColor: AppColors.error.withValues(alpha: 0.7),
+                      foregroundColor: AppColors.expense.withValues(alpha: 0.7),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                     child: Text(
@@ -297,28 +299,21 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
                 Text(
                   'settings_delete_account_warning'.tr(),
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: colorScheme.onSurfaceVariant,
-                    fontSize: 12,
-                    height: 1.6,
-                  ),
+                  style: TextStyle(color: textSecondary, fontSize: 12, height: 1.6),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _deleteInputCtrl,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: colorScheme.onSurface),
+                  style: TextStyle(color: textPrimary),
                   decoration: InputDecoration(
                     hintText: 'delete_account_confirmation_text'.tr(),
-                    hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+                    hintStyle: TextStyle(color: textSecondary),
                     filled: true,
-                    fillColor: colorScheme.surface,
+                    fillColor: surface,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(
-                        color: colorScheme.error,
-                        width: 0.5,
-                      ),
+                      borderSide: const BorderSide(color: AppColors.expense, width: 0.5),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -338,8 +333,9 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
                             ? null
                             : _deleteAccount,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.error,
-                          foregroundColor: Colors.white,
+                          backgroundColor: AppColors.expense,
+                          foregroundColor: AppColors.textInverse,
+                          elevation: 0,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -351,14 +347,12 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
                                 height: 18,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Colors.white,
+                                  color: AppColors.textInverse,
                                 ),
                               )
                             : Text(
                                 'confirm_delete'.tr(),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                ),
+                                style: const TextStyle(fontWeight: FontWeight.w700),
                               ),
                       ),
                     ),
@@ -372,8 +366,8 @@ class _ExportDeleteSectionState extends State<ExportDeleteSection> {
                           });
                         },
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: colorScheme.onSurfaceVariant,
-                          side: BorderSide(color: colorScheme.outlineVariant),
+                          foregroundColor: textSecondary,
+                          side: BorderSide(color: border),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),

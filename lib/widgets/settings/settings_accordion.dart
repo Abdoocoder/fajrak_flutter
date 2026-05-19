@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/theme/app_colors.dart';
 
 class SettingsAccordion extends StatelessWidget {
   final IconData icon;
@@ -18,41 +19,36 @@ class SettingsAccordion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: border.withValues(alpha: 0.5)),
       ),
       clipBehavior: Clip.antiAlias,
       child: Theme(
-        data: theme.copyWith(dividerColor: Colors.transparent),
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           initiallyExpanded: initiallyExpanded,
           backgroundColor: Colors.transparent,
           collapsedBackgroundColor: Colors.transparent,
-          iconColor: colorScheme.onSurfaceVariant,
-          collapsedIconColor: colorScheme.onSurfaceVariant,
+          iconColor: textSecondary,
+          collapsedIconColor: textSecondary,
           title: Row(
             children: [
-              Icon(icon, size: 18, color: colorScheme.primary),
+              Icon(icon, size: 18, color: AppColors.primary),
               const SizedBox(width: 10),
               Text(
                 title,
                 style: TextStyle(
-                  color: colorScheme.onSurface,
+                  color: textPrimary,
                   fontWeight: FontWeight.w800,
                   fontSize: 13,
                 ),
@@ -60,21 +56,16 @@ class SettingsAccordion extends StatelessWidget {
               if (badge != null) ...[
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: colorScheme.primary.withValues(alpha: 0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: colorScheme.primary.withValues(alpha: 0.2),
-                    ),
+                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
                   ),
                   child: Text(
                     badge!,
-                    style: TextStyle(
-                      color: colorScheme.primary,
+                    style: const TextStyle(
+                      color: AppColors.primary,
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
                     ),
