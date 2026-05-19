@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../common/app_card.dart';
@@ -12,12 +13,15 @@ class BudgetProgressCard extends StatelessWidget {
     required this.income,
     required this.expenses,
     required this.currency,
+    this.categoryBreakdown,
     this.onSeeAll,
   });
 
   final double income;
   final double expenses;
   final String currency;
+  /// Top-2 expense categories: [{'category': 'طعام', 'amount': 150.0}, ...]
+  final List<Map<String, dynamic>>? categoryBreakdown;
   final VoidCallback? onSeeAll;
 
   @override
@@ -123,6 +127,93 @@ class BudgetProgressCard extends StatelessWidget {
             amount: expenses,
             currency: currency,
             isDark: isDark,
+          ),
+
+          // Category breakdown — top 2 expense categories
+          if (categoryBreakdown != null && categoryBreakdown!.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Divider(height: 1, thickness: 1, color: dividerColor),
+            const SizedBox(height: AppSpacing.sm),
+            ...categoryBreakdown!.take(2).map(
+              (c) => _CategoryRow(
+                category: c['category'] as String,
+                amount: (c['amount'] as num).toDouble(),
+                totalExpenses: expenses,
+                currency: currency,
+                isDark: isDark,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _CategoryRow extends StatelessWidget {
+  const _CategoryRow({
+    required this.category,
+    required this.amount,
+    required this.totalExpenses,
+    required this.currency,
+    required this.isDark,
+  });
+
+  final String category;
+  final double amount;
+  final double totalExpenses;
+  final String currency;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final labelColor =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final trackColor =
+        isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant;
+    final pct =
+        totalExpenses > 0 ? (amount / totalExpenses).clamp(0.0, 1.0) : 0.0;
+    final n = amount.abs();
+    final formatted =
+        n % 1 == 0 ? n.toStringAsFixed(0) : n.toStringAsFixed(2);
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.xs),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                category,
+                style: AppTypography.labelSm.copyWith(color: labelColor),
+              ),
+              const Spacer(),
+              Text(
+                '$formatted $currency',
+                style: AppTypography.labelSm.copyWith(
+                  color: AppColors.expense,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadius.xs),
+            child: SizedBox(
+              height: 4,
+              child: Stack(
+                children: [
+                  Container(color: trackColor),
+                  FractionallySizedBox(
+                    widthFactor: pct,
+                    child: Container(
+                      color: AppColors.expense.withValues(alpha: 0.7),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

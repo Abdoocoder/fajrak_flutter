@@ -34,6 +34,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String _currency = 'JOD';
   String _name = '';
   List<Map<String, dynamic>> _recentTx = [];
+  List<Map<String, dynamic>> _categoryBreakdown = [];
   int _loadedTransactionVersion = -1;
 
   // Blue header geometry: status-bar + content (greeting line + date line + padding)
@@ -78,12 +79,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
           'get_account_balances',
           params: {'p_user_id': user.id},
         ).catchError((_) => <dynamic>[]),
+        Supabase.instance.client
+            .from('transactions')
+            .select('amount, category')
+            .eq('user_id', user.id)
+            .eq('type', 'expense')
+            .gte(
+              'transaction_date',
+              '${now.year}-${now.month.toString().padLeft(2, '0')}-01',
+            )
+            .lt(
+              'transaction_date',
+              '${DateTime(now.year, now.month + 1, 1).year}-'
+              '${DateTime(now.year, now.month + 1, 1).month.toString().padLeft(2, '0')}-01',
+            )
+            .catchError((_) => <dynamic>[]),
       ]);
 
       final profile = results[0] as Map<String, dynamic>;
       final recent = results[1] as List;
       final monthly = results[2] as Map<String, dynamic>;
       final balancesData = results[3] as List;
+      final expensesData = results[4] as List;
 
       final currency =
           (profile['currency'] as String? ?? 'JOD').toUpperCase();
@@ -94,6 +111,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
         (sum, b) => sum + (b['current_balance'] as num).toDouble(),
       );
 
+      // Aggregate expense transactions by category, take top 2
+      final Map<String, double> catMap = {};
+      for (final tx in expensesData) {
+        final cat = tx['category'] as String? ?? 'أخرى';
+        catMap[cat] = (catMap[cat] ?? 0) + (tx['amount'] as num).toDouble();
+      }
+      final breakdown = catMap.entries
+          .map((e) => {'category': e.key, 'amount': e.value})
+          .toList()
+        ..sort(
+          (a, b) => (b['amount'] as double).compareTo(a['amount'] as double),
+        );
+
       if (mounted) {
         setState(() {
           _name =
@@ -103,6 +133,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _expenses = expenses;
           _totalBalance = totalBalance;
           _recentTx = recent.cast<Map<String, dynamic>>();
+          _categoryBreakdown = breakdown.take(2).toList();
           _loading = false;
         });
       }
@@ -162,6 +193,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           expenses: _expenses,
                           currency: _currency,
                           recentTx: _recentTx,
+                          categoryBreakdown: _categoryBreakdown,
                           onSwitchTab: widget.onSwitchTab,
                         ),
             ),
@@ -247,6 +279,7 @@ class _DashboardContent extends StatelessWidget {
     required this.expenses,
     required this.currency,
     required this.recentTx,
+    required this.categoryBreakdown,
     required this.onSwitchTab,
   });
 
@@ -256,6 +289,7 @@ class _DashboardContent extends StatelessWidget {
   final double expenses;
   final String currency;
   final List<Map<String, dynamic>> recentTx;
+  final List<Map<String, dynamic>> categoryBreakdown;
   final ValueChanged<int> onSwitchTab;
 
   static const _kOverlap = 18.0;
@@ -298,6 +332,8 @@ class _DashboardContent extends StatelessWidget {
             income: income,
             expenses: expenses,
             currency: currency,
+            categoryBreakdown:
+                categoryBreakdown.isEmpty ? null : categoryBreakdown,
             onSeeAll: () => onSwitchTab(2),
           ),
         ),
