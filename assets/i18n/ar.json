@@ -904,5 +904,8 @@
   "tooltip_export_pdf": "تصدير PDF",
   "tooltip_show_password": "إظهار كلمة المرور",
   "tooltip_hide_password": "إخفاء كلمة المرور",
-  "app_logo_label": "شعار فجرك"
+  "app_logo_label": "شعار فجرك",
+  "today": "اليوم",
+  "yesterday": "أمس",
+  "trans_add_first": "سجّل أول معاملة"
 }

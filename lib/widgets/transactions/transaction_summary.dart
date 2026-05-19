@@ -11,15 +11,12 @@ class TransactionSummary extends StatelessWidget {
     required this.expenses,
     required this.currency,
     this.debtPayments = 0,
-    // kept for backward-compat call sites, unused
-    this.colorScheme,
   });
 
   final double income;
   final double expenses;
   final double debtPayments;
   final String currency;
-  final ColorScheme? colorScheme;
 
   String _fmt(double v) {
     final n = v.abs();

@@ -24,7 +24,7 @@ import '../../widgets/transactions/transaction_summary.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
-import '../../widgets/common/app_button.dart';
+import '../../widgets/common/empty_state.dart';
 import '../../widgets/common/shimmer_loader.dart';
 import '../../widgets/transactions/transaction_list_item.dart';
 import 'recurring_screen.dart';
@@ -388,6 +388,36 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     }
   }
 
+  /// Builds a flat list interleaving date-header strings with _TxRecord items.
+  List<Object> _buildItems(List<Map<String, dynamic>> transactions) {
+    final items = <Object>[];
+    String? lastDate;
+    int txIndex = 0;
+    for (final tx in transactions) {
+      final date = (tx['transaction_date'] as String? ?? '').substring(0, 10);
+      if (date != lastDate) {
+        items.add(date); // sentinel for _DateSectionHeader
+        lastDate = date;
+      }
+      items.add(_TxRecord(tx, txIndex));
+      txIndex++;
+    }
+    return items;
+  }
+
+  String _dateLabel(String isoDate) {
+    final date = DateTime.tryParse(isoDate);
+    if (date == null) return isoDate;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final d = DateTime(date.year, date.month, date.day);
+    if (d == today) return 'today'.tr();
+    if (d == yesterday) return 'yesterday'.tr();
+    if (date.year == now.year) return DateFormat('d MMMM', 'ar').format(date);
+    return DateFormat('d MMMM yyyy', 'ar').format(date);
+  }
+
   List<Map<String, dynamic>> get _filtered {
     if (_search.isEmpty) return _transactions;
     return _transactions.where((tx) {
@@ -417,7 +447,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? AppColors.surfaceDark
+          : AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -433,7 +465,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? AppColors.surfaceDark
+          : AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -455,6 +489,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final filtered = _filtered;
+    final listItems = _buildItems(filtered);
 
     const debtCategories = ['ديون', 'debts_title', 'Debts'];
     final income = _allTransactions
@@ -509,11 +544,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     _pendingCount.toString(),
                     style: const TextStyle(fontSize: 10),
                   ),
-                  backgroundColor: Colors.orange[600],
+                  backgroundColor: AppColors.warning,
                   child: IconButton(
                     onPressed: _triggerSync,
                     icon: const Icon(Icons.cloud_upload_outlined),
-                    color: Colors.orange[600], // intentional — sync badge
+                    color: AppColors.warning,
                     tooltip: 'tooltip_sync'.tr(),
                   ),
                 ),
@@ -598,49 +633,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           ),
           Expanded(
             child: _hasError && _transactions.isEmpty
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsetsDirectional.all(
-                          AppSpacing.xl),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.wifi_off_rounded,
-                            size: 48,
-                            color: isDark
-                                ? AppColors.textSecondaryDark
-                                : AppColors.textTertiary,
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          Text(
-                            'error_load_failed'.tr(),
-                            style: AppTypography.headingMd.copyWith(
-                              color: isDark
-                                  ? AppColors.textPrimaryDark
-                                  : AppColors.textPrimary,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: AppSpacing.xs),
-                          Text(
-                            'error_check_connection'.tr(),
-                            style: AppTypography.bodySm.copyWith(
-                              color: isDark
-                                  ? AppColors.textSecondaryDark
-                                  : AppColors.textSecondary,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: AppSpacing.lg),
-                          AppButton(
-                            label: 'btn_retry'.tr(),
-                            onPressed: () => _load(reset: true),
-                            fullWidth: false,
-                          ),
-                        ],
-                      ),
-                    ),
+                ? EmptyState(
+                    icon: Icons.wifi_off_rounded,
+                    title: 'error_load_failed'.tr(),
+                    subtitle: 'error_check_connection'.tr(),
+                    ctaLabel: 'btn_retry'.tr(),
+                    onCta: () => _load(reset: true),
                   )
                 : _loading && _transactions.isEmpty
                 ? const Padding(
@@ -648,29 +646,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     child: TransactionShimmer(count: 8),
                   )
                 : filtered.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.payments_outlined,
-                          size: 48,
-                          color: isDark
-                              ? AppColors.textSecondaryDark
-                              : AppColors.textTertiary,
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        Text(
-                          'trans_empty'.tr(),
-                          style: AppTypography.headingMd.copyWith(
-                            color: isDark
-                                ? AppColors.textPrimaryDark
-                                : AppColors.textPrimary,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
+                ? EmptyState(
+                    icon: Icons.payments_outlined,
+                    title: 'trans_empty'.tr(),
+                    subtitle: '',
+                    ctaLabel: _search.isEmpty ? 'trans_add_first'.tr() : null,
+                    onCta: _search.isEmpty ? () => _showAddDialog() : null,
                   )
                 : RefreshIndicator(
                     onRefresh: _triggerSync,
@@ -678,23 +659,80 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     child: ListView.builder(
                       controller: _scrollController,
                       padding: const EdgeInsetsDirectional.fromSTEB(
-                          0, 8, 0, 100),
-                      itemExtent: AppSpacing.listItemHeight,
-                      itemCount: filtered.length,
+                          0, 4, 0, 100),
+                      itemCount: listItems.length,
                       itemBuilder: (context, index) {
-                        final tx = filtered[index];
-                        return TransactionListItem(
-                          key: ValueKey(tx['id']),
-                          transaction: tx,
-                          currency: _currency,
-                          onDelete: _delete,
-                          onTap: (t) => _showAddDialog(existing: t),
-                          syncStatus: _syncStatuses[tx['id']],
-                          staggerIndex: index < 6 ? index : null,
+                        final item = listItems[index];
+                        if (item is String) {
+                          return _DateSectionHeader(
+                            label: _dateLabel(item),
+                          );
+                        }
+                        final rec = item as _TxRecord;
+                        return SizedBox(
+                          height: AppSpacing.listItemHeight,
+                          child: TransactionListItem(
+                            key: ValueKey(rec.tx['id']),
+                            transaction: rec.tx,
+                            currency: _currency,
+                            onDelete: _delete,
+                            onTap: (t) => _showAddDialog(existing: t),
+                            syncStatus: _syncStatuses[rec.tx['id']],
+                            staggerIndex:
+                                rec.txIndex < 6 ? rec.txIndex : null,
+                          ),
                         );
                       },
                     ),
                   ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Data record for interleaved list ─────────────────────────────────────
+
+class _TxRecord {
+  const _TxRecord(this.tx, this.txIndex);
+  final Map<String, dynamic> tx;
+  final int txIndex;
+}
+
+// ── Date section header ───────────────────────────────────────────────────
+
+class _DateSectionHeader extends StatelessWidget {
+  const _DateSectionHeader({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.screenPaddingHorizontal,
+        AppSpacing.sm,
+        AppSpacing.screenPaddingHorizontal,
+        AppSpacing.xs,
+      ),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: AppTypography.labelMd.copyWith(
+              color: isDark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Divider(
+              color: isDark ? AppColors.borderDark : AppColors.borderLight,
+              height: 1,
+              thickness: 1,
+            ),
           ),
         ],
       ),

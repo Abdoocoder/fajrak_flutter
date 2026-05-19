@@ -904,5 +904,8 @@
   "tooltip_export_pdf": "Export PDF",
   "tooltip_show_password": "Show Password",
   "tooltip_hide_password": "Hide Password",
-  "app_logo_label": "Fajrak Logo"
+  "app_logo_label": "Fajrak Logo",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "trans_add_first": "Add your first transaction"
 }
