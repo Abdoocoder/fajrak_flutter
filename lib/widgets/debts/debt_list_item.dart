@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../utils/app_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_typography.dart';
 import '../../utils/error_handler.dart';
 import '../../services/currency_service.dart';
+import '../common/progress_bar.dart';
 
 class DebtListItem extends StatefulWidget {
   final Map<String, dynamic> debt;
@@ -64,10 +66,10 @@ class _DebtListItemState extends State<DebtListItem> {
   }
 
   Future<void> _makePayment() async {
-    if (_payingSaving) return; // منع الضغط المزدوج قبل إعادة البناء
+    if (_payingSaving) return;
     final amount = double.tryParse(_paymentCtrl.text);
     if (amount == null || amount <= 0) return;
-    _payingSaving = true; // تعيين فوري قبل أي await
+    _payingSaving = true;
     setState(() {});
 
     try {
@@ -85,7 +87,6 @@ class _DebtListItemState extends State<DebtListItem> {
       final today = DateTime.now().toIso8601String().split('T')[0];
       final sb = Supabase.instance.client;
 
-      // ── 3 operations بالتوازي (~600ms → ~200ms) ──
       await Future.wait([
         sb
             .from('debts')
@@ -151,6 +152,13 @@ class _DebtListItemState extends State<DebtListItem> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+    final surfaceVariant = isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant;
+
     final original = (widget.debt['original_amount'] as num).toDouble();
     final remaining = (widget.debt['remaining_amount'] as num).toDouble();
     final pct = original > 0 ? ((original - remaining) / original * 100) : 0.0;
@@ -175,16 +183,13 @@ class _DebtListItemState extends State<DebtListItem> {
             ).difference(DateTime(now.year, now.month, now.day)).inDays;
     }
 
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsetsDirectional.only(bottom: 10),
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: cs.surface,
+        color: surface,
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: cs.outlineVariant),
+        border: Border.all(color: border),
       ),
       child: Stack(
         children: [
@@ -232,19 +237,17 @@ class _DebtListItemState extends State<DebtListItem> {
                         children: [
                           Text(
                             widget.debt['name'] ?? '',
-                            style: TextStyle(
-                              color: cs.onSurface,
+                            style: AppTypography.bodyMd.copyWith(
+                              color: textPrimary,
                               fontWeight: FontWeight.w900,
-                              fontSize: 14,
                             ),
                           ),
                           if (widget.debt['notes'] != null &&
                               (widget.debt['notes'] as String).isNotEmpty)
                             Text(
                               widget.debt['notes'],
-                              style: TextStyle(
-                                color: cs.onSurfaceVariant,
-                                fontSize: 11,
+                              style: AppTypography.bodySm.copyWith(
+                                color: textSecondary,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -266,11 +269,10 @@ class _DebtListItemState extends State<DebtListItem> {
                                         ),
                                         borderRadius: BorderRadius.circular(5),
                                       ),
-                                      child: const Text(
+                                      child: Text(
                                         '⚡ تلقائي',
-                                        style: TextStyle(
+                                        style: AppTypography.labelSm.copyWith(
                                           color: AppColors.primary,
-                                          fontSize: 11,
                                           fontWeight: FontWeight.w700,
                                         ),
                                       ),
@@ -282,16 +284,15 @@ class _DebtListItemState extends State<DebtListItem> {
                                         vertical: 2,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: AppColors.error.withValues(
+                                        color: AppColors.expense.withValues(
                                           alpha: 0.12,
                                         ),
                                         borderRadius: BorderRadius.circular(5),
                                       ),
-                                      child: const Text(
+                                      child: Text(
                                         '🔴 متأخر',
-                                        style: TextStyle(
-                                          color: AppColors.error,
-                                          fontSize: 11,
+                                        style: AppTypography.labelSm.copyWith(
+                                          color: AppColors.expense,
                                           fontWeight: FontWeight.w700,
                                         ),
                                       ),
@@ -304,8 +305,8 @@ class _DebtListItemState extends State<DebtListItem> {
                     ),
                     Text(
                       '${remaining.toStringAsFixed(0)} ${widget.currency}',
-                      style: const TextStyle(
-                        color: AppColors.error,
+                      style: AppTypography.bodySm.copyWith(
+                        color: AppColors.expense,
                         fontWeight: FontWeight.w900,
                         fontSize: 15,
                       ),
@@ -338,15 +339,15 @@ class _DebtListItemState extends State<DebtListItem> {
                         width: 28,
                         height: 28,
                         decoration: BoxDecoration(
-                          color: AppColors.error.withValues(alpha: 0.1),
+                          color: AppColors.expense.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(7),
                           border: Border.all(
-                            color: AppColors.error.withValues(alpha: 0.2),
+                            color: AppColors.expense.withValues(alpha: 0.2),
                           ),
                         ),
                         child: const Icon(
                           Icons.close,
-                          color: AppColors.error,
+                          color: AppColors.expense,
                           size: 14,
                         ),
                       ),
@@ -354,17 +355,11 @@ class _DebtListItemState extends State<DebtListItem> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                Semantics(
-                  value: '${pct.toStringAsFixed(0)}%',
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(5),
-                    child: LinearProgressIndicator(
-                      value: (pct / 100).clamp(0.0, 1.0),
-                      backgroundColor: cs.outlineVariant,
-                      color: AppColors.success,
-                      minHeight: 8,
-                    ),
-                  ),
+                AppProgressBar(
+                  value: (pct / 100).clamp(0.0, 1.0),
+                  title: '',
+                  percentageLabel: '${pct.toStringAsFixed(0)}%',
+                  variant: ProgressBarVariant.goal,
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -372,21 +367,14 @@ class _DebtListItemState extends State<DebtListItem> {
                   children: [
                     Text(
                       'debts_paid_pct'.tr(args: [pct.toStringAsFixed(0)]),
-                      style: TextStyle(
-                        color: cs.onSurfaceVariant,
-                        fontSize: 11,
-                      ),
+                      style: AppTypography.labelSm.copyWith(color: textSecondary),
                     ),
                     Row(
                       children: [
-                        if ((widget.debt['monthly_payment'] as num).toDouble() >
-                            0)
+                        if ((widget.debt['monthly_payment'] as num).toDouble() > 0)
                           Text(
                             '${(widget.debt['monthly_payment'] as num).toStringAsFixed(0)}${'debts_per_month'.tr()}',
-                            style: TextStyle(
-                              color: cs.onSurfaceVariant,
-                              fontSize: 11,
-                            ),
+                            style: AppTypography.labelSm.copyWith(color: textSecondary),
                           ),
                         if (widget.debt['payment_day'] != null) ...[
                           const SizedBox(width: 6),
@@ -403,9 +391,8 @@ class _DebtListItemState extends State<DebtListItem> {
                               'debts_day_label'.tr(
                                 args: [widget.debt['payment_day'].toString()],
                               ),
-                              style: const TextStyle(
+                              style: AppTypography.labelSm.copyWith(
                                 color: AppColors.primary,
-                                fontSize: 10,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -429,11 +416,10 @@ class _DebtListItemState extends State<DebtListItem> {
                                 daysUntil == 0
                                     ? '🔔 اليوم!'
                                     : 'بعد $daysUntil يوم',
-                                style: TextStyle(
+                                style: AppTypography.labelSm.copyWith(
                                   color: daysUntil == 0
                                       ? AppColors.warning
                                       : AppColors.textSecondary,
-                                  fontSize: 10,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -456,9 +442,8 @@ class _DebtListItemState extends State<DebtListItem> {
                                   0,
                                   10,
                                 ),
-                                style: const TextStyle(
+                                style: AppTypography.labelSm.copyWith(
                                   color: AppColors.warning,
-                                  fontSize: 10,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
@@ -486,18 +471,13 @@ class _DebtListItemState extends State<DebtListItem> {
                                   const TextInputType.numberWithOptions(
                                     decimal: true,
                                   ),
-                              style: TextStyle(
-                                color: cs.onSurface,
-                                fontSize: 13,
-                              ),
+                              style: TextStyle(color: textPrimary, fontSize: 13),
                               textAlign: TextAlign.center,
                               decoration: InputDecoration(
                                 hintText: 'trans_amount'.tr(),
-                                hintStyle: TextStyle(
-                                  color: cs.onSurfaceVariant,
-                                ),
+                                hintStyle: TextStyle(color: textSecondary),
                                 filled: true,
-                                fillColor: cs.surfaceContainerHigh,
+                                fillColor: surfaceVariant,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
                                   borderSide: BorderSide.none,
@@ -514,15 +494,15 @@ class _DebtListItemState extends State<DebtListItem> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 4),
                             decoration: BoxDecoration(
-                              color: cs.surfaceContainerHigh,
+                              color: surfaceVariant,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
                                 value: _paymentCurrency,
-                                dropdownColor: cs.surface,
+                                dropdownColor: surface,
                                 style: TextStyle(
-                                  color: cs.onSurface,
+                                  color: textPrimary,
                                   fontSize: 11,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -561,7 +541,7 @@ class _DebtListItemState extends State<DebtListItem> {
                                 vertical: 8,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.success,
+                                color: AppColors.income,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: _payingSaving
@@ -570,12 +550,12 @@ class _DebtListItemState extends State<DebtListItem> {
                                       height: 14,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        color: Colors.white,
+                                        color: AppColors.textInverse,
                                       ),
                                     )
                                   : const Icon(
                                       Icons.check,
-                                      color: Colors.white,
+                                      color: AppColors.textInverse,
                                       size: 14,
                                     ),
                             ),
@@ -594,12 +574,12 @@ class _DebtListItemState extends State<DebtListItem> {
                                 vertical: 8,
                               ),
                               decoration: BoxDecoration(
-                                color: cs.surfaceContainerHigh,
+                                color: surfaceVariant,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
                                 Icons.close,
-                                color: cs.onSurfaceVariant,
+                                color: textSecondary,
                                 size: 14,
                               ),
                             ),
@@ -611,9 +591,8 @@ class _DebtListItemState extends State<DebtListItem> {
                           padding: const EdgeInsets.only(top: 4, left: 4),
                           child: Text(
                             'Rate: ${_paymentExchangeRate.toStringAsFixed(4)} | ≈ ${((double.tryParse(_paymentCtrl.text) ?? 0) * _paymentExchangeRate).toStringAsFixed(2)} ${widget.currency}',
-                            style: TextStyle(
-                              color: AppColors.textMuted.withValues(alpha: 0.7),
-                              fontSize: 11,
+                            style: AppTypography.labelSm.copyWith(
+                              color: AppColors.textTertiary.withValues(alpha: 0.7),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -636,17 +615,16 @@ class _DebtListItemState extends State<DebtListItem> {
                           vertical: 7,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.success.withValues(alpha: 0.1),
+                          color: AppColors.income.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: AppColors.success.withValues(alpha: 0.2),
+                            color: AppColors.income.withValues(alpha: 0.2),
                           ),
                         ),
                         child: Text(
                           'debts_add_payment_btn'.tr(),
-                          style: TextStyle(
-                            color: AppColors.successLight,
-                            fontSize: 12,
+                          style: AppTypography.labelSm.copyWith(
+                            color: AppColors.income,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
