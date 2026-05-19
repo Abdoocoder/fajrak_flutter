@@ -1,10 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../utils/error_handler.dart';
-import '../../utils/detect_currency.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_typography.dart';
 import '../../services/analytics_service.dart';
 import '../../services/currency_service.dart';
+import '../../utils/detect_currency.dart';
+import '../../utils/error_handler.dart';
 import '../../widgets/common/currency_picker_sheet.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -74,11 +77,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       if (mounted) Navigator.pushReplacementNamed(context, '/main');
     } catch (e) {
       if (mounted) {
-        ErrorHandler.handle(
-          e,
-          context: context,
-          developerMessage: 'Onboarding Save',
-        );
+        ErrorHandler.handle(e, context: context, developerMessage: 'Onboarding Save');
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -98,41 +97,35 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final background = isDark ? AppColors.backgroundDark : AppColors.background;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: background,
       body: SafeArea(
         child: Column(
           children: [
-            // Progress dots
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  4,
-                  (index) => _buildDot(index, colorScheme),
-                ),
+                children: List.generate(4, (index) => _buildDot(index, isDark)),
               ),
             ),
-
             Expanded(
               child: PageView(
                 controller: _pageController,
                 physics: const NeverScrollableScrollPhysics(),
                 onPageChanged: (idx) => setState(() => _currentStep = idx),
                 children: [
-                  _slideIntro(colorScheme),
-                  _slideIncome(colorScheme),
-                  _slideSalaryDay(colorScheme),
-                  _slideSummary(colorScheme),
+                  _slideIntro(isDark),
+                  _slideIncome(isDark),
+                  _slideSalaryDay(isDark),
+                  _slideSummary(isDark),
                 ],
               ),
             ),
-
-            // Controls
             Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
@@ -142,21 +135,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: ElevatedButton(
                       onPressed: _loading ? null : _nextPage,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: colorScheme.primary,
-                        foregroundColor: colorScheme.onPrimary,
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.textInverse,
                         padding: const EdgeInsets.symmetric(vertical: 18),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
                         ),
-                        elevation: 8,
-                        shadowColor: colorScheme.primary.withValues(alpha: 0.4),
+                        elevation: 0,
                       ),
                       child: _loading
-                          ? SizedBox(
+                          ? const SizedBox(
                               width: 24,
                               height: 24,
                               child: CircularProgressIndicator(
-                                color: colorScheme.onPrimary,
+                                color: AppColors.textInverse,
                                 strokeWidth: 2,
                               ),
                             )
@@ -164,9 +156,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               _currentStep == 3
                                   ? 'onboarding_start'.tr()
                                   : 'continue'.tr(),
-                              style: const TextStyle(
+                              style: AppTypography.labelLg.copyWith(
                                 fontWeight: FontWeight.w900,
-                                fontSize: 16,
                               ),
                             ),
                     ),
@@ -179,7 +170,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                       child: Text(
                         'back'.tr(),
-                        style: TextStyle(color: colorScheme.onSurfaceVariant),
+                        style: AppTypography.labelMd.copyWith(color: textSecondary),
                       ),
                     ),
                 ],
@@ -191,22 +182,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildDot(int index, ColorScheme colorScheme) {
+  Widget _buildDot(int index, bool isDark) {
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       margin: const EdgeInsets.symmetric(horizontal: 4),
       height: 8,
       width: _currentStep == index ? 24 : 8,
       decoration: BoxDecoration(
-        color: _currentStep == index
-            ? colorScheme.primary
-            : colorScheme.outlineVariant,
+        color: _currentStep == index ? AppColors.primary : border,
         borderRadius: BorderRadius.circular(4),
       ),
     );
   }
 
-  Widget _slideIntro(ColorScheme colorScheme) {
+  Widget _slideIntro(bool isDark) {
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
     return Padding(
       padding: const EdgeInsets.all(30),
       child: Column(
@@ -215,43 +207,33 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           Container(
             padding: const EdgeInsets.all(30),
             decoration: BoxDecoration(
-              color: colorScheme.primary.withValues(alpha: 0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              Icons.auto_awesome,
-              size: 80,
-              color: colorScheme.primary,
-            ),
+            child: const Icon(Icons.auto_awesome, size: 80, color: AppColors.primary),
           ),
           const SizedBox(height: 40),
           Text(
             'onboarding_welcome_title'.tr(),
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: colorScheme.onSurface,
-              fontSize: 32,
-              fontWeight: FontWeight.w900,
-            ),
+            style: AppTypography.displaySmall.copyWith(color: textPrimary),
           ),
           const SizedBox(height: 16),
           Text(
             'onboarding_welcome_subtitle'.tr(),
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: colorScheme.onSurfaceVariant,
-              fontSize: 16,
-              height: 1.6,
-            ),
+            style: AppTypography.bodyLg.copyWith(color: textSecondary, height: 1.6),
           ),
         ],
       ),
     );
   }
 
-  Widget _slideIncome(ColorScheme colorScheme) {
+  Widget _slideIncome(bool isDark) {
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
     return _slideBase(
-      colorScheme: colorScheme,
+      isDark: isDark,
       icon: Icons.account_balance_wallet_outlined,
       title: 'settings_income'.tr(),
       subtitle: 'onboarding_income_subtitle'.tr(),
@@ -259,18 +241,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         controller: _incomeController,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         textAlign: TextAlign.center,
-        style: TextStyle(
-          color: colorScheme.onSurface,
-          fontSize: 32,
-          fontWeight: FontWeight.w900,
-        ),
+        style: AppTypography.displaySmall.copyWith(color: textPrimary),
         decoration: InputDecoration(
           hintText: '0',
-          hintStyle: TextStyle(color: colorScheme.outlineVariant),
+          hintStyle: AppTypography.displaySmall.copyWith(color: textSecondary),
           suffixText: _currency,
-          suffixStyle: TextStyle(
-            color: colorScheme.primary,
-            fontSize: 16,
+          suffixStyle: AppTypography.bodyLg.copyWith(
+            color: AppColors.primary,
             fontWeight: FontWeight.bold,
           ),
           border: InputBorder.none,
@@ -280,9 +257,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _slideSalaryDay(ColorScheme colorScheme) {
+  Widget _slideSalaryDay(bool isDark) {
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
     return _slideBase(
-      colorScheme: colorScheme,
+      isDark: isDark,
       icon: Icons.calendar_today_outlined,
       title: 'onboarding_payday_title'.tr(),
       subtitle: 'onboarding_payday_subtitle'.tr(),
@@ -290,20 +268,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         children: [
           Text(
             'onboarding_day_value'.tr(args: [_salaryDay.toString()]),
-            style: TextStyle(
-              color: colorScheme.primary,
-              fontSize: 40,
-              fontWeight: FontWeight.w900,
-            ),
+            style: AppTypography.displaySmall.copyWith(color: AppColors.primary),
           ),
           const SizedBox(height: 20),
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               trackHeight: 8,
-              activeTrackColor: colorScheme.primary,
-              inactiveTrackColor: colorScheme.outlineVariant,
-              thumbColor: colorScheme.onPrimary,
-              overlayColor: colorScheme.primary.withValues(alpha: 0.2),
+              activeTrackColor: AppColors.primary,
+              inactiveTrackColor: border,
+              thumbColor: AppColors.textInverse,
+              overlayColor: AppColors.primary.withValues(alpha: 0.2),
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 14),
             ),
             child: Slider(
@@ -319,24 +293,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _slideSummary(ColorScheme colorScheme) {
+  Widget _slideSummary(bool isDark) {
+    final surfaceVariant = isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariant;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
     final info = CurrencyService.findByCode(_currency);
     return _slideBase(
-      colorScheme: colorScheme,
+      isDark: isDark,
       icon: Icons.public,
       title: 'settings_currency'.tr(),
       subtitle: 'onboarding_currency_subtitle'.tr(),
       child: Column(
         children: [
-          // عرض العملة المكتشفة
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: colorScheme.primary.withValues(alpha: 0.3),
-              ),
+              color: surfaceVariant,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
@@ -351,18 +325,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     children: [
                       Text(
                         info?['labelAr'] as String? ?? _currency,
-                        style: TextStyle(
-                          color: colorScheme.onSurface,
-                          fontSize: 15,
+                        style: AppTypography.labelMd.copyWith(
+                          color: textPrimary,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       Text(
                         _currency,
-                        style: TextStyle(
-                          color: colorScheme.onSurfaceVariant,
-                          fontSize: 12,
-                        ),
+                        style: AppTypography.labelSm.copyWith(color: textSecondary),
                       ),
                     ],
                   ),
@@ -377,8 +347,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   },
                   child: Text(
                     'تغيير',
-                    style: TextStyle(
-                      color: colorScheme.primary,
+                    style: AppTypography.labelMd.copyWith(
+                      color: AppColors.primary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -391,10 +361,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             const SizedBox(height: 10),
             Text(
               '📍 اكتشفنا أنك في ${_detected!.countryName}',
-              style: TextStyle(
-                color: colorScheme.onSurfaceVariant,
-                fontSize: 12,
-              ),
+              style: AppTypography.labelSm.copyWith(color: textSecondary),
               textAlign: TextAlign.center,
             ),
           ],
@@ -404,40 +371,40 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _slideBase({
-    required ColorScheme colorScheme,
+    required bool isDark,
     required IconData icon,
     required String title,
     required String subtitle,
     required Widget child,
   }) {
+    final surface = isDark ? AppColors.surfaceDark : AppColors.surface;
+    final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 50, color: colorScheme.primary),
+          Icon(icon, size: 50, color: AppColors.primary),
           const SizedBox(height: 20),
           Text(
             title,
-            style: TextStyle(
-              color: colorScheme.onSurface,
-              fontSize: 24,
-              fontWeight: FontWeight.w900,
-            ),
+            style: AppTypography.headingLg.copyWith(color: textPrimary),
           ),
           const SizedBox(height: 8),
           Text(
             subtitle,
             textAlign: TextAlign.center,
-            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
+            style: AppTypography.bodyMd.copyWith(color: textSecondary),
           ),
           const SizedBox(height: 40),
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: colorScheme.surface,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: colorScheme.outlineVariant),
+              color: surface,
+              borderRadius: BorderRadius.circular(AppRadius.xl),
+              border: Border.all(color: border),
             ),
             child: child,
           ),

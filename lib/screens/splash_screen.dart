@@ -1,11 +1,13 @@
+import 'dart:io';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../app_state.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_typography.dart';
 import '../services/analytics_service.dart';
 import '../utils/error_handler.dart';
-import 'package:provider/provider.dart';
-import 'package:easy_localization/easy_localization.dart';
-import '../app_state.dart';
-import 'dart:io';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -99,11 +101,13 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final background = isDark ? AppColors.backgroundDark : AppColors.background;
+    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: background,
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnim,
@@ -119,7 +123,7 @@ class _SplashScreenState extends State<SplashScreen>
                     borderRadius: BorderRadius.circular(28),
                     boxShadow: [
                       BoxShadow(
-                        color: colorScheme.primary.withValues(alpha: 0.4),
+                        color: AppColors.primary.withValues(alpha: 0.4),
                         blurRadius: 30,
                         spreadRadius: 5,
                       ),
@@ -143,27 +147,20 @@ class _SplashScreenState extends State<SplashScreen>
                 const SizedBox(height: 24),
                 Text(
                   'فجرك',
-                  style: TextStyle(
-                    fontSize: 36,
-                    fontWeight: FontWeight.w900,
-                    color: colorScheme.onSurface,
-                  ),
+                  style: AppTypography.displaySmall.copyWith(color: textPrimary),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'إدارة شؤونك المالية',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                  style: AppTypography.bodyLg.copyWith(color: textSecondary),
                 ),
                 const SizedBox(height: 60),
-                SizedBox(
+                const SizedBox(
                   width: 30,
                   height: 30,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: colorScheme.primary,
+                    color: AppColors.primary,
                   ),
                 ),
               ],
