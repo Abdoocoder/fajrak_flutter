@@ -42,7 +42,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   bool _loading = true;
   bool _loadingMore = false;
   bool _hasError = false;
-  bool _saving = false;
   int _limit = 20;
   bool _hasMore = true;
 
@@ -142,23 +141,17 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     }
 
     try {
-      // Build date range strings once (used by both paged + totals queries)
       final String? start = (_filterMonth != null && _filterYear != null)
-          ? DateTime(
-              _filterYear!,
-              _filterMonth!,
-              1,
-            ).toIso8601String().split('T')[0]
+          ? DateTime(_filterYear!, _filterMonth!, 1)
+              .toIso8601String()
+              .split('T')[0]
           : null;
       final String? end = (_filterMonth != null && _filterYear != null)
-          ? DateTime(
-              _filterYear!,
-              _filterMonth! + 1,
-              0,
-            ).toIso8601String().split('T')[0]
+          ? DateTime(_filterYear!, _filterMonth! + 1, 0)
+              .toIso8601String()
+              .split('T')[0]
           : null;
 
-      // Build paged transactions query
       var baseQ = Supabase.instance.client
           .from('transactions')
           .select('*')
@@ -174,12 +167,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             (reset ? 0 : _transactions.length) + _limit - 1,
           );
 
-      // Parallel: profile (only on reset — we already have it on load-more)
-      // + paged transactions + totals (only on reset)
       if (reset) {
         var totalsQ = Supabase.instance.client
             .from('transactions')
-            .select('type, amount') // minimal fields for summary calculation
+            .select('type, amount')
             .eq('user_id', user.id);
         final totalsFuture = (start != null && end != null)
             ? totalsQ
@@ -199,12 +190,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
         final profile = results[0] as Map<String, dynamic>;
         final data = results[1] as List;
-        final allDataForSummary = (results[2] as List)
-            .cast<Map<String, dynamic>>();
+        final allDataForSummary =
+            (results[2] as List).cast<Map<String, dynamic>>();
 
         if (mounted) {
           _currency = profile['currency'] as String? ?? 'JOD';
-          _userName = (profile['full_name'] as String? ?? '').split(' ').first;
+          _userName =
+              (profile['full_name'] as String? ?? '').split(' ').first;
           setState(() {
             _allTransactions = allDataForSummary;
             _transactions = List<Map<String, dynamic>>.from(data);
@@ -212,7 +204,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           });
         }
       } else {
-        // Load-more: only need the next page of transactions
         final data = await pagedFuture;
         if (mounted) {
           setState(() {
@@ -246,7 +237,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('settings_exporting'.tr(), style: const TextStyle()),
+        content: Text(
+          'settings_exporting'.tr(),
+          style: AppTypography.bodyMd,
+        ),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -265,7 +259,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             SnackBar(
               content: Text(
                 'settings_no_export'.tr(),
-                style: const TextStyle(),
+                style: AppTypography.bodyMd,
               ),
             ),
           );
@@ -319,7 +313,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('error_export'.tr(args: [e.toString()]))),
+          SnackBar(
+            content: Text(
+              'error_export'.tr(args: [e.toString()]),
+              style: AppTypography.bodyMd,
+            ),
+          ),
         );
       }
     }
@@ -336,7 +335,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       final month = _filterMonth ?? now.month;
       final year = _filterYear ?? now.year;
 
-      // Fetch active debts for the report
       final debtsRes = await Supabase.instance.client
           .from('debts')
           .select('name, remaining_amount, monthly_payment, auto_deduct')
@@ -375,10 +373,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'حدث خطأ أثناء إنشاء التقرير',
-              style: const TextStyle(),
-            ),
+            content: Text('pdf_error'.tr(), style: AppTypography.bodyMd),
             backgroundColor: AppColors.expense,
           ),
         );
@@ -396,7 +391,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     for (final tx in transactions) {
       final date = (tx['transaction_date'] as String? ?? '').substring(0, 10);
       if (date != lastDate) {
-        items.add(date); // sentinel for _DateSectionHeader
+        items.add(date);
         lastDate = date;
       }
       items.add(_TxRecord(tx, txIndex));
@@ -428,18 +423,56 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   }
 
   Future<void> _delete(String id) async {
-    if (_saving) return;
-    _saving = true;
-    setState(() {});
+    final idx = _transactions.indexWhere((t) => t['id'] == id);
+    if (idx == -1) return;
+    final deleted = Map<String, dynamic>.from(_transactions[idx]);
+
+    // Optimistic remove
+    setState(() => _transactions.removeAt(idx));
+
     try {
-      await Supabase.instance.client.from('transactions').delete().eq('id', id);
+      await Supabase.instance.client
+          .from('transactions')
+          .delete()
+          .eq('id', id);
+      if (mounted) context.read<AppState>().notifyTransactionChanged();
+    } catch (e) {
+      // Rollback on network error
       if (mounted) {
-        setState(() => _transactions.removeWhere((t) => t['id'] == id));
-        context.read<AppState>().notifyTransactionChanged();
+        setState(() {
+          if (idx <= _transactions.length) {
+            _transactions.insert(idx, deleted);
+          } else {
+            _transactions.add(deleted);
+          }
+        });
       }
-    } finally {
-      if (mounted) setState(() => _saving = false);
+      return;
     }
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('trans_deleted'.tr(), style: AppTypography.bodyMd),
+        action: SnackBarAction(
+          label: 'undo'.tr(),
+          textColor: AppColors.accent,
+          onPressed: () async {
+            try {
+              await Supabase.instance.client
+                  .from('transactions')
+                  .insert(deleted);
+              if (mounted) {
+                context.read<AppState>().notifyTransactionChanged();
+              }
+            } catch (_) {}
+          },
+        ),
+        duration: const Duration(seconds: 4),
+      ),
+    );
   }
 
   void _showAddDialog({Map<String, dynamic>? existing}) {
@@ -506,6 +539,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         )
         .fold(0.0, (a, t) => a + (t['amount'] as num).toDouble());
 
+    final iconColor =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondary;
+
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : AppColors.background,
       appBar: AppBar(
@@ -534,67 +570,87 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           ],
         ),
         actions: [
+          // Sync badge — critical status, stays as dedicated icon
           if (_pendingCount > 0)
             Tooltip(
-              message: '$_pendingCount قيد المزامنة — اسحب للتحديث',
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Badge(
-                  label: Text(
-                    _pendingCount.toString(),
-                    style: const TextStyle(fontSize: 10),
-                  ),
-                  backgroundColor: AppColors.warning,
-                  child: IconButton(
-                    onPressed: _triggerSync,
-                    icon: const Icon(Icons.cloud_upload_outlined),
+              message: 'sync_pending'.tr(args: [_pendingCount.toString()]),
+              child: Badge(
+                label: Text(
+                  _pendingCount.toString(),
+                  style: const TextStyle(fontSize: 10),
+                ),
+                backgroundColor: AppColors.warning,
+                child: IconButton(
+                  onPressed: _triggerSync,
+                  icon: Icon(
+                    Icons.cloud_upload_outlined,
                     color: AppColors.warning,
-                    tooltip: 'tooltip_sync'.tr(),
+                    semanticLabel: 'tooltip_sync'.tr(),
                   ),
                 ),
               ),
             ),
-          IconButton(
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const RecurringScreen()),
-            ),
+          // Overflow menu — recurring, export CSV, export PDF
+          PopupMenuButton<_OverflowAction>(
             icon: Icon(
-              Icons.repeat,
-              color: isDark
-                  ? AppColors.textSecondaryDark
-                  : AppColors.textSecondary,
+              Icons.more_vert,
+              color: iconColor,
+              semanticLabel: 'المزيد من الخيارات',
             ),
-            tooltip: 'recurring_title'.tr(),
-          ),
-          IconButton(
-            onPressed: _exportCSV,
-            icon: Icon(
-              Icons.download,
-              color: isDark
-                  ? AppColors.textSecondaryDark
-                  : AppColors.textSecondary,
-            ),
-            tooltip: 'tooltip_export_csv'.tr(),
-          ),
-          _generatingPdf
-              ? const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                )
-              : IconButton(
-                  onPressed: _generatePdf,
-                  icon: const Icon(Icons.picture_as_pdf,
-                      color: AppColors.primary),
-                  tooltip: 'tooltip_export_pdf'.tr(),
+            onSelected: (action) {
+              switch (action) {
+                case _OverflowAction.recurring:
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const RecurringScreen()),
+                  );
+                case _OverflowAction.exportCsv:
+                  _exportCSV();
+                case _OverflowAction.exportPdf:
+                  _generatePdf();
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: _OverflowAction.recurring,
+                child: _OverflowItem(
+                  icon: Icons.repeat,
+                  label: 'recurring_title'.tr(),
+                  color: iconColor,
                 ),
+              ),
+              PopupMenuItem(
+                value: _OverflowAction.exportCsv,
+                child: _OverflowItem(
+                  icon: Icons.download_outlined,
+                  label: 'tooltip_export_csv'.tr(),
+                  color: iconColor,
+                ),
+              ),
+              PopupMenuItem(
+                value: _OverflowAction.exportPdf,
+                enabled: !_generatingPdf,
+                child: _OverflowItem(
+                  icon: Icons.picture_as_pdf_outlined,
+                  label: _generatingPdf
+                      ? 'settings_exporting'.tr()
+                      : 'tooltip_export_pdf'.tr(),
+                  color: _generatingPdf ? AppColors.textSecondary : iconColor,
+                  trailing: _generatingPdf
+                      ? const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.primary,
+                          ),
+                        )
+                      : null,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(width: 4),
         ],
       ),
@@ -650,8 +706,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     icon: Icons.payments_outlined,
                     title: 'trans_empty'.tr(),
                     subtitle: '',
-                    ctaLabel: _search.isEmpty ? 'trans_add_first'.tr() : null,
-                    onCta: _search.isEmpty ? () => _showAddDialog() : null,
+                    ctaLabel:
+                        _search.isEmpty ? 'trans_add_first'.tr() : null,
+                    onCta:
+                        _search.isEmpty ? () => _showAddDialog() : null,
                   )
                 : RefreshIndicator(
                     onRefresh: _triggerSync,
@@ -660,8 +718,19 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                       controller: _scrollController,
                       padding: const EdgeInsetsDirectional.fromSTEB(
                           0, 4, 0, 100),
-                      itemCount: listItems.length,
+                      // Extra item at end when loading more pages
+                      itemCount:
+                          listItems.length + (_loadingMore ? 1 : 0),
                       itemBuilder: (context, index) {
+                        // Load-more shimmer footer
+                        if (index == listItems.length) {
+                          return const Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                0, AppSpacing.xs, 0, 0),
+                            child: TransactionShimmer(count: 2),
+                          );
+                        }
+
                         final item = listItems[index];
                         if (item is String) {
                           return _DateSectionHeader(
@@ -688,6 +757,42 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ── Overflow menu ─────────────────────────────────────────────────────────
+
+enum _OverflowAction { recurring, exportCsv, exportPdf }
+
+class _OverflowItem extends StatelessWidget {
+  const _OverflowItem({
+    required this.icon,
+    required this.label,
+    required this.color,
+    this.trailing,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: color),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            label,
+            style:
+                AppTypography.bodyMd.copyWith(color: color),
+          ),
+        ),
+        if (trailing != null) trailing!,
+      ],
     );
   }
 }

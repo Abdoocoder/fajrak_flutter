@@ -1,0 +1,1 @@
+{"nodes": [{"id": "app_theme", "label": "AppTheme", "file_type": "code", "source_file": "lib/core/theme/app_theme.dart"}], "edges": [{"source": "app_theme", "target": "taste_standard_design", "relation": "implements", "confidence": "INFERRED", "confidence_score": 0.9, "source_file": "lib/core/theme/app_theme.dart"}], "hyperedges": []}

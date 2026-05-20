@@ -1,0 +1,1 @@
+{"nodes": [{"id": "jules_bolt", "label": "Jules Bolt Learning", "file_type": "rationale", "source_file": ".jules/bolt.md"}], "edges": [{"source": "jules_bolt", "target": "main_screen", "relation": "conceptually_related_to", "confidence": "INFERRED", "confidence_score": 0.8, "source_file": ".jules/bolt.md"}], "hyperedges": []}

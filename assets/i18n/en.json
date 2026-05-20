@@ -907,5 +907,9 @@
   "app_logo_label": "Fajrak Logo",
   "today": "Today",
   "yesterday": "Yesterday",
-  "trans_add_first": "Add your first transaction"
+  "trans_add_first": "Add your first transaction",
+  "trans_deleted": "Transaction deleted",
+  "undo": "Undo",
+  "pdf_error": "Error generating PDF report",
+  "sync_pending": "{} pending sync"
 }

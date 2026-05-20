@@ -1,0 +1,1 @@
+{"nodes": [{"id": "fajrak_redesign_prd", "label": "Fajrak Flutter Redesign PRD", "file_type": "document", "source_file": ".taskmaster/docs/prd.txt"}], "edges": [{"source": "fajrak_redesign_prd", "target": "taste_standard_design", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".taskmaster/docs/prd.txt"}], "hyperedges": []}
